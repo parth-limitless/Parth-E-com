@@ -1,0 +1,55 @@
+name: Spice Nest Hub 24h Stealth Daily Monitor
+
+on:
+  schedule:
+    # Runs once every 24 hours (Cron runs daily; inside the job a random jitter wait is applied)
+    - cron: '23 4 * * *' # ~9:53 AM IST daily
+  workflow_dispatch: # Allows manual trigger from GitHub web UI anytime
+
+permissions:
+  contents: write
+
+jobs:
+  run-daily-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r spice-nest-hub/requirements.txt
+          playwright install chromium --with-deps
+
+      - name: 🛡️ Apply Randomized Time Jitter (Anti-Bot Evasion)
+        run: |
+          # Sleep random duration between 60 to 900 seconds (1 to 15 mins) to randomize daily execution time
+          RANDOM_DELAY=$((RANDOM % 840 + 60))
+          echo "Applying stealth jitter delay: ${RANDOM_DELAY} seconds..."
+          sleep ${RANDOM_DELAY}
+
+      - name: 🚀 Run Headless Price & Competitor Check
+        run: |
+          python spice-nest-hub/check_runner.py
+
+      - name: 💾 Commit & Push Updated Database & Report
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Spice Nest Hub Bot"
+          git add spice-nest-hub/spicenest.db
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: Daily price & competitor monitor scan [skip ci]" && git push)
+
+      - name: 📤 Upload Daily Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spicenest-report
+          path: spice-nest-hub/spicenest.db
+          retention-days: 14

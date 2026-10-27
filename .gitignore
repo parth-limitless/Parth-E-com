@@ -1,0 +1,24 @@
+# Virtual Environment (do not push to git)
+venv/
+*/venv/
+env/
+.venv/
+
+# Python Bytecode & Cache
+__pycache__/
+*/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary & Scratch Files
+*.log
+*.tmp
+*.png
+scratch/
+amazon_body.txt
+amazon_screenshot.png
+
+# OS metadata
+Thumbs.db
+.DS_Store
