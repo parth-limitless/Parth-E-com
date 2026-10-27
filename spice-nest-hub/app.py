@@ -19,8 +19,8 @@ UA_POOL = [
 ]
 
 NOT_LIVE = [
-    "currently unavailable", "out of stock", "sold out", "notify me",
-    "no longer available", "temporarily unavailable", "page not found"
+    "currently unavailable", "out of stock", "sold out",
+    "item is out of stock", "temporarily unavailable", "page not found"
 ]
 
 app = Flask(__name__)
@@ -183,16 +183,29 @@ def fast_http_scrape(platform, url):
         if "enter the characters you see below" in low or "robot check" in low or "please complete the security check" in low:
             return None
 
-        gone = any(k in low for k in NOT_LIVE)
+        # Strip script and style tags so hidden JavaScript analytics don't cause false positives
+        clean_html = re.sub(r'<(script|style)[^>]*>.*?</\1>', '', html, flags=re.S | re.I)
+        clean_text = clean_html.lower()
+
         jld = jsonld_extract(html)
+        gone = False
+        if jld and jld.get("instock") is not None:
+            gone = not jld.get("instock")
+        else:
+            gone = any(k in clean_text for k in [
+                "out of stock", "sold out", "currently unavailable",
+                "item is out of stock", "temporarily unavailable"
+            ])
+
+        # If visible 'Add to cart' exists and not explicitly out of stock, it's Live
+        if ("add to cart" in clean_text or "buy now" in clean_text) and not ("out of stock" in clean_text):
+            gone = False
 
         price = None
         name = None
         if jld:
             price = jld.get("price")
             name = jld.get("name")
-            if jld.get("instock") is False:
-                gone = True
 
         if price is None and platform == "Flipkart":
             m = re.search(r'class="[^"]*(?:Nx9bqj|_30jeq3)[^"]*">₹?([\d,]+)', html)
@@ -244,12 +257,22 @@ def read_page(page, platform, url):
         return None, 0, f"HTTP {resp.status}"
 
     html = page.content()
-    text = page.inner_text("body")
-    low = text.lower()
-    if "enter the characters you see below" in low or "robot check" in low:
+    text = page.inner_text("body").lower()
+    if "enter the characters you see below" in text or "robot check" in text:
         return None, -1, "blocked/captcha"
 
-    gone = any(k in low for k in NOT_LIVE)
+    jld = jsonld_extract(html)
+    gone = False
+    if jld and jld.get("instock") is not None:
+        gone = not jld.get("instock")
+    else:
+        gone = any(k in text for k in [
+            "out of stock", "sold out", "currently unavailable",
+            "item is out of stock", "temporarily unavailable"
+        ])
+
+    if ("add to cart" in text or "buy now" in text) and not ("out of stock" in text):
+        gone = False
     price, note = None, ""
 
     if platform == "Amazon":
@@ -354,18 +377,25 @@ def scrape_competitor(url):
         data["price"] = jld.get("price")
         data["rating"] = jld.get("rating")
         data["reviews"] = jld.get("reviews")
-        if jld.get("instock") is False:
+    # Stock check on clean visible text
+    clean_html = re.sub(r'<(script|style)[^>]*>.*?</\1>', '', html, flags=re.S | re.I) if html else ""
+    clean_text = clean_html.lower()
+
+    if jld and jld.get("instock") is not None:
+        if not jld.get("instock"):
             data["stock"] = "Out of Stock"
             data["live"] = 0
-
-    # Stock check
-    if any(k in low for k in NOT_LIVE):
+    elif any(k in clean_text for k in NOT_LIVE):
         data["stock"] = "Out of Stock"
         data["live"] = 0
     else:
-        m_stock = re.search(r'only\s+(\d+)\s+left\s+in\s+stock', low)
+        m_stock = re.search(r'only\s+(\d+)\s+left\s+in\s+stock', clean_text)
         if m_stock:
             data["stock"] = f"Only {m_stock.group(1)} left in stock!"
+
+    if ("add to cart" in clean_text or "buy now" in clean_text) and not ("out of stock" in clean_text):
+        data["stock"] = "In Stock"
+        data["live"] = 1
 
     # Amazon Social proof ("500+ bought in past month")
     m_bought = re.search(r'([\d,kK\+]+)\s+bought\s+in\s+past\s+month', html or "", re.I)
