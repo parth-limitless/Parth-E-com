@@ -148,21 +148,55 @@ def text_price(text):
 
 
 def extract_grams(text, html=None):
-    if text:
-        m = re.search(r'(\d+(?:\.\d+)?)\s*(?:g|gm|grams|kg)\b', text, re.I)
-        if m:
-            val = float(m.group(1))
-            if "kg" in text[m.start():m.end()].lower():
+    """Robust weight / quantity extraction (grams, gm, gms, kg, ml, ltr, l).
+    Supports titles, Flipkart swatches, Selected Quantity pills, and specification tables.
+    """
+    def parse_unit(val_str, unit_str):
+        try:
+            val = float(val_str)
+            u = unit_str.strip().lower()
+            if u in ["kg", "ltr", "l", "litre", "liter"]:
                 val *= 1000
             return val
-    if html:
-        m = re.search(r'["\'](\d+)\s*g["\']', html, re.I)
+        except (ValueError, TypeError):
+            return 0.0
+
+    # 1. Check title/text first
+    if text:
+        m = re.search(r'(\d+(?:\.\d+)?)\s*(kg|ltr|litre|liter|ml|gms|gm|grams|g|l)\b', text, re.I)
         if m:
-            return float(m.group(1))
-        m2 = re.search(r'(\d+)\s*(?:g|gm|grams)\b', html, re.I)
-        if m2:
-            return float(m2.group(1))
+            return parse_unit(m.group(1), m.group(2))
+
+    # 2. Check HTML if available
+    if html:
+        # Pattern A: Explicit Flipkart / E-com "Selected Quantity: 120 g"
+        m_sel = re.search(r'Selected\s*Quantity\s*:\s*(\d+(?:\.\d+)?)\s*(kg|ltr|litre|liter|ml|gms|gm|grams|g|l)\b', html, re.I)
+        if m_sel:
+            return parse_unit(m_sel.group(1), m_sel.group(2))
+
+        # Pattern B: Swatch JSON / Attribute, e.g. "text":"120 g" or ATLAS_SWATCH_QUANTITY_ATTRIBUTE
+        m_swatch = re.search(r'["\'](?:text|value|title|displayValue|selected)["\']\s*:\s*["\'](\d+(?:\.\d+)?)\s*(kg|ltr|litre|liter|ml|gms|gm|grams|g|l)["\']', html, re.I)
+        if m_swatch:
+            return parse_unit(m_swatch.group(1), m_swatch.group(2))
+
+        # Pattern C: Net Quantity / Weight in specifications or attributes table
+        m_net = re.search(r'(?:Net\s*(?:Quantity|Weight)|Item\s*Weight|Size\s*Name|Package\s*Quantity)\b[^<>{}\n]{0,80}?(\d+(?:\.\d+)?)\s*(kg|ltr|litre|liter|ml|gms|gm|grams|g|l)\b', html, re.I)
+        if m_net:
+            return parse_unit(m_net.group(1), m_net.group(2))
+
+        # Pattern D: Quoted string with weight e.g. "120 g" or '120g'
+        m_quote = re.search(r'["\'](\d+(?:\.\d+)?)\s*(kg|ltr|litre|liter|ml|gms|gm|grams|g|l)["\']', html, re.I)
+        if m_quote:
+            return parse_unit(m_quote.group(1), m_quote.group(2))
+
+        # Pattern E: Clean text search (strip script/style so CSS classes like .v1zwn2g don't match)
+        clean = re.sub(r'<(script|style)[^>]*>.*?</\1>', '', html, flags=re.S | re.I)
+        m_clean = re.search(r'\b(\d+(?:\.\d+)?)\s*(kg|ltr|litre|liter|ml|gms|gm|grams|g|l)\b', clean, re.I)
+        if m_clean:
+            return parse_unit(m_clean.group(1), m_clean.group(2))
+
     return 0.0
+
 
 
 def fast_http_scrape(platform, url):
@@ -610,6 +644,9 @@ def check_sku_links(sku_id):
                 time.sleep(random.uniform(3.5, 7.5))
 
             with db() as c:
+                if fast_res and len(fast_res) > 4 and fast_res[4] and fast_res[4] > 0:
+                    c.execute("UPDATE sku SET grams=? WHERE id=? AND (grams IS NULL OR grams<=0)", (fast_res[4], r["sku_id"]))
+
                 if price is not None:
                     c.execute(
                         "INSERT INTO prices(ts,sku_id,platform,price,live,note) VALUES(?,?,?,?,?,?)",
@@ -668,6 +705,9 @@ def check_all_headless():
                     price, live, note = None, -1, str(e)[:80]
             
             with db() as c:
+                if fast_res and len(fast_res) > 4 and fast_res[4] and fast_res[4] > 0:
+                    c.execute("UPDATE sku SET grams=? WHERE id=? AND (grams IS NULL OR grams<=0)", (fast_res[4], r["sku_id"]))
+
                 if price is not None:
                     c.execute("INSERT INTO prices(ts,sku_id,platform,price,live,note) VALUES(?,?,?,?,?,?)",
                               (now(), r["sku_id"], r["platform"], price, live, note))
@@ -857,7 +897,7 @@ def preview_url():
         return jsonify({"error": "No url provided"}), 400
     pf = detect_platform(url)
     res = fast_http_scrape(pf, url)
-    if res:
+    if res and (res[0] is not None or res[3] or (len(res) > 4 and res[4] and res[4] > 0)):
         price, live, note, name, grams = res
         return jsonify({
             "platform": pf,
@@ -867,6 +907,36 @@ def preview_url():
             "live": live,
             "note": note
         })
+    # Fallback lightweight HTTP extraction for name & grams
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": get_ua(),
+                "Accept-Language": "en-IN,en;q=0.9",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            }
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            html = resp.read().decode("utf-8", errors="ignore")
+            jld = jsonld_extract(html)
+            name = jld.get("name") if jld else None
+            if not name:
+                m_title = re.search(r'<title[^>]*>(.*?)</title>', html, re.I)
+                if m_title:
+                    name = m_title.group(1).split('|')[0].split('-')[0].strip()
+            grams = extract_grams(name, html)
+            price = jld.get("price") if jld else None
+            return jsonify({
+                "platform": pf,
+                "name": name,
+                "grams": grams,
+                "price": price,
+                "live": 1,
+                "note": ""
+            })
+    except Exception:
+        pass
     return jsonify({"platform": pf, "name": None, "grams": 0, "price": None})
 
 
@@ -879,6 +949,7 @@ def save():
 
     links = {p: f.get(p, "").strip() for p in PLATFORMS}
 
+    # If raw_name is a URL, detect platform and link
     if raw_name.startswith("http://") or raw_name.startswith("https://"):
         pf = detect_platform(raw_name)
         if pf:
@@ -886,10 +957,35 @@ def save():
             res = fast_http_scrape(pf, raw_name)
             if res and res[3]:
                 raw_name = res[3]
-                if not raw_grams and res[4]:
+                if (not raw_grams or raw_grams <= 0) and res[4]:
                     raw_grams = res[4]
             else:
                 raw_name = f"{pf} Product"
+
+    # Auto-extract grams from links if user left grams empty or 0
+    if not raw_grams or raw_grams <= 0:
+        for pf, u in links.items():
+            if u and (u.startswith("http://") or u.startswith("https://")):
+                try:
+                    res = fast_http_scrape(pf, u)
+                    if res and len(res) > 4 and res[4] and res[4] > 0:
+                        raw_grams = res[4]
+                        if not raw_name or raw_name == f"{pf} Product":
+                            raw_name = res[3]
+                        break
+                    # Direct HTML fallback to extract grams
+                    req = urllib.request.Request(
+                        u,
+                        headers={"User-Agent": get_ua(), "Accept-Language": "en-IN,en;q=0.9"}
+                    )
+                    with urllib.request.urlopen(req, timeout=8) as resp:
+                        html = resp.read().decode("utf-8", errors="ignore")
+                        g = extract_grams(raw_name, html)
+                        if g > 0:
+                            raw_grams = g
+                            break
+                except Exception:
+                    continue
 
     with db() as c:
         if sid:
@@ -1898,6 +1994,7 @@ PAGE = """<!doctype html>
     async function handleNameInput(input) {
       const val = input.value.trim();
       const hint = document.getElementById('autoHint');
+      const skuGrams = document.getElementById('skuGrams');
       if (val.startsWith('http://') || val.startsWith('https://')) {
         let pf = null;
         if (val.includes('flipkart')) pf = 'Flipkart';
@@ -1910,16 +2007,16 @@ PAGE = """<!doctype html>
           const target = document.getElementById('link_' + pf);
           if (target && !target.value) target.value = val;
           hint.style.display = 'block';
-          hint.innerHTML = `✨ <b>${pf} link detected!</b> Fetching product name and details...`;
+          hint.innerHTML = `✨ <b>${pf} link detected!</b> Fetching product name and pack weight...`;
           try {
             const res = await (await fetch('/api/preview_url?url=' + encodeURIComponent(val))).json();
             if (res.name) {
               input.value = res.name;
-              if (res.grams && !document.getElementById('skuGrams').value) {
-                document.getElementById('skuGrams').value = res.grams;
-              }
-              hint.innerHTML = `✅ Auto-filled details for <b>${res.name}</b> (${res.grams || ''}g). Live price: ₹${res.price || 'N/A'}`;
             }
+            if (res.grams && (!skuGrams.value || skuGrams.value === '0')) {
+              skuGrams.value = res.grams;
+            }
+            hint.innerHTML = `✅ Auto-filled: <b>${res.name || input.value}</b> (${res.grams || ''}g). Live price: ₹${res.price || 'N/A'}`;
           } catch(e) {
             hint.innerHTML = `✨ <b>${pf} link set!</b>`;
           }
@@ -1932,14 +2029,24 @@ PAGE = """<!doctype html>
         const val = document.getElementById('link_' + platform).value.trim();
         if (val.startsWith('http://') || val.startsWith('https://')) {
           const skuName = document.getElementById('skuName');
-          if (!skuName.value) {
+          const skuGrams = document.getElementById('skuGrams');
+          const hint = document.getElementById('autoHint');
+          if (!skuName.value || !skuGrams.value || skuGrams.value === '0') {
             try {
+              if (hint) {
+                hint.style.display = 'block';
+                hint.innerHTML = `🔍 <b>${platform} link detected!</b> Fetching pack weight and details...`;
+              }
               const res = await (await fetch('/api/preview_url?url=' + encodeURIComponent(val))).json();
-              if (res.name) {
+              if (res.name && !skuName.value) {
                 skuName.value = res.name;
-                if (res.grams && !document.getElementById('skuGrams').value) {
-                  document.getElementById('skuGrams').value = res.grams;
-                }
+              }
+              if (res.grams && (!skuGrams.value || skuGrams.value === '0')) {
+                skuGrams.value = res.grams;
+              }
+              if (hint) {
+                hint.style.display = 'block';
+                hint.innerHTML = `✅ <b>Auto-detected:</b> ${res.name || skuName.value} ${res.grams ? '— ' + res.grams + 'g' : ''} ${res.price ? '(₹' + res.price + ')' : ''}`;
               }
             } catch(e) {}
           }
