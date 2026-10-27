@@ -44,12 +44,14 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "Spice Nest Hub Bot"
-          git add spice-nest-hub/spicenest.db
+          git add spice-nest-hub/spicenest.db spice-nest-hub/spicenest_daily_report.csv
           git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: Daily price & competitor monitor scan [skip ci]" && git push)
 
       - name: 📤 Upload Daily Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: spicenest-report
-          path: spice-nest-hub/spicenest.db
+          path: |
+            spice-nest-hub/spicenest.db
+            spice-nest-hub/spicenest_daily_report.csv
           retention-days: 14
