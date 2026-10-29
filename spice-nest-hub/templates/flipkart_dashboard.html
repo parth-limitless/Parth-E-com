@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flipkart Marketplace Seller Intelligence & P&L - Spice Nest Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0f1d;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --border: #24324f;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --flipkart-blue: #2874f0;
+      --flipkart-yellow: #ffe500;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+      max-width: 1550px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-icon {
+      font-size: 28px;
+      background: #172554;
+      border: 1px solid #1e40af;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0;
+      color: #fff;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Navigation & Buttons */
+    .btn-custom {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-flipkart {
+      background: var(--flipkart-blue);
+      color: #fff;
+    }
+    .btn-flipkart:hover {
+      background: #1c5ec9;
+      color: #fff;
+      box-shadow: 0 0 16px rgba(40, 116, 240, 0.45);
+    }
+    .btn-secondary-custom {
+      background: #1f2937;
+      color: var(--text);
+      border-color: #374151;
+    }
+    .btn-secondary-custom:hover {
+      background: #374151;
+      color: #fff;
+    }
+
+    /* Mode Banner */
+    .mode-banner {
+      background: linear-gradient(90deg, #131b2e 0%, #1e293b 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    /* KPI Cards */
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--flipkart-blue), var(--primary));
+    }
+    .kpi-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .kpi-sub {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    /* Tables */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .table-toolbar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .table-toolbar input, .table-toolbar select {
+      background: #0b1324;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .table-toolbar input:focus, .table-toolbar select:focus {
+      border-color: var(--flipkart-blue);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: #0c1427;
+      padding: 12px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+    td { padding: 14px 16px; border-bottom: 1px solid #1a233a; vertical-align: middle; }
+    tr:hover td { background: #141e33; }
+
+    /* Badges */
+    .badge-profit { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+    .badge-loss { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+    .badge-rto { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+    .badge-delivered { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🛒</div>
+      <div>
+        <h1>Flipkart Marketplace Seller Intelligence & P&L</h1>
+        <div class="subtitle">Unit-Level Profit & Loss, Shipment Sync & Returns (RTO) Auditing</div>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <a href="/" class="btn-custom btn-secondary-custom">
+        🌶️ Price Hub
+      </a>
+      <a href="/clv" class="btn-custom btn-secondary-custom">
+        📈 Customer CLV
+      </a>
+      <a href="/meesho-catalog" class="btn-custom btn-secondary-custom" style="background: rgba(225, 29, 72, 0.2); border-color: rgba(225, 29, 72, 0.4); color: #fda4af;">
+        🌸 Meesho Catalog
+      </a>
+      <form method="POST" action="/api/flipkart/sync" style="display:inline;">
+        <button type="submit" class="btn-custom btn-flipkart">
+          🔄 Sync Flipkart Orders Now
+        </button>
+      </form>
+      <a href="/flipkart/export" class="btn-custom btn-secondary-custom">
+        📥 Export P&L CSV
+      </a>
+    </div>
+  </header>
+
+  <!-- Integration Mode Banner -->
+  <div class="mode-banner">
+    <div class="d-flex align-items-center gap-3">
+      <span class="badge" style="background: {% if data.is_live %}#065f46; color: #34d399;{% else %}#78350f; color: #fcd34d;{% endif %} padding: 6px 12px; font-size: 11px; font-weight: 700;">
+        {{ data.mode_title }}
+      </span>
+      <span>
+        {% if data.is_live %}
+        Connected to live Flipkart Seller API with auto-renewing OAuth Bearer Tokens.
+        {% else %}
+        Running with realistic simulated shipments. To connect live: Set <code>FLIPKART_APP_ID</code> and <code>FLIPKART_APP_SECRET</code> in environment.
+        {% endif %}
+      </span>
+    </div>
+    <div class="text-muted" style="font-size: 12px;">
+      Commission benchmark: <b>~22%</b> | RTO courier penalty: <b>₹65/item</b>
+    </div>
+  </div>
+
+  <!-- Executive P&L KPI Cards -->
+  <div class="row g-3 mb-4">
+    <!-- 1. Gross Revenue -->
+    <div class="col-md-6 col-lg-3">
+      <div class="kpi-card">
+        <div class="kpi-title">Gross Sales Revenue</div>
+        <div class="kpi-value">₹{{ "{:,.1f}".format(data.kpis.total_revenue) }}</div>
+        <div class="kpi-sub">{{ data.kpis.total_orders }} total processed orders</div>
+      </div>
+    </div>
+
+    <!-- 2. Net Profit / Loss -->
+    <div class="col-md-6 col-lg-3">
+      <div class="kpi-card" style="border-top: 3px solid {% if data.kpis.net_pnl > 0 %}#10b981{% else %}#ef4444{% endif %};">
+        <div class="kpi-title">Net Profit (Post-Deductions)</div>
+        <div class="kpi-value" style="color: {% if data.kpis.net_pnl > 0 %}#34d399{% else %}#f87171{% endif %};">
+          ₹{{ "{:,.1f}".format(data.kpis.net_pnl) }}
+        </div>
+        <div class="kpi-sub">
+          Net Margin: <b>{{ data.kpis.net_margin_pct }}%</b> | Product COGS: ₹{{ "{:,.0f}".format(data.kpis.total_cogs) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Flipkart Commission -->
+    <div class="col-md-6 col-lg-3">
+      <div class="kpi-card">
+        <div class="kpi-title">Flipkart Deductions & Fees</div>
+        <div class="kpi-value" style="color: #60a5fa;">₹{{ "{:,.1f}".format(data.kpis.total_fee) }}</div>
+        <div class="kpi-sub">Marketplace commissions, fixed & collection fees</div>
+      </div>
+    </div>
+
+    <!-- 4. Returns & RTO Loss -->
+    <div class="col-md-6 col-lg-3">
+      <div class="kpi-card" style="border-top: 3px solid #f59e0b;">
+        <div class="kpi-title">Returns & RTO Penalties</div>
+        <div class="kpi-value" style="color: #fbbf24;">₹{{ "{:,.1f}".format(data.kpis.total_penalties) }}</div>
+        <div class="kpi-sub">
+          {{ data.kpis.rto_count }} RTOs (₹{{ "{:,.0f}".format(data.kpis.rto_loss) }}) + {{ data.kpis.return_count }} Customer Returns
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Analytics Charts Section -->
+  <div class="row g-3 mb-4">
+    <!-- Chart 1: Month-wise Gross Sales vs Net Profit -->
+    <div class="col-lg-8">
+      <div class="kpi-card">
+        <div class="kpi-title mb-3">📈 Month-Wise Flipkart Revenue & Net Profit Trend (₹)</div>
+        <div style="height: 260px; position: relative;">
+          <canvas id="flipkartPnlChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Order Fulfillment & Returns Breakdown -->
+    <div class="col-lg-4">
+      <div class="kpi-card">
+        <div class="kpi-title mb-3">📦 Shipment Status & Return Ratio</div>
+        <div style="height: 260px; position: relative;">
+          <canvas id="flipkartStatusDonut"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKU-Level Profitability Table -->
+  <div class="table-container mb-4">
+    <div class="table-toolbar">
+      <div>
+        <h4 style="font-size: 16px; font-weight: 700; margin: 0; color: #fff;">
+          🎯 SKU-Level Profitability & Margin Health
+        </h4>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+          Product-wise revenue, manufacturing cost, marketplace fees, and net profit per spice blend
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>SKU Code</th>
+            <th>Product Title</th>
+            <th style="text-align: right;">Units Sold</th>
+            <th style="text-align: right;">Gross Sales</th>
+            <th style="text-align: right;">Product COGS</th>
+            <th style="text-align: right;">Flipkart Fees</th>
+            <th style="text-align: right;">Return Penalties</th>
+            <th style="text-align: right;">Net Profit (₹)</th>
+            <th style="text-align: right;">Net Margin</th>
+            <th style="text-align: right;">Return Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in data.sku_list %}
+          <tr>
+            <td><code style="color: #60a5fa; font-weight: 700;">{{ s.sku }}</code></td>
+            <td style="font-weight: 600; color: #f3f4f6;">{{ s.title }}</td>
+            <td style="text-align: right; font-weight: 700;">{{ s.units }}</td>
+            <td style="text-align: right;">₹{{ "{:,.1f}".format(s.revenue) }}</td>
+            <td style="text-align: right; color: var(--text-muted);">₹{{ "{:,.1f}".format(s.cogs) }}</td>
+            <td style="text-align: right; color: #94a3b8;">₹{{ "{:,.1f}".format(s.fees) }}</td>
+            <td style="text-align: right; color: {% if s.penalties > 0 %}#f87171{% else %}var(--text-muted){% endif %};">
+              {% if s.penalties > 0 %}₹{{ "{:,.0f}".format(s.penalties) }}{% else %}-{% endif %}
+            </td>
+            <td style="text-align: right; font-weight: 800; color: {% if s.net_pnl > 0 %}#34d399{% else %}#f87171{% endif %}; font-size: 14px;">
+              ₹{{ "{:,.1f}".format(s.net_pnl) }}
+            </td>
+            <td style="text-align: right;">
+              <span class="badge" style="background: {% if s.margin_pct > 15 %}rgba(16, 185, 129, 0.2); color: #34d399;{% elif s.margin_pct > 0 %}rgba(59, 130, 246, 0.2); color: #60a5fa;{% else %}rgba(239, 68, 68, 0.2); color: #f87171;{% endif %};">
+                {{ s.margin_pct }}%
+              </span>
+            </td>
+            <td style="text-align: right; color: {% if s.return_rate_pct > 15 %}#fbbf24{% else %}var(--text-muted){% endif %};">
+              {{ s.return_rate_pct }}%
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Detailed Orders & Shipments Audit Table -->
+  <div class="table-container">
+    <div class="table-toolbar" style="display: block;">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+          <h4 style="font-size: 16px; font-weight: 700; margin: 0; color: #fff;">
+            📦 Live Flipkart Order Transactions & P&L Audit
+          </h4>
+          <span id="orderCounter" class="badge bg-dark border border-secondary text-light mt-1">
+            Showing {{ data.recent_orders|length }} Orders
+          </span>
+        </div>
+        <div>
+          <button type="button" class="btn btn-sm btn-outline-secondary text-light" onclick="resetOrderFilters()">
+            🔄 Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <input type="text" id="orderSearch" class="w-100" placeholder="🔍 Search Order ID, Item ID, or Product..." oninput="filterOrdersTable()">
+        </div>
+        <div class="col-md-3">
+          <select id="statusFilter" class="w-100" onchange="filterOrdersTable()">
+            <option value="">All Fulfillment Statuses</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="SHIPPED">In Transit (Shipped)</option>
+            <option value="RTO">RTO (Courier Return)</option>
+            <option value="Customer Return">Customer Return</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select id="pnlFilter" class="w-100" onchange="filterOrdersTable()">
+            <option value="">All P&L Statuses</option>
+            <option value="PROFIT">Profitable Orders Only</option>
+            <option value="LOSS">Loss-Making Orders Only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table id="ordersAuditTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Order Date</th>
+            <th>Product SKU</th>
+            <th>Qty</th>
+            <th style="text-align: right;">Selling Price</th>
+            <th style="text-align: right;">Flipkart Fee</th>
+            <th style="text-align: right;">Return Penalty</th>
+            <th style="text-align: center;">Fulfillment Status</th>
+            <th style="text-align: right;">Net P&L (₹)</th>
+            <th style="text-align: center;">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in data.recent_orders %}
+          <tr data-status="{{ r.shipment_status }}" data-return="{{ r.return_type }}" data-pnl="{{ r.pnl_status }}">
+            <td>
+              <div style="font-weight: 700; color: #f3f4f6;">{{ r.order_id }}</div>
+              <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">{{ r.order_item_id }}</div>
+            </td>
+            <td>
+              <div>{{ r.order_date[:10] }}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">{{ r.order_date[11:16] }}</div>
+            </td>
+            <td>
+              <div style="font-weight: 600; color: #e2e8f0;">{{ r.title }}</div>
+              <div style="font-size: 11px; color: #60a5fa; font-family: monospace;">{{ r.sku }}</div>
+            </td>
+            <td><b>{{ r.quantity }}</b></td>
+            <td style="text-align: right; font-weight: 700;">₹{{ "{:,.1f}".format(r.selling_price) }}</td>
+            <td style="text-align: right; color: #94a3b8;">₹{{ "{:,.1f}".format(r.marketplace_fee) }}</td>
+            <td style="text-align: right; color: {% if r.shipping_penalty > 0 %}#f87171{% else %}var(--text-muted){% endif %};">
+              {% if r.shipping_penalty > 0 %}₹{{ "{:,.0f}".format(r.shipping_penalty) }}{% else %}-{% endif %}
+            </td>
+            <td style="text-align: center;">
+              {% if 'RTO' in r.return_type %}
+              <span class="badge-rto">⚠️ RTO Return</span>
+              {% elif 'Customer' in r.return_type %}
+              <span class="badge-loss">🔄 Customer Return</span>
+              {% elif r.shipment_status == 'DELIVERED' %}
+              <span class="badge-delivered">✅ Delivered</span>
+              {% else %}
+              <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🚚 In Transit</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right; font-weight: 800; font-size: 14px; color: {% if r.net_pnl > 0 %}#34d399{% else %}#f87171{% endif %};">
+              ₹{{ "{:,.1f}".format(r.net_pnl) }}
+            </td>
+            <td style="text-align: center;">
+              <span class="{% if r.pnl_status == 'PROFIT' %}badge-profit{% else %}badge-loss{% endif %}">
+                {{ r.pnl_status }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JavaScript Charts & Table Filtering -->
+  <script>
+    // 1. Month-wise Revenue & Net Profit Chart
+    const pnlCtx = document.getElementById('flipkartPnlChart').getContext('2d');
+    new Chart(pnlCtx, {
+      type: 'bar',
+      data: {
+        labels: {{ data.chart_data.labels | tojson }},
+        datasets: [
+          {
+            label: 'Gross Sales (₹)',
+            data: {{ data.chart_data.revenue | tojson }},
+            backgroundColor: '#2874f0',
+            borderRadius: 6
+          },
+          {
+            label: 'Net Profit (₹)',
+            data: {{ data.chart_data.pnl | tojson }},
+            backgroundColor: '#10b981',
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#94a3b8' } }
+        },
+        scales: {
+          x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+          y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+        }
+      }
+    });
+
+    // 2. Shipment Status Doughnut Chart
+    const statusCtx = document.getElementById('flipkartStatusDonut').getContext('2d');
+    new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: {{ data.chart_data.status_labels | tojson }},
+        datasets: [{
+          data: {{ data.chart_data.status_counts | tojson }},
+          backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+          borderColor: '#111827',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } }
+        }
+      }
+    });
+
+    // 3. Client-Side Filtering for Orders Audit Table
+    function filterOrdersTable() {
+      const query = document.getElementById('orderSearch').value.toLowerCase().trim();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const pnlFilter = document.getElementById('pnlFilter').value;
+
+      const rows = document.querySelectorAll('#ordersAuditTable tbody tr');
+      let visible = 0;
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const status = row.dataset.status || '';
+        const returnType = row.dataset.return || '';
+        const pnl = row.dataset.pnl || '';
+
+        const matchQuery = !query || text.includes(query);
+        let matchStatus = true;
+        if (statusFilter === 'DELIVERED') matchStatus = (status === 'DELIVERED' && returnType === 'NONE');
+        else if (statusFilter === 'SHIPPED') matchStatus = (status === 'SHIPPED');
+        else if (statusFilter === 'RTO') matchStatus = returnType.includes('RTO');
+        else if (statusFilter === 'Customer Return') matchStatus = returnType.includes('Customer');
+
+        const matchPnl = !pnlFilter || pnl === pnlFilter;
+
+        if (matchQuery && matchStatus && matchPnl) {
+          row.style.display = '';
+          visible++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      const counter = document.getElementById('orderCounter');
+      if (counter) counter.innerText = `Showing ${visible} of ${rows.length} Orders`;
+    }
+
+    function resetOrderFilters() {
+      document.getElementById('orderSearch').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('pnlFilter').value = '';
+      filterOrdersTable();
+    }
+  </script>
+
+</body>
+</html>
+

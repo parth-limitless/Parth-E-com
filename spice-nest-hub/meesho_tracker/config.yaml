@@ -1,0 +1,47 @@
+# ===========================================================================
+# Meesho Store Tracker Configuration
+# ===========================================================================
+store:
+  name: "Spice Nest Impex Private Limited"
+  url: "https://www.meesho.com/SpiceNestImpexPrivateLimited?ms=2"
+  expected_product_count: 51
+  batch_size: 20
+
+limits:
+  concurrency: 1
+  max_requests_per_minute: 8
+  min_delay_product_sec: 4.0
+  max_delay_product_sec: 9.0
+  pause_every_n_pages: 10
+  pause_duration_min_sec: 20.0
+  pause_duration_max_sec: 40.0
+  max_pages_per_run: 80
+  max_run_duration_min: 20
+  max_request_retries: 1
+
+circuit_breaker:
+  cooldown_base_hours: 24
+  cooldown_2nd_hours: 48
+  cooldown_3rd_hours: 72
+  retry_after_block_wait_sec: 60
+
+guards:
+  min_hours_between_full_scans: 24
+  min_minutes_between_live_scans: 30
+  schema_drift_drop_pct_threshold: 30.0
+  empty_fields_threshold_pct: 20.0
+
+storage:
+  db_path: "spicenest.db"
+  raw_dir: "./raw"
+  output_dir: "./output"
+  logs_dir: "./logs"
+  excel_file: "./output/meesho_store_tracker.xlsx"
+  raw_retention_days: 14
+  history_warning_row_count: 100000
+
+alerts:
+  telegram_enabled: false
+  price_change_alert_threshold_pct: 10.0
+  rating_drop_alert_threshold: 0.1
+

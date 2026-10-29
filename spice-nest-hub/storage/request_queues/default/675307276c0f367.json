@@ -1,0 +1,16 @@
+{
+  "unique_key": "https://www.meesho.com/spicenestimpexprivatelimited?ms=2",
+  "url": "https://www.meesho.com/SpiceNestImpexPrivateLimited?ms=2",
+  "method": "GET",
+  "payload": null,
+  "headers": {},
+  "user_data": {
+    "__crawlee": {
+      "state": 4
+    }
+  },
+  "retry_count": 0,
+  "no_retry": false,
+  "loaded_url": "https://www.meesho.com/SpiceNestImpexPrivateLimited?ms=2",
+  "handled_at": "2026-10-29 09:05:00.489090+00:00"
+}

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Lifetime Value (CLV) & Segmentation - Spice Nest Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <style>
+    :root {
+      --bg: #0a0f1d;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --card-hover: #1e293b;
+      --border: #24324f;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-icon {
+      font-size: 32px;
+      background: #1e1b4b;
+      border: 1px solid #3730a3;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0;
+      color: #fff;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Buttons */
+    .btn-custom {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-primary-custom {
+      background: var(--primary);
+      color: #042f2e;
+    }
+    .btn-primary-custom:hover {
+      background: var(--primary-hover);
+      color: #02201f;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+    .btn-secondary-custom {
+      background: #1f2937;
+      color: var(--text);
+      border-color: #374151;
+    }
+    .btn-secondary-custom:hover {
+      background: #374151;
+      color: #fff;
+    }
+    .btn-accent-custom {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #fff;
+    }
+    .btn-accent-custom:hover {
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.45);
+      color: #fff;
+    }
+
+    /* Model Status Banner */
+    .model-banner {
+      background: linear-gradient(90deg, #131b2e 0%, #1e1b4b 100%);
+      border: 1px solid #2e3856;
+      border-radius: 12px;
+      padding: 12px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .engine-pill {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    /* KPI Cards */
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent-blue));
+    }
+    .kpi-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .kpi-desc {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    /* Segment Cards */
+    .segment-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      height: 100%;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .segment-card:hover {
+      transform: translateY(-2px);
+      border-color: #374151;
+    }
+    .segment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .segment-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .segment-count {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #1f2937;
+    }
+    .segment-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      background: #0b1324;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+    }
+    .segment-metrics div span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    .segment-metrics div strong {
+      font-size: 13px;
+      color: #f3f4f6;
+    }
+    .segment-strategy {
+      font-size: 12px;
+      color: #94a3b8;
+      background: rgba(30, 41, 59, 0.4);
+      padding: 8px 10px;
+      border-radius: 6px;
+      border-left: 3px solid var(--primary);
+      line-height: 1.4;
+    }
+
+    /* Badges */
+    .badge-champion { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-loyal { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-potential { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-new { background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-atrisk { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-lost { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .custom-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Table Container */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+    .table-toolbar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .table-toolbar input, .table-toolbar select {
+      background: #0b1324;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .table-toolbar input:focus, .table-toolbar select:focus {
+      border-color: var(--primary);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      background: #0c1427;
+      padding: 12px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1a233a;
+      vertical-align: middle;
+    }
+    tr:hover td {
+      background: #141e33;
+    }
+
+    /* P(Alive) meter */
+    .alive-bar {
+      width: 50px;
+      height: 6px;
+      background: #1f2937;
+      border-radius: 3px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .alive-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📈</div>
+      <div>
+        <h1>Customer Lifetime Value (CLV) & Segmentation</h1>
+        <div class="subtitle">RFM Analytics, BG-NBD Repeat Purchase Prediction & Gamma-Gamma Value Estimation</div>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <a href="/" class="btn-custom btn-secondary-custom">
+        🌶️ Price Hub
+      </a>
+      <a href="/flipkart-seller" class="btn-custom btn-secondary-custom">
+        🛒 Flipkart Seller P&L
+      </a>
+      <a href="/meesho-catalog" class="btn-custom btn-secondary-custom" style="background: rgba(225, 29, 72, 0.2); border-color: rgba(225, 29, 72, 0.4); color: #fda4af;">
+        🌸 Meesho Catalog
+      </a>
+      <form method="POST" action="/api/clv/seed" style="display:inline;" onsubmit="return confirm('Do you want to generate/reseed 50 realistic customer transaction histories?');">
+        <button type="submit" class="btn-custom btn-primary-custom">
+          ⚡ Seed Sample Transactions
+        </button>
+      </form>
+      <a href="/clv/export" class="btn-custom btn-accent-custom">
+        📥 Export Analysis CSV
+      </a>
+    </div>
+  </header>
+
+  <!-- Engine Status Banner -->
+  <div class="model-banner">
+    <div class="d-flex align-items-center gap-3">
+      <span class="engine-pill">🤖 Predictive Engine</span>
+      <span><b>Status:</b> {{ analysis.model_status }}</span>
+    </div>
+    <div class="text-muted" style="font-size: 12px;">
+      BG-NBD: Frequency ($x$), Recency ($t_x$), Age ($T$) &nbsp;|&nbsp; Gamma-Gamma: Monetary Value ($\bar{m}$)
+    </div>
+  </div>
+
+  <!-- KPI Overview Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-title">Active Customers & Orders</div>
+        <div class="kpi-value">{{ analysis.total_customers }} <span style="font-size: 15px; color: var(--text-muted); font-weight: normal;">({{ analysis.total_orders }} Orders)</span></div>
+        <div class="kpi-desc">Total unique buyers in database</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-title">Historical Revenue</div>
+        <div class="kpi-value">₹{{ "{:,.1f}".format(analysis.total_revenue) }}</div>
+        <div class="kpi-desc">Total past transaction value across portals</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-title">Average Predicted 12M CLV</div>
+        <div class="kpi-value" style="color: #34d399;">₹{{ "{:,.1f}".format(analysis.avg_clv) }}</div>
+        <div class="kpi-desc">Projected net value per customer over 1 year</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-title">Expected 30-Day Revenue</div>
+        <div class="kpi-value" style="color: #60a5fa;">₹{{ "{:,.1f}".format(analysis.pred_30d_revenue) }}</div>
+        <div class="kpi-desc">Based on BG-NBD conditional order forecast</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts & Visual Section -->
+  {% if analysis.chart_data and analysis.chart_data.labels %}
+  <div class="row g-3 mb-4">
+    <div class="col-lg-5">
+      <div class="kpi-card">
+        <div class="kpi-title mb-3">Customer Segmentation Distribution</div>
+        <div style="height: 250px; position: relative;">
+          <canvas id="segmentDonutChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="kpi-card">
+        <div class="kpi-title mb-3">Projected 12-Month CLV by Segment (₹)</div>
+        <div style="height: 250px; position: relative;">
+          <canvas id="clvBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Strategic Segmentation Cards Grid -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 style="font-size: 18px; font-weight: 700; margin: 0;">👥 Strategic Customer Segments & AI Action Cards</h3>
+    <span style="font-size: 12px; color: var(--text-muted);">Calculated via Recency, Frequency, Monetary & Probability Alive</span>
+  </div>
+
+  <div class="row g-3 mb-4">
+    {% for s_name, seg in analysis.segments_summary.items() %}
+    <div class="col-md-6 col-lg-4">
+      <div class="segment-card" style="border-top: 3px solid {{ seg.color }};">
+        <div class="segment-header">
+          <div class="segment-title">
+            <span>{{ seg.icon }}</span>
+            <span>{{ s_name }}</span>
+          </div>
+          <span class="segment-count" style="color: {{ seg.color }}; border: 1px solid {{ seg.color }}44;">
+            {{ seg.count }} ({{ seg.pct_of_customers }}%)
+          </span>
+        </div>
+        <div class="segment-metrics">
+          <div>
+            <span>Total Spend:</span>
+            <strong>₹{{ "{:,.0f}".format(seg.total_spend) }}</strong>
+          </div>
+          <div>
+            <span>Avg 12M CLV:</span>
+            <strong style="color: #34d399;">₹{{ "{:,.0f}".format(seg.avg_clv) }}</strong>
+          </div>
+          <div>
+            <span>Avg AOV:</span>
+            <strong>₹{{ "{:,.0f}".format(seg.avg_spend) }}</strong>
+          </div>
+          <div>
+            <span>Avg P(Alive):</span>
+            <strong style="color: #60a5fa;">{{ seg.avg_p_alive }}%</strong>
+          </div>
+        </div>
+        <div class="segment-strategy" style="border-left-color: {{ seg.color }};">
+          <b>🎯 Action Advice:</b> {{ seg.action }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- SECTION: 📦 Month-wise Platform Order Volume & Revenue Matrix -->
+  {% if analysis.monthly_platforms and analysis.monthly_platforms.months_list %}
+  <div class="table-container mb-4" style="background: var(--card-bg); border-color: var(--card-border);">
+    <!-- Section Header & Controls -->
+    <div class="table-toolbar" style="display: block;">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0; color: #fff;">
+            📦 Month-Wise Platform Order & Revenue Breakdown
+          </h3>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+            Har mahine me kis platform (Meesho, Flipkart, Amazon, Blinkit, JioMart, Direct Store) se kitne orders aur revenue aayi
+          </div>
+        </div>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          <!-- View Toggle: Orders vs Revenue -->
+          <div class="btn-group" role="group">
+            <button type="button" id="btnViewOrders" class="btn btn-sm btn-primary" onclick="setMonthlyView('orders')">
+              📦 View by Orders
+            </button>
+            <button type="button" id="btnViewRevenue" class="btn btn-sm btn-outline-secondary text-light" onclick="setMonthlyView('revenue')">
+              💰 View by Revenue (₹)
+            </button>
+          </div>
+          <!-- Platform Filter Dropdown -->
+          <select id="monthlyPlatformSelect" onchange="filterMonthlyMatrixTable()" style="padding: 6px 12px; font-size: 12px;">
+            <option value="all">🏢 All Platforms (Full Matrix)</option>
+            <option value="Flipkart">Flipkart Only</option>
+            <option value="Amazon">Amazon Only</option>
+            <option value="Meesho">Meesho Only</option>
+            <option value="Blinkit">Blinkit Only</option>
+            <option value="JioMart">JioMart Only</option>
+            <option value="Direct Store">Direct Store Only</option>
+          </select>
+
+          <!-- Month Filter Dropdown -->
+          <select id="monthlyMonthSelect" onchange="filterMonthlyMatrixTable()" style="padding: 6px 12px; font-size: 12px;">
+            <option value="all">📅 All Months (Full Timeline)</option>
+            <optgroup label="⚡ Quick Ranges">
+              <option value="last3">Past 3 Months (Quarter)</option>
+              <option value="last6">Past 6 Months (Half Year)</option>
+            </optgroup>
+            {% if analysis.monthly_platforms and analysis.monthly_platforms.months_list %}
+            <optgroup label="📆 Specific Month">
+              {% for m in analysis.monthly_platforms.months_list %}
+              <option value="{{ m.month_code }}">{{ m.label }}</option>
+              {% endfor %}
+            </optgroup>
+            {% endif %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Platform Total Cards with Period Label -->
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span id="monthlyKpiPeriodLabel" style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">
+          📈 Showing: All Time Totals
+        </span>
+      </div>
+      <div class="row g-2">
+        {% set p_totals = analysis.monthly_platforms.platform_totals %}
+        {% set p_colors = analysis.monthly_platforms.platform_colors %}
+        {% for pf in analysis.monthly_platforms.platforms %}
+        {% set pf_slug = pf | lower | replace(' ', '-') %}
+        <div class="col-6 col-md-4 col-lg-2">
+          <div style="background: #0b1324; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; border-left: 3px solid {{ p_colors[pf] }};">
+            <div style="font-size: 11px; font-weight: 700; color: {{ p_colors[pf] }};">{{ pf }}</div>
+            <div style="font-size: 16px; font-weight: 800; color: #fff; margin: 2px 0;">
+              <span id="card-orders-{{ pf_slug }}">{{ p_totals[pf].orders }}</span> <span style="font-size: 11px; font-weight: normal; color: var(--text-muted);">orders</span>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8;">
+              ₹<span id="card-rev-{{ pf_slug }}">{{ "{:,.0f}".format(p_totals[pf].revenue) }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Chart: Monthly Stacked Order Volume -->
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--border);">
+      <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;">
+        📊 Month-Over-Month Platform Performance Trends
+      </div>
+      <div style="height: 250px; position: relative;">
+        <canvas id="monthlyPlatformChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Month x Platform Matrix Table -->
+    <div class="table-responsive">
+      <table id="monthlyMatrixTable" style="margin: 0;">
+        <thead>
+          <tr>
+            <th style="min-width: 140px;">Month</th>
+            <th class="col-platform col-flipkart" style="color: #5aa1ff;">Flipkart</th>
+            <th class="col-platform col-amazon" style="color: #fba42b;">Amazon</th>
+            <th class="col-platform col-meesho" style="color: #ff68b5;">Meesho</th>
+            <th class="col-platform col-blinkit" style="color: #fbd658;">Blinkit</th>
+            <th class="col-platform col-jiomart" style="color: #32d0ff;">JioMart</th>
+            <th class="col-platform col-direct-store" style="color: #34d399;">Direct Store</th>
+            <th style="text-align: right;">Total Orders</th>
+            <th style="text-align: right;">Total Revenue</th>
+            <th style="text-align: center;">Top Platform</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in analysis.monthly_platforms.months_list %}
+          <tr class="monthly-matrix-row" data-month-code="{{ m.month_code }}">
+            <td>
+              <div style="font-weight: 700; color: #f3f4f6;">{{ m.label }}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">{{ m.month_code }}</div>
+            </td>
+
+            {% for pf in analysis.monthly_platforms.platforms %}
+            {% set p_data = m.platforms[pf] %}
+            <td class="col-platform col-{{ pf | lower | replace(' ', '-') }}">
+              <div class="val-primary" style="font-weight: 700; color: {% if p_data.orders > 0 %}#f3f4f6{% else %}#4b5563{% endif %};">
+                <span class="view-orders-txt">{{ p_data.orders }} <span style="font-size: 11px; font-weight: normal; color: var(--text-muted);">ord</span></span>
+                <span class="view-revenue-txt d-none">{% if p_data.revenue > 0 %}₹{{ "{:,.0f}".format(p_data.revenue) }}{% else %}-{% endif %}</span>
+              </div>
+              <div class="val-secondary text-muted" style="font-size: 11px;">
+                <span class="view-orders-txt">{% if p_data.revenue > 0 %}₹{{ "{:,.0f}".format(p_data.revenue) }}{% else %}-{% endif %}</span>
+                <span class="view-revenue-txt d-none">{{ p_data.orders }} ord</span>
+              </div>
+            </td>
+            {% endfor %}
+
+            <td style="text-align: right; font-weight: 800; font-size: 14px; color: #60a5fa;">
+              {{ m.total_orders }}
+            </td>
+            <td style="text-align: right; font-weight: 800; font-size: 14px; color: #34d399;">
+              ₹{{ "{:,.0f}".format(m.total_revenue) }}
+            </td>
+            <td style="text-align: center;">
+              {% if m.top_platform != '-' %}
+              <span class="custom-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                🏆 {{ m.top_platform }} ({{ m.top_platform_orders }})
+              </span>
+              {% else %}
+              <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr style="background: #080d1a; font-weight: 700; border-top: 2px solid var(--border);">
+            <td style="color: #fff;">GRAND TOTAL</td>
+            {% for pf in analysis.monthly_platforms.platforms %}
+            {% set p_tot = analysis.monthly_platforms.platform_totals[pf] %}
+            <td class="col-platform col-{{ pf | lower | replace(' ', '-') }}">
+              <div class="val-primary" style="color: {{ analysis.monthly_platforms.platform_colors[pf] }}; font-weight: 800;">
+                <span class="view-orders-txt">{{ p_tot.orders }} ord</span>
+                <span class="view-revenue-txt d-none">₹{{ "{:,.0f}".format(p_tot.revenue) }}</span>
+              </div>
+              <div class="val-secondary" style="font-size: 11px; color: #94a3b8;">
+                <span class="view-orders-txt">₹{{ "{:,.0f}".format(p_tot.revenue) }}</span>
+                <span class="view-revenue-txt d-none">{{ p_tot.orders }} ord</span>
+              </div>
+            </td>
+            {% endfor %}
+            <td style="text-align: right; color: #60a5fa; font-weight: 800; font-size: 15px;">
+              {{ analysis.monthly_platforms.grand_total_orders }}
+            </td>
+            <td style="text-align: right; color: #34d399; font-weight: 800; font-size: 15px;">
+              ₹{{ "{:,.0f}".format(analysis.monthly_platforms.grand_total_revenue) }}
+            </td>
+            <td style="text-align: center; color: var(--text-muted); font-size: 11px;">
+              All Time
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Detailed Customer Table & Advanced Multi-Filter Toolbar -->
+  <div class="table-container">
+    <div class="table-toolbar" style="display: block;">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div class="d-flex align-items-center gap-3">
+          <h4 style="font-size: 16px; font-weight: 700; margin: 0;">👥 Customer Directory & Predictive Scores</h4>
+          <span id="customerCountBadge" class="badge bg-dark border border-secondary text-light">Showing {{ analysis.customers|length }} Customers</span>
+        </div>
+        <div>
+          <button type="button" class="btn-custom btn-secondary-custom" style="padding: 5px 14px; font-size: 12px;" onclick="resetAllFilters()">
+            🔄 Reset All Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Advanced 6-Way Filter Controls -->
+      <div class="row g-2 align-items-center">
+        <!-- 1. Search Box -->
+        <div class="col-lg-3 col-md-6">
+          <input type="text" id="custSearch" class="w-100" placeholder="🔍 Search name or CUST ID..." oninput="applyFilters()">
+        </div>
+
+        <!-- 2. Platform / Channel Filter (Meesho, Flipkart, Amazon, Blinkit, JioMart, Direct Store) -->
+        <div class="col-lg-2 col-md-6">
+          <select id="channelFilter" class="w-100" onchange="applyFilters()">
+            <option value="">🏢 All Channels (Sabhi)</option>
+            <option value="Meesho">Meesho</option>
+            <option value="Flipkart">Flipkart</option>
+            <option value="Amazon">Amazon</option>
+            <option value="Blinkit">Blinkit</option>
+            <option value="JioMart">JioMart</option>
+            <option value="Direct Store">Direct Store</option>
+          </select>
+        </div>
+
+        <!-- 3. Month / Time Period Filter -->
+        <div class="col-lg-2 col-md-4">
+          <select id="monthFilter" class="w-100" onchange="applyFilters()">
+            <option value="">📅 All Months (Sabhi Mahine)</option>
+            <optgroup label="⚡ Quick Timeframes">
+              <option value="30d">Past 30 Days (Aakhri 1 Mahina)</option>
+              <option value="60d">Past 60 Days (Aakhri 2 Mahine)</option>
+              <option value="90d">Past 90 Days (Quarter)</option>
+              <option value="180d">Past 180 Days (6 Months)</option>
+            </optgroup>
+            {% if analysis.available_months %}
+            <optgroup label="📆 Specific Months">
+              {% for m in analysis.available_months %}
+              <option value="{{ m.value }}">{{ m.label }}</option>
+              {% endfor %}
+            </optgroup>
+            {% endif %}
+          </select>
+        </div>
+
+        <!-- 4. Segment Filter -->
+        <div class="col-lg-2 col-md-4">
+          <select id="segmentFilter" class="w-100" onchange="applyFilters()">
+            <option value="">🎯 All Segments</option>
+            {% for s_name in analysis.segments_summary.keys() %}
+            <option value="{{ s_name }}">{{ s_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- 5. Show Top Limit Filter ("Top 50 se end tak") -->
+        <div class="col-lg-1 col-md-2 col-6">
+          <select id="limitFilter" class="w-100" onchange="applyFilters()" title="Filter by Top count">
+            <option value="all">🔢 End tak (All)</option>
+            <option value="10">Top 10</option>
+            <option value="25">Top 25</option>
+            <option value="50">Top 50</option>
+            <option value="100">Top 100</option>
+          </select>
+        </div>
+
+        <!-- 6. Sort By Filter -->
+        <div class="col-lg-2 col-md-2 col-6">
+          <select id="sortFilter" class="w-100" onchange="applyFilters()" title="Sort order">
+            <option value="clv_desc">🔃 CLV: High to Low</option>
+            <option value="clv_asc">🔃 CLV: Low to High</option>
+            <option value="spend_desc">💰 Spend: High to Low</option>
+            <option value="orders_desc">📦 Orders: Most to Least</option>
+            <option value="recency_asc">⏱️ Recency: Most Recent</option>
+            <option value="palive_desc">💚 P(Alive): High to Low</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table id="customerTable">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Segment</th>
+            <th>Orders (F)</th>
+            <th>Recency (R)</th>
+            <th>Total Spend (M)</th>
+            <th>Avg Basket</th>
+            <th>P(Alive)</th>
+            <th>Pred. 30D Orders</th>
+            <th>Predicted 12M CLV</th>
+            <th>Channel</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in analysis.customers %}
+          <tr 
+            data-segment="{{ c.segment }}"
+            data-platform="{{ c.primary_platform }}"
+            data-all-platforms="{{ c.all_platforms | join(',') }}"
+            data-months="{{ c.order_months | join(',') }}"
+            data-recency="{{ c.recency_days }}"
+            data-clv="{{ c.predicted_clv_12m }}"
+            data-spend="{{ c.total_spend }}"
+            data-orders="{{ c.total_orders }}"
+            data-palive="{{ c.p_alive_pct }}"
+          >
+            <td>
+              <div style="font-weight: 600; color: #f3f4f6;">{{ c.customer_name }}</div>
+              <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">{{ c.customer_id }}</div>
+            </td>
+            <td>
+              <span class="custom-badge {{ c.segment_badge }}">
+                {{ c.segment_icon }} {{ c.segment }}
+              </span>
+            </td>
+            <td>
+              <b>{{ c.total_orders }}</b>
+              <span class="text-muted" style="font-size: 11px;">(Score: {{ c.f_score }})</span>
+            </td>
+            <td>
+              <div>{{ c.recency_days }}d ago</div>
+              <div class="text-muted" style="font-size: 11px;">{{ c.last_order_date }}</div>
+            </td>
+            <td>
+              <b>₹{{ "{:,.1f}".format(c.total_spend) }}</b>
+            </td>
+            <td>₹{{ "{:,.1f}".format(c.avg_order_value) }}</td>
+            <td>
+              <div class="alive-bar">
+                <div class="alive-fill" style="width: {{ c.p_alive_pct }}%; background: {% if c.p_alive_pct > 70 %}#10b981{% elif c.p_alive_pct > 40 %}#f59e0b{% else %}#ef4444{% endif %};"></div>
+              </div>
+              <span>{{ c.p_alive_pct }}%</span>
+            </td>
+            <td>
+              <span style="color: #60a5fa; font-weight: 600;">{{ c.pred_purchases_30d }}</span>
+            </td>
+            <td>
+              <strong style="color: #34d399; font-size: 14px;">₹{{ "{:,.1f}".format(c.predicted_clv_12m) }}</strong>
+            </td>
+            <td>
+              <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="font-size: 11px;">
+                {{ c.primary_platform }}
+              </span>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="10" class="text-center py-5 text-muted">
+              No transactions recorded yet. Click <b>"Seed Sample Transactions"</b> above to load realistic customer analysis data.
+            </td>
+          </tr>
+          {% endfor %}
+          <tr id="noResultsRow" style="display: none;">
+            <td colspan="10" class="text-center py-5 text-muted">
+              ⚠️ Koi customer select kiye gaye filter combination se match nahi hua.<br>
+              <button class="btn btn-sm btn-link text-decoration-none mt-2" onclick="resetAllFilters()">🔄 Reset Filters</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Client-side Advanced Multi-Filter & Chart.js -->
+  <script>
+    function applyFilters() {
+      const query = document.getElementById('custSearch').value.toLowerCase().trim();
+      const channelFilter = document.getElementById('channelFilter').value;
+      const segmentFilter = document.getElementById('segmentFilter').value;
+      const monthFilter = document.getElementById('monthFilter').value;
+      const limitFilter = document.getElementById('limitFilter').value;
+      const sortBy = document.getElementById('sortFilter').value;
+
+      const tbody = document.querySelector('#customerTable tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr:not(#noResultsRow)'));
+      const noResultsRow = document.getElementById('noResultsRow');
+
+      // 1. Sort rows dynamically
+      rows.sort((a, b) => {
+        const clvA = parseFloat(a.dataset.clv || 0);
+        const clvB = parseFloat(b.dataset.clv || 0);
+        const spendA = parseFloat(a.dataset.spend || 0);
+        const spendB = parseFloat(b.dataset.spend || 0);
+        const ordersA = parseInt(a.dataset.orders || 0);
+        const ordersB = parseInt(b.dataset.orders || 0);
+        const recencyA = parseInt(a.dataset.recency || 0);
+        const recencyB = parseInt(b.dataset.recency || 0);
+        const paliveA = parseFloat(a.dataset.palive || 0);
+        const paliveB = parseFloat(b.dataset.palive || 0);
+
+        if (sortBy === 'clv_desc') return clvB - clvA;
+        if (sortBy === 'clv_asc') return clvA - clvB;
+        if (sortBy === 'spend_desc') return spendB - spendA;
+        if (sortBy === 'orders_desc') return ordersB - ordersA;
+        if (sortBy === 'recency_asc') return recencyA - recencyB;
+        if (sortBy === 'palive_desc') return paliveB - paliveA;
+        return 0;
+      });
+
+      // Re-append sorted rows into table
+      rows.forEach(r => tbody.appendChild(r));
+      if (noResultsRow) tbody.appendChild(noResultsRow);
+
+      // 2. Filter matching & Top Limit calculation
+      let matchedCount = 0;
+      let visibleCount = 0;
+      const maxLimit = limitFilter === 'all' ? Infinity : parseInt(limitFilter, 10);
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const segment = row.dataset.segment || '';
+        const platform = row.dataset.platform || '';
+        const allPlatforms = (row.dataset.allPlatforms || '').split(',');
+        const months = (row.dataset.months || '').split(',');
+        const recency = parseInt(row.dataset.recency || 0, 10);
+
+        const matchQuery = !query || text.includes(query);
+        const matchSegment = !segmentFilter || segment === segmentFilter;
+        const matchChannel = !channelFilter || platform.trim().toLowerCase() === channelFilter.trim().toLowerCase();
+
+        let matchMonth = true;
+        if (monthFilter) {
+          if (monthFilter === '30d') {
+            matchMonth = recency <= 30;
+          } else if (monthFilter === '60d') {
+            matchMonth = recency <= 60;
+          } else if (monthFilter === '90d') {
+            matchMonth = recency <= 90;
+          } else if (monthFilter === '180d') {
+            matchMonth = recency <= 180;
+          } else {
+            matchMonth = months.includes(monthFilter);
+          }
+        }
+
+        const isMatch = matchQuery && matchSegment && matchChannel && matchMonth;
+
+        if (isMatch) {
+          matchedCount++;
+          if (matchedCount <= maxLimit) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // 3. Update counter badge & empty state
+      const totalRows = rows.length;
+      const countBadge = document.getElementById('customerCountBadge');
+      if (countBadge) {
+        if (limitFilter !== 'all' && matchedCount > maxLimit) {
+          countBadge.innerText = `Showing Top ${visibleCount} of ${matchedCount} (Total: ${totalRows})`;
+        } else if (matchedCount < totalRows) {
+          countBadge.innerText = `Showing ${visibleCount} of ${totalRows} Filtered`;
+        } else {
+          countBadge.innerText = `Showing ${visibleCount} Customers`;
+        }
+      }
+
+      if (noResultsRow) {
+        noResultsRow.style.display = matchedCount === 0 ? '' : 'none';
+      }
+    }
+
+    function resetAllFilters() {
+      document.getElementById('custSearch').value = '';
+      document.getElementById('channelFilter').value = '';
+      document.getElementById('segmentFilter').value = '';
+      document.getElementById('monthFilter').value = '';
+      document.getElementById('limitFilter').value = 'all';
+      document.getElementById('sortFilter').value = 'clv_desc';
+      applyFilters();
+    }
+
+    {% if analysis.chart_data and analysis.chart_data.labels %}
+    // Donut Chart: Customer Distribution
+    const donutCtx = document.getElementById('segmentDonutChart').getContext('2d');
+    new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: {{ analysis.chart_data.labels | tojson }},
+        datasets: [{
+          data: {{ analysis.chart_data.counts | tojson }},
+          backgroundColor: {{ analysis.chart_data.colors | tojson }},
+          borderColor: '#111827',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { color: '#94a3b8', font: { size: 11 } }
+          }
+        }
+      }
+    });
+
+    // Bar Chart: 12M CLV by Segment
+    const barCtx = document.getElementById('clvBarChart').getContext('2d');
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: {{ analysis.chart_data.labels | tojson }},
+        datasets: [{
+          label: 'Total Expected 12M CLV (₹)',
+          data: {{ analysis.chart_data.clv | tojson }},
+          backgroundColor: {{ analysis.chart_data.colors | tojson }},
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: '#1e293b' },
+            ticks: { color: '#94a3b8', font: { size: 11 } }
+          },
+          y: {
+            grid: { color: '#1e293b' },
+            ticks: { color: '#94a3b8' }
+          }
+        }
+      }
+    });
+    {% endif %}
+
+    {% if analysis.monthly_platforms and analysis.monthly_platforms.months_list %}
+    // Monthly Platform Stacked Bar Chart
+    const monthlyPlatformLabels = {{ analysis.monthly_platforms.chart_labels | tojson }};
+    const monthlyPlatformOrderDatasets = {{ analysis.monthly_platforms.chart_order_datasets | tojson }};
+    const monthlyPlatformRevenueDatasets = {{ analysis.monthly_platforms.chart_revenue_datasets | tojson }};
+
+    const monthlyCtx = document.getElementById('monthlyPlatformChart').getContext('2d');
+    const monthlyChart = new Chart(monthlyCtx, {
+      type: 'bar',
+      data: {
+        labels: monthlyPlatformLabels,
+        datasets: JSON.parse(JSON.stringify(monthlyPlatformOrderDatasets))
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            stacked: true,
+            grid: { color: '#1e293b' },
+            ticks: { color: '#94a3b8', font: { size: 11 } }
+          },
+          y: {
+            stacked: true,
+            grid: { color: '#1e293b' },
+            ticks: { color: '#94a3b8' },
+            title: { display: true, text: 'Total Orders', color: '#94a3b8' }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#94a3b8', font: { size: 11 } }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        }
+      }
+    });
+
+    let currentMonthlyView = 'orders';
+
+    function setMonthlyView(mode) {
+      currentMonthlyView = mode;
+      const btnOrders = document.getElementById('btnViewOrders');
+      const btnRev = document.getElementById('btnViewRevenue');
+
+      if (mode === 'orders') {
+        btnOrders.className = 'btn btn-sm btn-primary';
+        btnRev.className = 'btn btn-sm btn-outline-secondary text-light';
+        document.querySelectorAll('.view-orders-txt').forEach(el => el.classList.remove('d-none'));
+        document.querySelectorAll('.view-revenue-txt').forEach(el => el.classList.add('d-none'));
+
+        monthlyChart.data.datasets = JSON.parse(JSON.stringify(monthlyPlatformOrderDatasets));
+        monthlyChart.options.scales.y.title.text = 'Total Orders';
+        filterMonthlyMatrixTable();
+      } else {
+        btnRev.className = 'btn btn-sm btn-primary';
+        btnOrders.className = 'btn btn-sm btn-outline-secondary text-light';
+        document.querySelectorAll('.view-orders-txt').forEach(el => el.classList.add('d-none'));
+        document.querySelectorAll('.view-revenue-txt').forEach(el => el.classList.remove('d-none'));
+
+        monthlyChart.data.datasets = JSON.parse(JSON.stringify(monthlyPlatformRevenueDatasets));
+        monthlyChart.options.scales.y.title.text = 'Total Revenue (₹)';
+        filterMonthlyMatrixTable();
+      }
+      monthlyChart.update();
+    }
+
+    function filterMonthlyMatrixTable() {
+      const selectedPlatform = document.getElementById('monthlyPlatformSelect').value;
+      const selectedMonth = document.getElementById('monthlyMonthSelect').value;
+
+      const rows = document.querySelectorAll('.monthly-matrix-row');
+      const allMonthsData = {{ analysis.monthly_platforms.months_list | tojson }};
+      const platformTotals = {{ analysis.monthly_platforms.platform_totals | tojson }};
+      const platforms = {{ analysis.monthly_platforms.platforms | tojson }};
+
+      // 1. Filter Matrix Table Rows by Month
+      let visibleMonths = [];
+      rows.forEach((row, index) => {
+        const rowMonth = row.dataset.monthCode;
+        let matchMonth = false;
+        if (selectedMonth === 'all') {
+          matchMonth = true;
+        } else if (selectedMonth === 'last3') {
+          matchMonth = index < 3;
+        } else if (selectedMonth === 'last6') {
+          matchMonth = index < 6;
+        } else {
+          matchMonth = rowMonth === selectedMonth;
+        }
+
+        if (matchMonth) {
+          row.style.display = '';
+          const mObj = allMonthsData.find(m => m.month_code === rowMonth);
+          if (mObj) visibleMonths.push(mObj);
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // 2. Highlight/Focus Platform Column
+      const allCols = document.querySelectorAll('#monthlyMatrixTable .col-platform');
+      allCols.forEach(col => {
+        col.style.transition = 'all 0.2s';
+        if (selectedPlatform === 'all') {
+          col.style.opacity = '1';
+          col.style.background = '';
+        } else {
+          const colClass = 'col-' + selectedPlatform.toLowerCase().replace(/ /g, '-');
+          if (col.classList.contains(colClass)) {
+            col.style.opacity = '1';
+            col.style.background = 'rgba(59, 130, 246, 0.12)';
+          } else {
+            col.style.opacity = '0.35';
+            col.style.background = '';
+          }
+        }
+      });
+
+      // 3. Update Platform KPI Cards based on filtered month(s)
+      const kpiLabel = document.getElementById('monthlyKpiPeriodLabel');
+      if (selectedMonth === 'all') {
+        if (kpiLabel) kpiLabel.innerText = '📈 Showing: All Time Totals';
+        platforms.forEach(pf => {
+          const slug = pf.toLowerCase().replace(/ /g, '-');
+          const elOrd = document.getElementById('card-orders-' + slug);
+          const elRev = document.getElementById('card-rev-' + slug);
+          if (elOrd) elOrd.innerText = platformTotals[pf].orders;
+          if (elRev) elRev.innerText = Number(platformTotals[pf].revenue).toLocaleString('en-IN');
+        });
+      } else {
+        let periodName = selectedMonth === 'last3' ? 'Past 3 Months' : (selectedMonth === 'last6' ? 'Past 6 Months' : selectedMonth);
+        const matchedM = allMonthsData.find(m => m.month_code === selectedMonth);
+        if (matchedM) periodName = matchedM.label;
+        if (kpiLabel) kpiLabel.innerText = `📈 Showing: ${periodName}`;
+
+        platforms.forEach(pf => {
+          let pfOrders = 0;
+          let pfRev = 0;
+          visibleMonths.forEach(mObj => {
+            if (mObj && mObj.platforms && mObj.platforms[pf]) {
+              pfOrders += mObj.platforms[pf].orders;
+              pfRev += mObj.platforms[pf].revenue;
+            }
+          });
+          const slug = pf.toLowerCase().replace(/ /g, '-');
+          const elOrd = document.getElementById('card-orders-' + slug);
+          const elRev = document.getElementById('card-rev-' + slug);
+          if (elOrd) elOrd.innerText = pfOrders;
+          if (elRev) elRev.innerText = Math.round(pfRev).toLocaleString('en-IN');
+        });
+      }
+
+      // 4. Update Stacked Bar Chart with filtered months and platform
+      if (monthlyChart) {
+        const rawOrderDatasets = {{ analysis.monthly_platforms.chart_order_datasets | tojson }};
+        const rawRevenueDatasets = {{ analysis.monthly_platforms.chart_revenue_datasets | tojson }};
+        const baseDatasets = currentMonthlyView === 'orders' ? rawOrderDatasets : rawRevenueDatasets;
+        const allLabels = {{ analysis.monthly_platforms.chart_labels | tojson }};
+        const ascMonths = Array.from(allMonthsData).reverse();
+
+        let activeIndices = [];
+        ascMonths.forEach((mObj, idx) => {
+          let isVisible = false;
+          if (selectedMonth === 'all') {
+            isVisible = true;
+          } else if (selectedMonth === 'last3') {
+            isVisible = (ascMonths.length - idx) <= 3;
+          } else if (selectedMonth === 'last6') {
+            isVisible = (ascMonths.length - idx) <= 6;
+          } else {
+            isVisible = mObj.month_code === selectedMonth;
+          }
+          if (isVisible) activeIndices.push(idx);
+        });
+
+        monthlyChart.data.labels = activeIndices.map(i => allLabels[i]);
+        monthlyChart.data.datasets = baseDatasets.map(ds => {
+          const isPlatformVisible = (selectedPlatform === 'all' || ds.label === selectedPlatform);
+          return {
+            ...ds,
+            data: activeIndices.map(i => ds.data[i]),
+            hidden: !isPlatformVisible
+          };
+        });
+        monthlyChart.update();
+      }
+    }
+    {% endif %}
+  </script>
+
+</body>
+</html>
+

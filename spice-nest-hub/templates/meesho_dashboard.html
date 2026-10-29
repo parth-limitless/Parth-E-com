@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spice Nest Impex Private Limited - Meesho Storefront Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0f1d;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --border: #24324f;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --meesho-pink: #e11d48;
+      --meesho-accent: #f43f5e;
+      --meesho-light: #fda4af;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+      max-width: 1550px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-icon {
+      font-size: 28px;
+      background: #881337;
+      border: 1px solid #be123c;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25);
+    }
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-custom {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary-custom {
+      background: var(--meesho-pink);
+      color: #fff;
+    }
+    .btn-primary-custom:hover {
+      background: #be123c;
+      color: #fff;
+    }
+    .btn-outline-custom {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline-custom:hover {
+      background: var(--card-border);
+      color: #fff;
+    }
+    .btn-sync {
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
+    }
+    .btn-sync:hover {
+      background: linear-gradient(135deg, #be123c, #9f1239);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Store Profile Banner */
+    .store-hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #1e293b 50%, #0f172a 100%);
+      border: 1px solid #3b82f6;
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    /* KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--border);
+    }
+    .kpi-card.pink::before { background: var(--meesho-pink); }
+    .kpi-card.green::before { background: var(--primary); }
+    .kpi-card.yellow::before { background: var(--warning); }
+    .kpi-card.blue::before { background: #3b82f6; }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .kpi-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .kpi-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Visual Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 992px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .chart-container {
+      position: relative;
+      height: 270px;
+    }
+
+    /* Filters Bar */
+    .filter-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      flex: 1;
+    }
+    .search-input {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      min-width: 260px;
+      flex: 1;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--meesho-pink);
+    }
+    .select-filter {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .select-filter:focus {
+      outline: none;
+      border-color: var(--meesho-pink);
+    }
+
+    /* Data Table */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    .table-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .table-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .custom-table th {
+      background: #172033;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--card-border);
+      text-align: left;
+    }
+    .custom-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1e293b;
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
+    .custom-table tr:hover td {
+      background: rgba(225, 29, 72, 0.05);
+    }
+
+    .product-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--meesho-light);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .product-name-link {
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .product-name-link:hover {
+      color: var(--meesho-light);
+    }
+
+    .badge-stock {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-out {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-discount {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Brand Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🌸</div>
+      <div>
+        <h1 class="brand-title">Meesho Storefront & Catalog Intelligence</h1>
+        <p class="brand-subtitle">Automated Catalog Tracking for Spice Nest Impex Private Limited</p>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <a href="/" class="btn-custom btn-outline-custom">← Price Spy Hub</a>
+      <a href="/clv" class="btn-custom btn-outline-custom">👥 Customer CLV</a>
+      <a href="/flipkart-seller" class="btn-custom btn-outline-custom">🛒 Flipkart Seller P&L</a>
+      <a href="/meesho-catalog" class="btn-custom btn-primary-custom">🌸 Meesho Store Tracker</a>
+
+      <!-- Power BI Excel Deliverable Download Button -->
+      <a href="/download/meesho-tracker-excel" class="btn-custom" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
+        📊 Download Power BI Excel (.xlsx)
+      </a>
+
+      <a href="/meesho/export" class="btn-custom btn-outline-custom">
+        📥 Export CSV
+      </a>
+    </div>
+  </header>
+
+  <!-- Real-Time Live Sync & ScrapingBee Setup Banner -->
+  <div style="background: #111827; border: 1px solid {% if has_api_key %}#10b981{% else %}#f59e0b{% endif %}; border-radius: 12px; padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      {% if has_api_key %}
+        <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+          🟢 Live API Connected
+        </span>
+        <span style="font-size: 13px; color: #e2e8f0;">
+          ScrapingBee Key: <code style="color: #60a5fa;">{{ masked_key }}</code> &bull; All syncs will hit live Meesho servers directly.
+        </span>
+      {% else %}
+        <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+          🟡 Running in Verified Seeder Mode
+        </span>
+        <span style="font-size: 13px; color: #e2e8f0;">
+          Real live data ke liye apni <b>ScrapingBee API Key</b> enter karein (Takes 30s &bull; 1,000 Free Credits on <a href="https://www.scrapingbee.com" target="_blank" style="color: #fda4af;">ScrapingBee.com</a>):
+        </span>
+      {% endif %}
+    </div>
+
+    <!-- API Key Save Form -->
+    <form method="post" action="/api/meesho/save-key" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;" onsubmit="this.querySelector('button').innerHTML='Connecting...';">
+      <input type="password" name="api_key" placeholder="{% if has_api_key %}Update ScrapingBee API Key...{% else %}Paste ScrapingBee API Key here...{% endif %}" required style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 12px; min-width: 250px;">
+      <button type="submit" class="btn-custom" style="background: {% if has_api_key %}#334155{% else %}#10b981{% endif %}; color: #fff; padding: 6px 14px; font-size: 12px; font-weight: 700;">
+        {% if has_api_key %}Update Key{% else %}⚡ Save & Connect Live API{% endif %}
+      </button>
+    </form>
+  </div>
+
+  <!-- Live Meesho Storefront Profile Card (Identical to Meesho UI) -->
+  <div class="store-hero">
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="width: 68px; height: 68px; border-radius: 50%; background: #0f172a; border: 2px solid #60a5fa; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">
+        🏪
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <h2 style="font-size: 22px; font-weight: 800; color: #fff; margin: 0;">{{ data.store.store_name }}</h2>
+          <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;">
+            ✓ Official Verified Meesho Supplier
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; margin-top: 6px; font-size: 13px; color: #cbd5e1; flex-wrap: wrap;">
+          <span><b style="color: #fbbf24; font-size: 14px;">★ {{ data.store.rating }}</b> ({{ "{:,}".format(data.store.ratings_count) }} Ratings)</span>
+          <span>&bull;</span>
+          <span><b>{{ data.store.followers }}</b> Followers</span>
+          <span>&bull;</span>
+          <span><b style="color: #60a5fa;">{{ data.store.total_products }} Products Active</b> in Store</span>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <a href="{{ data.store.store_url }}" target="_blank" class="btn-custom" style="background: #be185d; color: #fff; padding: 10px 18px; font-size: 13px; border-radius: 10px; font-weight: 700;">
+        Open Meesho Storefront ↗
+      </a>
+    </div>
+  </div>
+
+  <!-- Meesho Store Tracker - Production Guard & Circuit Breaker Control Center -->
+  <div style="background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; border-bottom: 1px solid #1f2937; padding-bottom: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 22px;">🛡️</span>
+        <div>
+          <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin: 0;">Meesho Store Tracker & 24-Hour Circuit Breaker</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Crawlee Playwright discovery engine &bull; Power BI automated daily sync &bull; Zero fingerprint spoofing</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        {% if tracker.status == 'HEALTHY' %}
+          <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+            ● Engine Status: HEALTHY
+          </span>
+        {% else %}
+          <span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+            ● Cooldown Active Until: {{ tracker.cooldown_until }}
+          </span>
+        {% endif %}
+        <span style="background: #1e293b; color: #94a3b8; padding: 4px 10px; border-radius: 8px; font-size: 12px;">
+          Blocks: <b>{{ tracker.consecutive_blocks }} / 3</b>
+        </span>
+      </div>
+    </div>
+
+    <!-- Tracker Diagnostics Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Last Successful Scan</div>
+        <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">{{ tracker.last_success_time }}</div>
+      </div>
+      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">24h Rule Guard Status</div>
+        <div style="font-size: 13px; font-weight: 600; color: {% if tracker.can_run_scheduled %}#34d399{% else %}#fbbf24{% endif %}; margin-top: 4px;">
+          {{ tracker.scheduled_guard_reason }}
+        </div>
+      </div>
+      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Tracked Products in SQLite</div>
+        <div style="font-size: 14px; font-weight: 700; color: #60a5fa; margin-top: 4px;">{{ tracker.tracked_products_count }} Products</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons with Guard Tooltips -->
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <!-- Live Scan Form -->
+      <form method="post" action="/api/meesho-tracker/run-live" style="display:inline;">
+        <button type="submit" class="btn-custom" style="background: #2563eb; color: #fff; padding: 9px 18px;" {% if not tracker.can_run_live %}disabled title="{{ tracker.live_guard_reason }}" style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+          ⚡ Run Live Refresh (Catalog Only)
+        </button>
+      </form>
+
+      <!-- Full Scan Form -->
+      <form method="post" action="/api/meesho-tracker/run-full" style="display:flex; align-items: center; gap: 10px;">
+        <button type="submit" class="btn-custom" style="background: var(--meesho-pink); color: #fff; padding: 9px 18px;" {% if not tracker.can_run_scheduled %}disabled title="{{ tracker.scheduled_guard_reason }}" style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+          🚀 Run Full Scan (24h Enforced)
+        </button>
+        {% if not tracker.can_run_scheduled and tracker.status == 'HEALTHY' %}
+          <label style="font-size: 12px; color: #fbbf24; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+            <input type="checkbox" name="force" value="1"> Force once/24h
+          </label>
+        {% endif %}
+      </form>
+
+      <!-- Excel Export -->
+      <a href="/download/meesho-tracker-excel" class="btn-custom btn-outline-custom" style="padding: 9px 18px;">
+        📊 Open Power BI Excel (Latest + History)
+      </a>
+    </div>
+
+    <!-- Recent Run Logs Preview -->
+    {% if tracker.recent_runs %}
+      <div style="margin-top: 20px; border-top: 1px solid #1f2937; padding-top: 16px;">
+        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Recent Scrape Run History</div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+            <thead>
+              <tr style="color: #64748b; border-bottom: 1px solid #24324f; text-align: left;">
+                <th style="padding: 6px 10px;">Run ID</th>
+                <th style="padding: 6px 10px;">Status</th>
+                <th style="padding: 6px 10px;">Products Saved</th>
+                <th style="padding: 6px 10px;">Duration</th>
+                <th style="padding: 6px 10px;">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in tracker.recent_runs %}
+                <tr style="border-bottom: 1px solid #1e293b;">
+                  <td style="padding: 8px 10px; font-family: monospace; color: #93c5fd;">{{ r.run_id }}</td>
+                  <td style="padding: 8px 10px;">
+                    <span style="background: {% if r.status == 'SUCCESS' %}rgba(16, 185, 129, 0.2); color: #34d399;{% elif r.status == 'PARTIAL' %}rgba(245, 158, 11, 0.2); color: #fbbf24;{% else %}rgba(239, 68, 68, 0.2); color: #f87171;{% endif %} padding: 2px 8px; border-radius: 6px; font-weight: 700;">
+                      {{ r.status }}
+                    </span>
+                  </td>
+                  <td style="padding: 8px 10px; color: #fff; font-weight: 600;">{{ r.products_saved }}</td>
+                  <td style="padding: 8px 10px; color: #94a3b8;">{{ r.elapsed_sec }}s</td>
+                  <td style="padding: 8px 10px; color: #94a3b8;">{{ r.started_at }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Executive KPI Metrics Grid -->
+  <div class="kpi-grid">
+    <!-- Total Products -->
+    <div class="kpi-card pink">
+      <div class="kpi-header">
+        <span class="kpi-title">Store Products Tracked</span>
+        <span class="kpi-badge" style="background: rgba(225, 29, 72, 0.2); color: #fda4af;">All Active</span>
+      </div>
+      <div class="kpi-value">{{ data.kpis.total_products }} Products</div>
+      <div class="kpi-subtitle">100% Spice Nest Official Catalog</div>
+    </div>
+
+    <!-- Avg Selling Price -->
+    <div class="kpi-card blue">
+      <div class="kpi-header">
+        <span class="kpi-title">Avg Selling Price</span>
+        <span class="kpi-badge" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd;">Price Band</span>
+      </div>
+      <div class="kpi-value">₹{{ data.kpis.avg_price }}</div>
+      <div class="kpi-subtitle">Min: ₹{{ data.kpis.min_price }} | Max: ₹{{ data.kpis.max_price }}</div>
+    </div>
+
+    <!-- Avg Discount -->
+    <div class="kpi-card yellow">
+      <div class="kpi-header">
+        <span class="kpi-title">Avg Meesho Discount</span>
+        <span class="kpi-badge" style="background: rgba(245, 158, 11, 0.2); color: #fde68a;">Consumer Saver</span>
+      </div>
+      <div class="kpi-value">{{ data.kpis.avg_discount_pct }}% OFF</div>
+      <div class="kpi-subtitle">Direct Factory / Supplier Pricing</div>
+    </div>
+
+    <!-- Stock Availability -->
+    <div class="kpi-card green">
+      <div class="kpi-header">
+        <span class="kpi-title">Live Stock Rate</span>
+        <span class="kpi-badge" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7;">Fulfillment</span>
+      </div>
+      <div class="kpi-value">{{ data.kpis.stock_rate_pct }}%</div>
+      <div class="kpi-subtitle">{{ data.kpis.in_stock_count }} In Stock | 0 Out of Stock</div>
+    </div>
+  </div>
+
+  <!-- Visual Analytics Charts -->
+  <div class="charts-grid">
+    <!-- Price Bucket Histogram -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">📊 Store Price Distribution</span>
+        <span style="font-size: 12px; color: var(--text-muted);">Products per Price Bracket</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="priceBucketChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Category Share Doughnut -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">🏷️ Product Categories</span>
+        <span style="font-size: 12px; color: var(--text-muted);">Inventory Spread</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="categoryShareChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Month-Wise Orders Breakdown Card -->
+  <div class="table-card" style="margin-bottom: 24px;">
+    <div class="table-header" style="background: #172033;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <h2 class="table-title">📅 Meesho Month-Wise Order Volume & Sales Revenue</h2>
+        <span style="background: rgba(225, 29, 72, 0.2); color: #fda4af; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+          Store Order Ledger
+        </span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted);">
+        Aggregated from Spice Nest Customer Orders Database &bull; <a href="/clv" style="color: #60a5fa; text-decoration: none;">View CLV Matrix ↗</a>
+      </div>
+    </div>
+    
+    <div style="padding: 16px 20px;">
+      <div style="display: grid; grid-template-columns: 1.1fr 1.9fr; gap: 20px; align-items: center;">
+        <!-- Left: Month Table -->
+        <div style="max-height: 240px; overflow-y: auto;">
+          <table class="custom-table" style="font-size: 12px;">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Orders</th>
+                <th>Total Revenue</th>
+                <th>Avg Basket</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in data.monthly_orders %}
+              <tr>
+                <td><b>{{ m.month }}</b></td>
+                <td><span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 4px; font-weight: 700;">{{ m.orders_count }} Orders</span></td>
+                <td><b style="color: #34d399;">₹{{ "{:,}".format(m.total_revenue) }}</b></td>
+                <td style="color: var(--text-muted);">₹{{ m.avg_order_value }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted);">No monthly transactions logged yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Right: Monthly Orders Trend Bar Chart -->
+        <div style="height: 230px; position: relative;">
+          <canvas id="monthlyOrdersChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters & Search Toolbar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search product name, SKU, or category..." oninput="applyFilters()">
+      
+      <select id="categoryFilter" class="select-filter" onchange="applyFilters()">
+        <option value="ALL">All Categories (4)</option>
+        {% for c in data.categories %}
+        <option value="{{ c.name }}">{{ c.name }} ({{ c.count }})</option>
+        {% endfor %}
+      </select>
+
+      <select id="sortFilter" class="select-filter" onchange="applyFilters()">
+        <option value="REVIEWS_DESC">Most Popular (Review Count)</option>
+        <option value="PRICE_DESC">Price: High to Low</option>
+        <option value="PRICE_ASC">Price: Low to High</option>
+        <option value="RATING_DESC">Top Rated (★)</option>
+      </select>
+    </div>
+
+    <div>
+      <span id="filteredCountBadge" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
+        Showing {{ data.catalog|length }} of {{ data.catalog|length }} Products
+      </span>
+      <button class="btn-custom btn-outline-custom" style="padding: 6px 12px; margin-left: 8px;" onclick="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  <!-- Catalog Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div>
+        <h2 class="table-title">Spice Nest Impex Private Limited - Store Catalog Table</h2>
+        <span style="font-size: 12px; color: var(--text-muted);">All 51 Active Products with Live Prices, Reviews & Meesho PDP links</span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted);">
+        Storefront Synced: <b>{{ data.last_sync or 'Recently' }}</b>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table" id="catalogTable">
+        <thead>
+          <tr>
+            <th style="width: 50px;">Item</th>
+            <th>Product Name & SKU</th>
+            <th>Selling Price</th>
+            <th>MRP</th>
+            <th>Discount</th>
+            <th>Rating & Reviews</th>
+            <th>Stock Status</th>
+            <th style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in data.catalog %}
+          <tr class="catalog-row" 
+              data-id="{{ p.product_id }}" 
+              data-name="{{ p.name | lower }}" 
+              data-price="{{ p.price }}" 
+              data-mrp="{{ p.mrp }}" 
+              data-rating="{{ p.rating }}" 
+              data-reviews="{{ p.review_count }}" 
+              data-stock="{{ 'IN_STOCK' if p.in_stock else 'OUT_STOCK' }}">
+            <td>
+              <div class="product-thumb">
+                {% if 'pickle' in p.name.lower() or 'achar' in p.name.lower() %}
+                  🥒
+                {% elif 'jam' in p.name.lower() %}
+                  🍓
+                {% elif 'sauce' in p.name.lower() or 'ketchup' in p.name.lower() or 'vinegar' in p.name.lower() %}
+                  🍾
+                {% elif 'kesar' in p.name.lower() or 'saffron' in p.name.lower() %}
+                  ✨
+                {% else %}
+                  🌶️
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <a href="{{ p.product_url }}" target="_blank" class="product-name-link" title="{{ p.name }}">
+                {{ p.name }}
+              </a>
+              <span style="font-size: 11px; color: var(--text-muted);">PID: {{ p.product_id }} &bull; Supplier: {{ p.supplier_name }}</span>
+            </td>
+            <td>
+              <b style="color: #fff; font-size: 15px;">₹{{ p.price }}</b>
+            </td>
+            <td style="color: var(--text-muted);">
+              {% if p.mrp and p.mrp > p.price %}
+                <del>₹{{ p.mrp }}</del>
+              {% else %}
+                ₹{{ p.price }}
+              {% endif %}
+            </td>
+            <td>
+              {% if p.mrp and p.mrp > p.price %}
+                {% set disc = (((p.mrp - p.price) / p.mrp) * 100) | round(0) | int %}
+                <span class="badge-discount" style="font-size: 11px; padding: 3px 8px;">{{ disc }}% OFF</span>
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 11px;">Regular</span>
+              {% endif %}
+            </td>
+            <td>
+              <span style="color: #fbbf24; font-weight: 700;">★ {{ p.rating }}</span>
+              <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">({{ "{:,}".format(p.review_count) }})</span>
+            </td>
+            <td>
+              {% if p.in_stock %}
+                <span class="badge-stock">✓ In Stock</span>
+              {% else %}
+                <span class="badge-out">✕ Out of Stock</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              <a href="{{ p.product_url }}" target="_blank" class="btn-custom btn-outline-custom" style="padding: 5px 12px; font-size: 12px;">
+                View on Meesho ↗
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 20px 0; border-top: 1px solid var(--border);">
+    Spice Nest Hub &copy; 2026 &bull; Official Storefront Synchronization Engine for Spice Nest Impex Private Limited
+  </footer>
+
+  <script>
+    // Initialize Visual Charts
+    const bucketData = {{ data.price_buckets | tojson }};
+    const categoryData = {{ data.categories | tojson }};
+
+    // 1. Price Histogram
+    const ctxBar = document.getElementById('priceBucketChart').getContext('2d');
+    new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: ['Under ₹150', '₹150 - ₹250', '₹250 - ₹350', '₹350+'],
+        datasets: [{
+          label: 'Number of Products',
+          data: [bucketData.under_150, bucketData.150_to_250, bucketData.250_to_350, bucketData.350_plus],
+          backgroundColor: '#e11d48',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3af' } },
+          y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3af', stepSize: 5 }, beginAtZero: true }
+        }
+      }
+    });
+
+    // 2. Categories Share Doughnut
+    const ctxDoughnut = document.getElementById('categoryShareChart').getContext('2d');
+    const catLabels = categoryData.map(c => c.name);
+    const catCounts = categoryData.map(c => c.count);
+    const catColors = ['#e11d48', '#3b82f6', '#10b981', '#f59e0b'];
+
+    new Chart(ctxDoughnut, {
+      type: 'doughnut',
+      data: {
+        labels: catLabels,
+        datasets: [{
+          data: catCounts,
+          backgroundColor: catColors,
+          borderWidth: 2,
+          borderColor: '#111827'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94a3af', boxWidth: 12, font: { size: 11 } } }
+        }
+      }
+    });
+
+    // 3. Month-Wise Orders Trend Chart
+    const monthlyOrdersData = {{ data.monthly_orders | tojson }};
+    const mSorted = [...monthlyOrdersData].reverse();
+    const mLabels = mSorted.map(m => m.month);
+    const mOrders = mSorted.map(m => m.orders_count);
+    const mRev = mSorted.map(m => m.total_revenue);
+
+    const ctxMonth = document.getElementById('monthlyOrdersChart').getContext('2d');
+    new Chart(ctxMonth, {
+      type: 'bar',
+      data: {
+        labels: mLabels,
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Orders Count',
+            data: mOrders,
+            backgroundColor: '#e11d48',
+            borderRadius: 6,
+            yAxisID: 'y'
+          },
+          {
+            type: 'line',
+            label: 'Revenue (₹)',
+            data: mRev,
+            borderColor: '#10b981',
+            backgroundColor: '#10b981',
+            borderWidth: 2,
+            tension: 0.3,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { color: '#94a3af', boxWidth: 12, font: { size: 11 } } }
+        },
+        scales: {
+          x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3af', font: { size: 10 } } },
+          y: {
+            type: 'linear',
+            position: 'left',
+            grid: { color: '#1e293b' },
+            ticks: { color: '#fda4af', stepSize: 1 },
+            title: { display: true, text: 'Orders', color: '#fda4af' },
+            beginAtZero: true
+          },
+          y1: {
+            type: 'linear',
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: { color: '#6ee7b7' },
+            title: { display: true, text: 'Revenue (₹)', color: '#6ee7b7' },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Client-side Filters
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      const sort = document.getElementById('sortFilter').value;
+
+      const rows = Array.from(document.querySelectorAll('.catalog-row'));
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        const id = row.getAttribute('data-id').toLowerCase();
+
+        let match = true;
+        if (search && !name.includes(search) && !id.includes(search)) {
+          match = false;
+        }
+
+        if (category !== 'ALL') {
+          if (category === 'Pickles & Achars' && !name.includes('pickle') && !name.includes('achar')) match = false;
+          else if (category === 'Jams & Sauces' && !name.includes('jam') && !name.includes('sauce') && !name.includes('ketchup') && !name.includes('vinegar') && !name.includes('chutney')) match = false;
+          else if (category === 'Whole Spices' && !name.includes('whole') && !name.includes('seeds') && !name.includes('kesar') && !name.includes('cloves') && !name.includes('cardamom') && !name.includes('sticks') && !name.includes('pepper') && !name.includes('jeera')) match = false;
+          else if (category === 'Ground Spices & Masalas' && (name.includes('pickle') || name.includes('achar') || name.includes('jam') || name.includes('sauce') || name.includes('kesar') || name.includes('sticks'))) match = false;
+        }
+
+        row.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+
+      document.getElementById('filteredCountBadge').innerText = `Showing ${visibleCount} of ${rows.length} Products`;
+
+      // Sorting
+      const tbody = document.querySelector('#catalogTable tbody');
+      const visibleRows = rows.filter(r => r.style.display !== 'none');
+      visibleRows.sort((a, b) => {
+        const priceA = parseFloat(a.getAttribute('data-price')) || 0;
+        const priceB = parseFloat(b.getAttribute('data-price')) || 0;
+        const ratingA = parseFloat(a.getAttribute('data-rating')) || 0;
+        const ratingB = parseFloat(b.getAttribute('data-rating')) || 0;
+        const revA = parseInt(a.getAttribute('data-reviews')) || 0;
+        const revB = parseInt(b.getAttribute('data-reviews')) || 0;
+
+        if (sort === 'REVIEWS_DESC') return revB - revA;
+        if (sort === 'PRICE_DESC') return priceB - priceA;
+        if (sort === 'PRICE_ASC') return priceA - priceB;
+        if (sort === 'RATING_DESC') return ratingB - ratingA;
+        return 0;
+      });
+      visibleRows.forEach(r => tbody.appendChild(r));
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('categoryFilter').value = 'ALL';
+      document.getElementById('sortFilter').value = 'REVIEWS_DESC';
+      applyFilters();
+    }
+  </script>
+</body>
+</html>

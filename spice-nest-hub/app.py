@@ -4,7 +4,7 @@ Run run.bat, then open http://localhost:5000
 import csv, io, json, os, random, re, sqlite3, threading, time
 import datetime as dt
 import urllib.request
-from flask import Flask, Response, jsonify, redirect, render_template_string, request
+from flask import Flask, Response, jsonify, redirect, render_template_string, render_template, request
 
 DB = "spicenest.db"
 PLATFORMS = ["Flipkart", "Amazon", "Meesho", "Blinkit", "JioMart"]
@@ -93,6 +93,11 @@ def init():
             ts TEXT
         );
         """)
+        try:
+            import clv_analytics
+            clv_analytics.init_clv_db(c)
+        except Exception as e:
+            print(f"[CLV Init Warning]: {e}")
 
 
 # ---------- Extraction Helpers ----------
@@ -1076,6 +1081,330 @@ def history():
     return jsonify([dict(r) for r in rows])
 
 
+@app.get("/api/meesho/catalog")
+def api_meesho_catalog():
+    with db() as c:
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS meesho_catalog (
+                product_id TEXT PRIMARY KEY,
+                title TEXT,
+                price REAL,
+                product_url TEXT,
+                image_url TEXT,
+                status TEXT,
+                first_seen TEXT,
+                last_seen TEXT,
+                deactivated_at TEXT
+            )
+        """)
+        rows = [dict(r) for r in c.execute("SELECT * FROM meesho_catalog ORDER BY status ASC, last_seen DESC").fetchall()]
+        active_cnt = sum(1 for r in rows if r["status"] == "ACTIVE")
+        deact_cnt = sum(1 for r in rows if r["status"] == "DEACTIVATED")
+    return jsonify({
+        "total": len(rows),
+        "active": active_cnt,
+        "deactivated": deact_cnt,
+        "products": rows
+    })
+
+
+@app.post("/api/meesho/scan")
+def api_meesho_scan():
+    import meesho_watchdog
+    threading.Thread(target=meesho_watchdog.run_watchdog_cycle, daemon=True).start()
+    return jsonify({"success": True, "msg": "Meesho Watchdog scan started in background!"})
+
+
+# ---------- Customer Lifetime Value (CLV) & Segmentation Routes ----------
+@app.route("/clv")
+def clv_dashboard():
+    """Customer Lifetime Value (CLV) & RFM Segmentation Dashboard."""
+    import clv_analytics
+    analysis = clv_analytics.analyze_customer_clv(DB)
+    return render_template("clv_dashboard.html", analysis=analysis)
+
+
+@app.post("/api/clv/seed")
+def api_clv_seed():
+    """Seed / Re-seed realistic mock transaction history for RFM & CLV modeling."""
+    import clv_analytics
+    count = clv_analytics.seed_mock_transactions(db_path=DB, num_customers=75, clear_existing=True)
+    if "application/json" in request.headers.get("Accept", "") and not request.form:
+        return jsonify({"success": True, "count": count, "msg": f"Seeded {count} mock transactions!"})
+    return redirect("/clv")
+
+
+@app.get("/api/clv/data")
+def api_clv_data():
+    """JSON API returning full CLV model calculations and customer segments."""
+    import clv_analytics
+    analysis = clv_analytics.analyze_customer_clv(DB)
+    return jsonify(analysis)
+
+
+@app.get("/api/clv/monthly-platform")
+def api_clv_monthly_platform():
+    """JSON API returning month-wise total orders and revenue breakdown per platform."""
+    import clv_analytics
+    data = clv_analytics.get_month_wise_platform_analytics(DB)
+    return jsonify(data)
+
+
+@app.get("/clv/export")
+def clv_export():
+    """Export customer RFM, P(Alive), and 12-Month CLV predictions as CSV."""
+    import clv_analytics
+    analysis = clv_analytics.analyze_customer_clv(DB)
+    out = io.StringIO()
+    w = csv.writer(out)
+    w.writerow([
+        "Customer ID", "Customer Name", "Segment", "Total Orders",
+        "Recency (Days)", "Total Spend (Rs)", "Average Basket (Rs)",
+        "P(Alive) %", "Predicted 30D Orders", "Predicted 12M CLV (Rs)",
+        "Preferred Channel", "Recommended Strategy"
+    ])
+    for c in analysis.get("customers", []):
+        w.writerow([
+            c["customer_id"], c["customer_name"], c["segment"], c["total_orders"],
+            c["recency_days"], c["total_spend"], c["avg_order_value"],
+            c["p_alive_pct"], c["pred_purchases_30d"], c["predicted_clv_12m"],
+            c["primary_platform"], c["segment_action"]
+        ])
+    return Response(
+        out.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=spicenest_clv_segmentation_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
+
+
+# ---------- Flipkart Marketplace Seller Intelligence & P&L Routes ----------
+@app.route("/flipkart-seller")
+def flipkart_seller_dashboard():
+    """Flipkart Seller Intelligence, P&L & Returns Tracking Dashboard."""
+    import flipkart_tracker
+    data = flipkart_tracker.get_flipkart_dashboard_analytics(DB)
+    return render_template("flipkart_dashboard.html", data=data)
+
+
+@app.post("/api/flipkart/sync")
+def api_flipkart_sync():
+    """Sync orders from Flipkart Seller API or simulation engine."""
+    import flipkart_tracker
+    res = flipkart_tracker.sync_flipkart_orders(db_path=DB, num_mock_orders=50)
+    if "application/json" in request.headers.get("Accept", "") and not request.form:
+        return jsonify(res)
+    return redirect("/flipkart-seller")
+
+
+@app.get("/api/flipkart/data")
+def api_flipkart_data():
+    """JSON API returning Flipkart Seller P&L analytics and order audit data."""
+    import flipkart_tracker
+    data = flipkart_tracker.get_flipkart_dashboard_analytics(DB)
+    return jsonify(data)
+
+
+@app.get("/flipkart/export")
+def flipkart_export():
+    """Export Flipkart orders P&L dataset as CSV for analysis or Power BI."""
+    import flipkart_tracker
+    data = flipkart_tracker.get_flipkart_dashboard_analytics(DB)
+    out = io.StringIO()
+    w = csv.writer(out)
+    w.writerow([
+        "Order Item ID", "Order ID", "Order Date", "SKU", "Product Title",
+        "Quantity", "Selling Price (Rs)", "Total Revenue (Rs)", "Unit Cost (Rs)",
+        "Total COGS (Rs)", "Marketplace Fee (Rs)", "Return/Shipping Penalty (Rs)",
+        "Net Profit Loss (Rs)", "P&L Status", "Shipment Status", "Return Category", "Last Synced At"
+    ])
+    for r in data.get("recent_orders", []):
+        w.writerow([
+            r["order_item_id"], r["order_id"], r["order_date"], r["sku"], r["title"],
+            r["quantity"], r["selling_price"], r["total_revenue"], r["item_unit_cost"],
+            r["total_cogs"], r["marketplace_fee"], r["shipping_penalty"],
+            r["net_pnl"], r["pnl_status"], r["shipment_status"], r["return_type"], r["last_synced_at"]
+        ])
+    return Response(
+        out.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=flipkart_pnl_orders_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
+
+
+# ---------- System Settings Helpers ----------
+def get_system_setting(key: str, default: str = "") -> str:
+    try:
+        with db() as c:
+            c.execute("CREATE TABLE IF NOT EXISTS system_settings (key TEXT PRIMARY KEY, value TEXT, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+            row = c.execute("SELECT value FROM system_settings WHERE key = ?", (key,)).fetchone()
+            if row and row["value"]:
+                return str(row["value"]).strip()
+    except Exception:
+        pass
+    return os.getenv(key, default)
+
+
+def set_system_setting(key: str, value: str):
+    with db() as c:
+        c.execute("CREATE TABLE IF NOT EXISTS system_settings (key TEXT PRIMARY KEY, value TEXT, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+        c.execute("""
+            INSERT INTO system_settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=CURRENT_TIMESTAMP
+        """, (key, value.strip()))
+        c.commit()
+    os.environ[key] = value.strip()
+
+
+# ---------- Meesho Public Catalog & Store Tracker Routes ----------
+@app.route("/meesho-catalog")
+@app.route("/meesho-store-tracker")
+def meesho_catalog_dashboard():
+    """Meesho Public Catalog & Production Store Tracker Intelligence Dashboard."""
+    import meesho_catalog_sync
+    from meesho_tracker.runner import TrackerRunner
+    api_key = get_system_setting("SCRAPINGBEE_API_KEY", "")
+    data = meesho_catalog_sync.get_meesho_dashboard_analytics(DB)
+    masked_key = f"{api_key[:6]}...{api_key[-4:]}" if len(api_key) > 10 else ("Configured" if api_key else "")
+    
+    # Fetch Tracker Health & Diagnostics
+    try:
+        runner = TrackerRunner()
+        tracker_health = runner.get_health_status()
+    except Exception as e:
+        tracker_health = {"status": "UNKNOWN", "error": str(e)}
+
+    return render_template(
+        "meesho_dashboard.html",
+        data=data,
+        has_api_key=bool(api_key),
+        masked_key=masked_key,
+        tracker=tracker_health
+    )
+
+
+@app.post("/api/meesho-tracker/run-live")
+def api_meesho_tracker_run_live():
+    """Trigger Live Lightweight Store Refresh (Store listing only, min 30 min cooldown)."""
+    from meesho_tracker.runner import TrackerRunner
+    try:
+        runner = TrackerRunner()
+        res = runner.run(mode="live")
+    except Exception as e:
+        res = {"status": "ERROR", "error": str(e)}
+
+    if "application/json" in request.headers.get("Accept", "") and not request.form:
+        return jsonify(res)
+    return redirect("/meesho-catalog")
+
+
+@app.post("/api/meesho-tracker/run-full")
+def api_meesho_tracker_run_full():
+    """Trigger Full Store Scan (Guarded by 24h rule)."""
+    from meesho_tracker.runner import TrackerRunner
+    force = request.form.get("force") == "1"
+    try:
+        runner = TrackerRunner()
+        res = runner.run(mode="full", force=force)
+    except Exception as e:
+        res = {"status": "ERROR", "error": str(e)}
+
+    if "application/json" in request.headers.get("Accept", "") and not request.form:
+        return jsonify(res)
+    return redirect("/meesho-catalog")
+
+
+@app.get("/download/meesho-tracker-excel")
+def download_meesho_tracker_excel():
+    """Downloads Power BI Ready Multi-Sheet Excel Workbook."""
+    from flask import send_file
+    from pathlib import Path
+    excel_path = Path("output/meesho_store_tracker.xlsx")
+    if not excel_path.exists():
+        from meesho_tracker.runner import TrackerRunner
+        runner = TrackerRunner()
+        runner.run(mode="export-only")
+
+    return send_file(
+        excel_path.resolve(),
+        as_attachment=True,
+        download_name=f"meesho_store_tracker_{dt.datetime.now().strftime('%Y%m%d')}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
+@app.get("/api/meesho-tracker/health")
+def api_meesho_tracker_health():
+    """Returns JSON diagnostics of the tracker state, cooldowns, and recent runs."""
+    from meesho_tracker.runner import TrackerRunner
+    try:
+        runner = TrackerRunner()
+        return jsonify(runner.get_health_status())
+    except Exception as e:
+        return jsonify({"status": "ERROR", "error": str(e)})
+
+
+@app.post("/api/meesho/save-key")
+def api_meesho_save_key():
+    """Saves ScrapingBee API Key into database and triggers live sync."""
+    key = request.form.get("api_key", "").strip()
+    if key:
+        set_system_setting("SCRAPINGBEE_API_KEY", key)
+        import meesho_catalog_sync
+        meesho_catalog_sync.run_pipeline(api_key=key, max_products=51, db_path=DB, use_mock=False)
+    return redirect("/meesho-catalog")
+
+
+@app.post("/api/meesho/sync")
+def api_meesho_sync():
+    """Trigger Meesho Catalog sync via ScrapingBee or Mock Engine."""
+    import meesho_catalog_sync
+    api_key = get_system_setting("SCRAPINGBEE_API_KEY", "")
+    use_mock = not bool(api_key)
+    res = meesho_catalog_sync.run_pipeline(
+        api_key=api_key,
+        max_products=51,
+        db_path=DB,
+        use_mock=use_mock
+    )
+    if "application/json" in request.headers.get("Accept", "") and not request.form:
+        return jsonify({"status": "success", "count": len(res), "mode": "live" if api_key else "simulation"})
+    return redirect("/meesho-catalog")
+
+
+@app.get("/api/meesho/data")
+def api_meesho_data():
+    """JSON API returning Meesho public catalog items & metrics."""
+    import meesho_catalog_sync
+    data = meesho_catalog_sync.get_meesho_dashboard_analytics(DB)
+    return jsonify(data)
+
+
+@app.get("/meesho/export")
+def meesho_export():
+    """Export Meesho catalog items as CSV."""
+    import meesho_catalog_sync
+    data = meesho_catalog_sync.get_meesho_dashboard_analytics(DB)
+    out = io.StringIO()
+    w = csv.writer(out)
+    w.writerow([
+        "Product ID", "Product Name", "Selling Price (Rs)", "MRP (Rs)",
+        "Supplier Name", "Rating", "Review Count", "In Stock", "Product URL", "Data Source", "Updated At"
+    ])
+    for p in data.get("catalog", []):
+        w.writerow([
+            p.get("product_id"), p.get("name"), p.get("price"), p.get("mrp"),
+            p.get("supplier_name"), p.get("rating"), p.get("review_count"),
+            "In Stock" if p.get("in_stock") else "Out of Stock",
+            p.get("product_url"), p.get("data_source"), p.get("updated_at")
+        ])
+    return Response(
+        out.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=meesho_catalog_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
+
+
+
 PAGE = """<!doctype html>
 <html lang="hi">
 <head>
@@ -1487,6 +1816,15 @@ PAGE = """<!doctype html>
       </div>
     </div>
     <div style="display:flex; gap:10px; align-items:center;">
+      <a href="/clv" class="btn accent" style="padding: 8px 16px; font-weight: 700; text-decoration: none;">
+        📈 Customer CLV
+      </a>
+      <a href="/flipkart-seller" class="btn" style="background: #2874f0; color: #fff; padding: 8px 16px; font-weight: 700; text-decoration: none;">
+        🛒 Flipkart Seller P&L
+      </a>
+      <a href="/meesho-catalog" class="btn" style="background: #e11d48; color: #fff; padding: 8px 16px; font-weight: 700; text-decoration: none;">
+        🌸 Meesho Catalog
+      </a>
       <form method="post" action="/check" style="display:inline">
         <button class="primary" {% if state.running %}disabled{% endif %}>
           {% if state.running %}⏳ Running Scan...{% else %}🔄 Scan All Now (Manual){% endif %}
@@ -2136,5 +2474,6 @@ if __name__ == "__main__":
     init()
     # Start randomized 24-hour scheduler daemon thread
     threading.Thread(target=randomized_24h_loop, daemon=True).start()
-    print("Dashboard: http://localhost:5000")
-    app.run(port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Dashboard: http://0.0.0.0:{port}")
+    app.run(host="0.0.0.0", port=port)

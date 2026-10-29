@@ -1,0 +1,29 @@
+# ===========================================================================
+# Centralized Meesho DOM Selectors & JSON Paths
+# ===========================================================================
+store_page:
+  product_card: "a[href*='/p/']"
+  card_image: "img"
+  title: "p, span[class*='Text'], div[class*='Card'] p"
+  price: "h5, span[class*='Price'], div[class*='Price']"
+  mrp: "p[class*='strike'], span[class*='strike'], s"
+  discount: "span[class*='Discount'], span[class*='off']"
+  rating: "span[class*='Rating'], span[class*='badge']"
+  review_count: "span[class*='Review'], span[class*='count']"
+
+product_page:
+  json_ld_script: "script[type='application/ld+json']"
+  next_data_script: "script#__NEXT_DATA__"
+  sku_meta: "meta[itemprop='sku']"
+  supplier_name: "span[class*='ShopName'], span[class*='Supplier']"
+  stock_status: "span[class*='Stock'], div[class*='OutOfStock']"
+
+block_signatures:
+  akamai_container: "sec-if-cpt-container"
+  captcha_form: "form#challenge-form, div#captcha-container, iframe[src*='captcha']"
+  access_denied_titles:
+    - "Access Denied"
+    - "Security Challenge"
+    - "Robot Check"
+    - "Please complete the security check"
+

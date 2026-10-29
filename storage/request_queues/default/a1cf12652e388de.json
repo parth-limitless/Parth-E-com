@@ -1,0 +1,16 @@
+{
+  "unique_key": "http://localhost:5000",
+  "url": "http://localhost:5000/",
+  "method": "GET",
+  "payload": null,
+  "headers": {},
+  "user_data": {
+    "__crawlee": {
+      "state": 4
+    }
+  },
+  "retry_count": 0,
+  "no_retry": false,
+  "loaded_url": "http://localhost:5000/",
+  "handled_at": "2026-10-29 07:54:05.728229+00:00"
+}
