@@ -805,9 +805,71 @@ def home():
             ORDER BY c.id DESC
         """)]
 
+        # Collect Deactivated / Missing listings
+        deactivated_listings = []
+        # 1. From active SKUs where portal is not live
+        for s in skus:
+            for pf in PLATFORMS:
+                v = s["latest"].get(pf)
+                link = s["links"].get(pf)
+                if link and v:
+                    if v.get("live") == 0:
+                        deactivated_listings.append({
+                            "name": s["name"],
+                            "grams": s["grams"],
+                            "platform": pf,
+                            "price": v.get("price"),
+                            "status": "OUT_OF_STOCK",
+                            "badge_color": "#f59e0b",
+                            "reason": v.get("note") or "Out of Stock / Unavailable",
+                            "last_seen": v.get("ts"),
+                            "url": link
+                        })
+                    elif v.get("live") == -1:
+                        deactivated_listings.append({
+                            "name": s["name"],
+                            "grams": s["grams"],
+                            "platform": pf,
+                            "price": v.get("price"),
+                            "status": "DEACTIVATED",
+                            "badge_color": "#ef4444",
+                            "reason": v.get("note") or "Listing Removed / Error",
+                            "last_seen": v.get("ts"),
+                            "url": link
+                        })
+
+        # 2. From meesho_catalog where status == 'DEACTIVATED'
+        try:
+            m_rows = c.execute("SELECT * FROM meesho_catalog WHERE status = 'DEACTIVATED' ORDER BY deactivated_at DESC").fetchall()
+            for mr in m_rows:
+                deactivated_listings.append({
+                    "name": mr["title"],
+                    "grams": None,
+                    "platform": "Meesho",
+                    "price": mr["price"],
+                    "status": "STORE_DEACTIVATED",
+                    "badge_color": "#ec4899",
+                    "reason": "🔴 Deactivated from Meesho Storefront",
+                    "last_seen": mr["deactivated_at"] or mr["last_seen"],
+                    "url": mr["product_url"]
+                })
+        except Exception:
+            pass
+
+        # 3. Pre-load daily price history dictionary for all SKUs
+        history_map = {}
+        for s in skus:
+            h_rows = c.execute(
+                "SELECT strftime('%Y-%m-%d', ts) d, platform, AVG(price) p FROM prices "
+                "WHERE sku_id=? AND price IS NOT NULL GROUP BY d, platform ORDER BY d",
+                (s["id"],)
+            ).fetchall()
+            history_map[s["id"]] = [dict(hr) for hr in h_rows]
+
     return render_template_string(
         PAGE, skus=skus, platforms=PLATFORMS, competitors=competitors,
-        state=state, pct=MISMATCH_PCT
+        state=state, pct=MISMATCH_PCT,
+        deactivated_listings=deactivated_listings, history_map=history_map
     )
 
 
@@ -2065,6 +2127,84 @@ PAGE = """<!doctype html>
     </div>
   </div>
 
+  <!-- SECTION: 🚨 Deactivated & Missing Listings Alert Card -->
+  <div class="card" style="border: 1px solid rgba(239, 68, 68, 0.45); background: linear-gradient(180deg, #181124 0%, #111827 100%);">
+    <div class="card-title">
+      <span style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size: 20px;">🚨</span> Deactivated / Missing Listings (Portal Se Hat Gaye Ya Out of Stock)
+      </span>
+      {% if deactivated_listings %}
+      <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px;">
+        ● {{ deactivated_listings|length }} Missing / Inactive Detected
+      </span>
+      {% else %}
+      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px;">
+        ✓ All Portals 100% Live
+      </span>
+      {% endif %}
+    </div>
+
+    {% if deactivated_listings %}
+    <div class="table-container" style="margin-top: 10px;">
+      <table>
+        <thead>
+          <tr style="background: #1c1022;">
+            <th>Product / Listing Name</th>
+            <th>Platform</th>
+            <th>Status / Issue</th>
+            <th>Last Recorded Price</th>
+            <th>Last Detected</th>
+            <th style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in deactivated_listings %}
+          <tr>
+            <td>
+              <div style="font-weight: 700; color: #fff;">{{ d.name }}</div>
+              {% if d.grams %}
+              <span class="sku-grams">{{ '%g'|format(d.grams) }} g</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge" style="background: #1e293b; color: {{ d.badge_color }}; font-weight: 700; border: 1px solid #334155;">
+                {{ d.platform }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3);">
+                {{ d.reason }}
+              </span>
+            </td>
+            <td>
+              {% if d.price %}
+              <div style="font-weight: 700; color: #e2e8f0;">₹{{ '%g'|format(d.price) }}</div>
+              {% else %}
+              <span style="color: var(--text-muted);">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <div style="font-size: 12px; color: var(--text-muted);">{{ d.last_seen or 'Recent Scan' }}</div>
+            </td>
+            <td style="text-align: right;">
+              {% if d.url %}
+              <a href="{{ d.url }}" target="_blank" class="portal-link" style="color: #fda4af;">Check Link ↗</a>
+              {% else %}
+              <span style="font-size: 11px; color: var(--text-muted);">No Link</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="padding: 14px 18px; background: rgba(16, 185, 129, 0.08); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 13px; color: #6ee7b7;">
+      ✅ <b>Sabhi listings active hain!</b> Koi bhi SKU ya product kisi portal se deactivated ya out-of-stock nahi hai.
+    </div>
+    {% endif %}
+  </div>
+
   <!-- SECTION: 📊 SKU Table Card -->
   <div class="card">
     <div class="filter-bar">
@@ -2179,7 +2319,14 @@ PAGE = """<!doctype html>
     <div style="position: relative; height: 260px;">
       <canvas id="historyChart"></canvas>
     </div>
+    
+    <!-- Daily Price History Table Preview -->
+    <div id="dailyHistoryTableContainer" style="margin-top: 18px; max-height: 220px; overflow-y: auto;"></div>
   </div>
+
+  <script>
+    window.PRICE_HISTORY = {{ history_map|tojson }};
+  </script>
 
   {% raw %}
   <script>
@@ -2412,7 +2559,30 @@ PAGE = """<!doctype html>
       const sid = document.getElementById('skuSelect').value;
       if (!sid) return;
       const gr = document.getElementById('granularity').value;
-      const rows = await (await fetch('/api/history?sku=' + sid + '&g=' + gr)).json();
+      
+      let rows = [];
+      if (window.PRICE_HISTORY && window.PRICE_HISTORY[sid]) {
+        const rawRows = window.PRICE_HISTORY[sid];
+        if (gr === 'month') {
+          const mMap = {};
+          rawRows.forEach(r => {
+            const m = r.d.substring(0, 7);
+            const k = m + '_' + r.platform;
+            if (!mMap[k]) mMap[k] = { d: m, platform: r.platform, sum: 0, count: 0 };
+            mMap[k].sum += r.p;
+            mMap[k].count += 1;
+          });
+          rows = Object.values(mMap).map(x => ({ d: x.d, platform: x.platform, p: Math.round(x.sum / x.count * 100) / 100 }));
+        } else {
+          rows = rawRows;
+        }
+      } else {
+        try {
+          rows = await (await fetch('/api/history?sku=' + sid + '&g=' + gr)).json();
+        } catch(e) {
+          rows = [];
+        }
+      }
 
       const labels = [...new Set(rows.map(r => r.d))];
       const pfs = [...new Set(rows.map(r => r.platform))];
@@ -2458,6 +2628,28 @@ PAGE = """<!doctype html>
           }
         }
       });
+
+      // Render Daily Price History Table
+      const tblContainer = document.getElementById('dailyHistoryTableContainer');
+      if (tblContainer) {
+        if (rows.length === 0) {
+          tblContainer.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center; padding:12px;">Is SKU ka daily price history data abhi log nahi hua hai.</div>';
+        } else {
+          let html = '<table style="width:100%; font-size:12px; border-collapse:collapse;">';
+          html += '<thead><tr style="background:#0c1427; color:#94a3b8; text-align:left;"><th style="padding:6px 10px;">Date (' + (gr === 'month' ? 'Month' : 'Daily') + ')</th><th style="padding:6px 10px;">Platform</th><th style="padding:6px 10px;">Recorded Price</th><th style="padding:6px 10px;">Status</th></tr></thead><tbody>';
+          const sorted = [...rows].reverse();
+          sorted.slice(0, 15).forEach(r => {
+            html += '<tr style="border-bottom:1px solid #1e293b;">';
+            html += '<td style="padding:6px 10px; color:#fff; font-weight:600;">' + r.d + '</td>';
+            html += '<td style="padding:6px 10px;"><span class="badge" style="background:#1e293b; color:' + (colors[r.platform] || '#fff') + '; border:1px solid #334155;">' + r.platform + '</span></td>';
+            html += '<td style="padding:6px 10px; color:#34d399; font-weight:700;">₹' + r.p + '</td>';
+            html += '<td style="padding:6px 10px;"><span class="badge badge-live">● Recorded</span></td>';
+            html += '</tr>';
+          });
+          html += '</tbody></table>';
+          tblContainer.innerHTML = html;
+        }
+      }
     }
 
     loadChart();
