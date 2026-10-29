@@ -59,8 +59,8 @@ def export_price_hub_dashboard(output_dir: str = "../docs"):
     import re
     # Replace the local buttons block in header for GitHub Pages
     cleaned_html = re.sub(
-        r'<div style="display:flex; gap:10px; align-items:center;">.*?<form method="post" action="/check".*?</form>\s*</div>',
-        gh_header_nav.strip(),
+        r'<div style="display:flex; gap:10px; align-items:center;">\s*<a href="/clv".*?</div>\s*</header>',
+        gh_header_nav.strip() + "\n  </header>",
         html_content,
         flags=re.DOTALL
     )

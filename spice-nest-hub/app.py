@@ -1,13 +1,13 @@
 """Spice Nest Hub - Multi-Platform Price Monitor & Competitor Spy Engine
 Run run.bat, then open http://localhost:5000
 """
-import csv, io, json, os, random, re, sqlite3, threading, time
+import csv, io, json, os, random, re, sqlite3, sys, threading, time
 import datetime as dt
 import urllib.request
 from flask import Flask, Response, jsonify, redirect, render_template_string, render_template, request
 
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spicenest.db")
-PLATFORMS = ["Flipkart", "Amazon", "Meesho", "Blinkit", "JioMart"]
+PLATFORMS = ["Flipkart", "Amazon", "Meesho", "Blinkit", "JioMart", "Shopsy"]
 MISMATCH_PCT = 20
 
 # Anti-Bot Genuine User-Agents Pool
@@ -56,6 +56,8 @@ def num(x):
 
 def detect_platform(url):
     u = (url or "").lower()
+    if "shopsy" in u:
+        return "Shopsy"
     if "flipkart" in u:
         return "Flipkart"
     if "amazon" in u:
@@ -258,10 +260,97 @@ def resolve_meesho_product(url):
     return price, live, note, clean_name, grams
 
 
+def resolve_shopsy_product(url):
+    """
+    Smart Shopsy product resolver:
+    Extracts product title, price, and stock status directly from Shopsy Next.js __NEXT_DATA__ SSR state or HTML regex.
+    Fast, reliable, genuine Indian IP without heavy browser overhead.
+    """
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": get_ua(),
+                "Accept-Language": "en-IN,en;q=0.9",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            }
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            html = resp.read().decode("utf-8", errors="ignore")
+
+        name = None
+        price = None
+        live = 1
+        note = "In Stock"
+
+        # 1. Parse __NEXT_DATA__
+        m = re.search(r'<script id="__NEXT_DATA__" type="application/json">([^<]+)</script>', html)
+        if m:
+            try:
+                data = json.loads(m.group(1))
+                page_data = data.get("props", {}).get("pageProps", {}).get("initialState", {}).get("pageData", {}).get("RESPONSE", {}).get("pageData", {})
+                page_context = page_data.get("pageContext", {})
+                seo_data = page_data.get("seoData", {})
+                
+                # Title
+                name = page_context.get("titles", {}).get("title") or page_context.get("seo", {}).get("title")
+                if not name and seo_data.get("schema") and len(seo_data["schema"]) > 0:
+                    name = seo_data["schema"][0].get("name")
+                
+                # Price
+                pricing = page_context.get("pricing", {})
+                if pricing.get("finalPrice") and isinstance(pricing["finalPrice"], dict):
+                    price = float(pricing["finalPrice"].get("value") or 0)
+                if not price and seo_data.get("schema") and len(seo_data["schema"]) > 0:
+                    offers = seo_data["schema"][0].get("offers", {})
+                    if offers.get("price"):
+                        price = float(offers.get("price"))
+                if not price and pricing.get("prices"):
+                    for p in pricing["prices"]:
+                        if p.get("value"):
+                            price = float(p["value"])
+                            break
+
+                # Availability
+                if seo_data.get("schema") and len(seo_data["schema"]) > 0:
+                    avail = str(seo_data["schema"][0].get("offers", {}).get("availability", ""))
+                    if "OutOfStock" in avail:
+                        live = 0
+                        note = "Out of stock"
+            except Exception:
+                pass
+
+        # 2. Fallbacks if __NEXT_DATA__ missed
+        if price is None:
+            m_p = re.search(r'class="[^"]*(?:Nx9bqj|_30jeq3)[^"]*">₹?([\d,]+)', html)
+            if m_p:
+                price = float(m_p.group(1).replace(",", ""))
+
+        if not name:
+            m_title = re.search(r'<title>([^<]+)</title>', html)
+            if m_title:
+                name = m_title.group(1).split("Price in India")[0].strip()
+
+        # 3. Stock fallback
+        low = html.lower()
+        if any(k in low for k in ["out of stock", "currently unavailable", "sold out", "item is out of stock"]):
+            if not ("add to cart" in low or "buy now" in low):
+                live = 0
+                note = "Out of stock"
+
+        grams = extract_grams(name, html)
+        return price, live, note, name, grams
+    except Exception as e:
+        print("Error resolving Shopsy URL:", e)
+    return None
+
+
 def fast_http_scrape(platform, url):
     """Fast extraction using lightweight HTTP request without launching heavy browser."""
     if platform == "Meesho":
         return resolve_meesho_product(url)
+    if platform == "Shopsy":
+        return resolve_shopsy_product(url)
 
     try:
         req = urllib.request.Request(
@@ -342,9 +431,9 @@ def read_page(page, platform, url):
             page.wait_for_selector(".a-price, #corePriceDisplay_desktopFeature_div, .a-price-whole", timeout=8000)
         except Exception:
             pass
-    elif platform == "Flipkart":
+    elif platform in ("Flipkart", "Shopsy"):
         try:
-            page.wait_for_selector("div.Nx9bqj, div._30jeq3, div.hl05eU", timeout=8000)
+            page.wait_for_selector("div.Nx9bqj, div._30jeq3, div.hl05eU, div[dir='auto']", timeout=8000)
         except Exception:
             pass
 
@@ -354,6 +443,10 @@ def read_page(page, platform, url):
             p_price, p_live, p_note, p_name, p_grams = resolve_meesho_product(url)
             if p_price is not None:
                 return p_price, p_live, p_note
+        elif platform == "Shopsy":
+            s_res = resolve_shopsy_product(url)
+            if s_res and s_res[0] is not None:
+                return s_res[0], s_res[1], s_res[2]
         return None, 0, f"HTTP {resp.status}"
 
     html = page.content()
@@ -396,12 +489,13 @@ def read_page(page, platform, url):
                     price = p
                     break
 
-    elif platform == "Flipkart":
+    elif platform in ("Flipkart", "Shopsy"):
         fk_selectors = [
             "div.Nx9bqj",
             "div._30jeq3",
             "div.hl05eU div._30jeq3",
-            "div._16FRp0"
+            "div._16FRp0",
+            "div[dir='auto']"
         ]
         for sel in fk_selectors:
             el = page.query_selector(sel)
@@ -1083,6 +1177,32 @@ def preview_url():
     return jsonify({"platform": pf, "name": None, "grams": 0, "price": None})
 
 
+def trigger_github_sync_background():
+    """Runs in a background thread to export docs/index.html and push to GitHub Pages."""
+    def _task():
+        time.sleep(3)
+        try:
+            repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            if repo_root not in sys.path:
+                sys.path.insert(0, repo_root)
+            import export_price_hub
+            import subprocess
+            export_price_hub.export_price_hub_dashboard()
+            subprocess.run("git add docs/ spice-nest-hub/spicenest.db spicenest.db", cwd=repo_root, shell=True, capture_output=True)
+            subprocess.run('git commit -m "Auto-sync: Update Price Hub snapshot on GitHub Pages [skip ci]"', cwd=repo_root, shell=True, capture_output=True)
+            subprocess.run("git push origin main", cwd=repo_root, shell=True, capture_output=True)
+            print("[AutoSync] Successfully synced changes to GitHub Pages!")
+        except Exception as e:
+            print("[AutoSync] Error during GitHub sync:", str(e))
+    threading.Thread(target=_task, daemon=True).start()
+
+
+@app.post("/api/sync_to_github")
+def api_sync_to_github():
+    trigger_github_sync_background()
+    return redirect("/?msg=synced")
+
+
 @app.post("/sku/save")
 def save():
     f = request.form
@@ -1140,6 +1260,7 @@ def save():
             c.execute("INSERT OR REPLACE INTO links VALUES(?,?,?)", (sid, pf, links.get(pf, "")))
 
     threading.Thread(target=check_sku_links, args=(sid,), daemon=True).start()
+    trigger_github_sync_background()
     time.sleep(0.3)
     return redirect("/")
 
@@ -1147,6 +1268,7 @@ def save():
 @app.post("/sku/check/<int:sid>")
 def check_single(sid):
     threading.Thread(target=check_sku_links, args=(sid,), daemon=True).start()
+    trigger_github_sync_background()
     time.sleep(0.5)
     return redirect("/")
 
@@ -1156,6 +1278,7 @@ def delete(sid):
     with db() as c:
         for t, k in (("sku", "id"), ("links", "sku_id"), ("prices", "sku_id")):
             c.execute(f"DELETE FROM {t} WHERE {k}=?", (sid,))
+    trigger_github_sync_background()
     return redirect("/")
 
 
@@ -1940,6 +2063,7 @@ PAGE = """<!doctype html>
     .tag-meesho { color: #ff68b5; }
     .tag-blinkit { color: #fbd658; }
     .tag-jiomart { color: #32d0ff; }
+    .tag-shopsy { color: #c084fc; }
   </style>
 </head>
 <body>
@@ -1968,8 +2092,19 @@ PAGE = """<!doctype html>
           {% if state.running %}⏳ Running Scan...{% else %}🔄 Scan All Now (Manual){% endif %}
         </button>
       </form>
+      <form method="post" action="/api/sync_to_github" style="display:inline">
+        <button type="submit" class="btn" style="background: #0284c7; color: #fff; border: 1px solid #38bdf8; padding: 8px 16px; font-weight: 700; border-radius: 8px; cursor: pointer;" title="Naye SKUs ya updates ko instant GitHub public link par bhejein">
+          🚀 Sync To GitHub
+        </button>
+      </form>
     </div>
   </header>
+
+  {% if request.args.get('msg') == 'synced' %}
+  <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 600;">
+    ✅ GitHub Pages Sync shuru ho gaya hai! Background me export & push ho raha hai (30 seconds me live link update ho jayegi).
+  </div>
+  {% endif %}
 
   <!-- Anti-Bot Security & Random 24h Scheduler Banner -->
   <div class="security-banner">
@@ -2291,6 +2426,7 @@ PAGE = """<!doctype html>
         <button class="tab-btn" onclick="setPortalFilter('Meesho', this)">Meesho</button>
         <button class="tab-btn" onclick="setPortalFilter('Blinkit', this)">Blinkit</button>
         <button class="tab-btn" onclick="setPortalFilter('JioMart', this)">JioMart</button>
+        <button class="tab-btn" onclick="setPortalFilter('Shopsy', this)">Shopsy</button>
       </div>
 
       <label style="font-size: 12px; color: var(--text-muted); display:flex; align-items:center; gap:6px; cursor:pointer;">
@@ -2406,7 +2542,7 @@ PAGE = """<!doctype html>
 
   {% raw %}
   <script>
-    const PLATFORMS = ["Flipkart", "Amazon", "Meesho", "Blinkit", "JioMart"];
+    const PLATFORMS = ["Flipkart", "Amazon", "Meesho", "Blinkit", "JioMart", "Shopsy"];
     let chartInstance = null;
     let currentFilter = 'all';
     let lastAnalyzedComp = null;
@@ -2558,7 +2694,8 @@ PAGE = """<!doctype html>
       const skuGrams = document.getElementById('skuGrams');
       if (val.startsWith('http://') || val.startsWith('https://')) {
         let pf = null;
-        if (val.includes('flipkart')) pf = 'Flipkart';
+        if (val.includes('shopsy')) pf = 'Shopsy';
+        else if (val.includes('flipkart')) pf = 'Flipkart';
         else if (val.includes('amazon')) pf = 'Amazon';
         else if (val.includes('meesho')) pf = 'Meesho';
         else if (val.includes('blinkit')) pf = 'Blinkit';
@@ -2668,7 +2805,8 @@ PAGE = """<!doctype html>
         'Amazon': '#f59e0b',
         'Meesho': '#ec4899',
         'Blinkit': '#eab308',
-        'JioMart': '#06b6d4'
+        'JioMart': '#06b6d4',
+        'Shopsy': '#c084fc'
       };
 
       const datasets = pfs.map(p => ({
