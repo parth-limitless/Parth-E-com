@@ -6,7 +6,7 @@ import datetime as dt
 import urllib.request
 from flask import Flask, Response, jsonify, redirect, render_template_string, render_template, request
 
-DB = "spicenest.db"
+DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spicenest.db")
 PLATFORMS = ["Flipkart", "Amazon", "Meesho", "Blinkit", "JioMart"]
 MISMATCH_PCT = 20
 

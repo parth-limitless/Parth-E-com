@@ -457,11 +457,9 @@
           
           <option value="3">2x Chilli Oil (120g)</option>
           
-          <option value="4">Ginger Garlic Paste - 750g (0g)</option>
+          <option value="4">Spice Nest Ginger Garlic Paste 750g (750g)</option>
           
           <option value="2">Spice Nest Gochujang Korean chilli paste | Authentic Fermented Red Chilli Hot Pepper Sauce (170g)</option>
-          
-          <option value="5">gdfgg (0g)</option>
           
         </select>
       </div>
@@ -546,6 +544,15 @@
 
     <div id="autoHint" class="auto-hint"></div>
 
+    <div style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #93c5fd; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;">
+      <span style="font-size: 18px;">🔒</span>
+      <div>
+        <strong>Public Live Snapshot (View-Only):</strong> Yeh dashboard live report dekhne aur share karne ke liye hai.
+        Naye SKU add ya edit karne ke liye apne Master Local Admin (<code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #67e8f9;">http://localhost:5000</code>) par karein. Wahan add karne ke baad sync chalte hi yahan apne aap update ho jayega.
+      </div>
+    </div>
+    
+
     <form method="post" action="/sku/save" id="skuForm">
       <input type="hidden" name="id" id="skuId">
 
@@ -624,7 +631,7 @@
       </span>
       
       <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px;">
-        ● 3 Missing / Inactive Detected
+        ● 2 Missing / Inactive Detected
       </span>
       
     </div>
@@ -643,36 +650,6 @@
           </tr>
         </thead>
         <tbody>
-          
-          <tr>
-            <td>
-              <div style="font-weight: 700; color: #fff;">Ginger Garlic Paste - 750g</div>
-              
-            </td>
-            <td>
-              <span class="badge" style="background: #1e293b; color: #f59e0b; font-weight: 700; border: 1px solid #334155;">
-                Meesho
-              </span>
-            </td>
-            <td>
-              <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3);">
-                HTTP 403
-              </span>
-            </td>
-            <td>
-              
-              <span style="color: var(--text-muted);">-</span>
-              
-            </td>
-            <td>
-              <div style="font-size: 12px; color: var(--text-muted);">2026-10-29 14:51:10</div>
-            </td>
-            <td style="text-align: right;">
-              
-              <a href="https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp?ms=2&amp;source=Meri+Shop" target="_blank" class="portal-link" style="color: #fda4af;">Check Link ↗</a>
-              
-            </td>
-          </tr>
           
           <tr>
             <td>
@@ -889,8 +866,8 @@
           
           <tr class="">
             <td>
-              <div class="sku-title">Ginger Garlic Paste - 750g</div>
-              <span class="sku-grams">0 g</span>
+              <div class="sku-title">Spice Nest Ginger Garlic Paste 750g</div>
+              <span class="sku-grams">750 g</span>
               
             </td>
 
@@ -916,13 +893,18 @@
             <td class="col-Meesho" data-has-portal="1">
               
                 
+                  <div class="price-tag">₹233</div>
+                  
+                  <div class="unit-price">₹31.1 / 100g</div>
+                  
+                
 
                 
-                  <span class="badge badge-off">● Not Live</span>
+                  <span class="badge badge-live">● Live</span>
                 
 
                 
-                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">HTTP 403</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">In Stock</div>
                 
 
                 <br><a href="https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp?ms=2&amp;source=Meri+Shop" target="_blank" class="portal-link">Open Meesho ↗</a>
@@ -951,7 +933,7 @@
                 <form method="post" action="/sku/check/4" style="display:inline" title="Is SKU ka price abhi refresh karo">
                   <button class="sm">🔄</button>
                 </form>
-                <button type="button" class="sm" onclick='editSku({"grams": 0.0, "id": 4, "latest": {"Meesho": {"cmp": null, "id": 40, "live": 0, "note": "HTTP 403", "p100": null, "platform": "Meesho", "price": null, "sku_id": 4, "ts": "2026-10-29 14:51:10"}}, "links": {"Amazon": "", "Blinkit": "", "Flipkart": "", "JioMart": "", "Meesho": "https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp?ms=2\u0026source=Meri+Shop"}, "mismatch": false, "name": "Ginger Garlic Paste - 750g"})'>Edit</button>
+                <button type="button" class="sm" onclick='editSku({"grams": 750.0, "id": 4, "latest": {"Meesho": {"cmp": 31.1, "id": 41, "live": 1, "note": "In Stock", "p100": 31.1, "platform": "Meesho", "price": 233.0, "sku_id": 4, "ts": "2026-10-29 16:16:03"}}, "links": {"Amazon": "", "Blinkit": "", "Flipkart": "", "JioMart": "", "Meesho": "https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp?ms=2\u0026source=Meri+Shop"}, "mismatch": false, "name": "Spice Nest Ginger Garlic Paste 750g"})'>Edit</button>
                 <form method="post" action="/sku/delete/4" style="display:inline" onsubmit="return confirm('Kya aap is SKU ko delete karna chahte hain?')">
                   <button class="danger sm">✕</button>
                 </form>
@@ -1081,68 +1063,6 @@
             </td>
           </tr>
           
-          <tr class="">
-            <td>
-              <div class="sku-title">gdfgg</div>
-              <span class="sku-grams">0 g</span>
-              
-            </td>
-
-            
-            
-            
-            <td class="col-Flipkart" data-has-portal="0">
-              
-                <span class="badge-none">-</span>
-              
-            </td>
-            
-            
-            
-            <td class="col-Amazon" data-has-portal="0">
-              
-                <span class="badge-none">-</span>
-              
-            </td>
-            
-            
-            
-            <td class="col-Meesho" data-has-portal="0">
-              
-                <span class="badge-none">-</span>
-              
-            </td>
-            
-            
-            
-            <td class="col-Blinkit" data-has-portal="0">
-              
-                <span class="badge-none">-</span>
-              
-            </td>
-            
-            
-            
-            <td class="col-JioMart" data-has-portal="0">
-              
-                <span class="badge-none">-</span>
-              
-            </td>
-            
-
-            <td style="text-align: right;">
-              <div class="row-actions" style="justify-content: flex-end;">
-                <form method="post" action="/sku/check/5" style="display:inline" title="Is SKU ka price abhi refresh karo">
-                  <button class="sm">🔄</button>
-                </form>
-                <button type="button" class="sm" onclick='editSku({"grams": 0.0, "id": 5, "latest": {}, "links": {"Amazon": "", "Blinkit": "", "Flipkart": "", "JioMart": "", "Meesho": ""}, "mismatch": false, "name": "gdfgg"})'>Edit</button>
-                <form method="post" action="/sku/delete/5" style="display:inline" onsubmit="return confirm('Kya aap is SKU ko delete karna chahte hain?')">
-                  <button class="danger sm">✕</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          
         </tbody>
       </table>
     </div>
@@ -1156,11 +1076,9 @@
         
         <option value="3">2x Chilli Oil</option>
         
-        <option value="4">Ginger Garlic Paste - 750g</option>
+        <option value="4">Spice Nest Ginger Garlic Paste 750g</option>
         
         <option value="2">Spice Nest Gochujang Korean chilli paste | Authentic Fermented Red Chilli Hot Pepper Sauce</option>
-        
-        <option value="5">gdfgg</option>
         
       </select>
       <select id="granularity" onchange="loadChart()">
@@ -1177,7 +1095,7 @@
   </div>
 
   <script>
-    window.PRICE_HISTORY = {"2": [{"d": "2026-10-27", "p": 183.0, "platform": "Amazon"}, {"d": "2026-10-27", "p": 199.0, "platform": "Blinkit"}, {"d": "2026-10-27", "p": 140.0, "platform": "Flipkart"}, {"d": "2026-10-27", "p": 199.0, "platform": "JioMart"}], "3": [{"d": "2026-10-27", "p": 179.0, "platform": "Amazon"}, {"d": "2026-10-27", "p": 178.5, "platform": "Flipkart"}, {"d": "2026-10-27", "p": 199.0, "platform": "JioMart"}, {"d": "2026-10-29", "p": 179.0, "platform": "Amazon"}, {"d": "2026-10-29", "p": 138.0, "platform": "Flipkart"}, {"d": "2026-10-29", "p": 199.0, "platform": "JioMart"}], "4": [], "5": []};
+    window.PRICE_HISTORY = {"2": [{"d": "2026-10-27", "p": 183.0, "platform": "Amazon"}, {"d": "2026-10-27", "p": 199.0, "platform": "Blinkit"}, {"d": "2026-10-27", "p": 140.0, "platform": "Flipkart"}, {"d": "2026-10-27", "p": 199.0, "platform": "JioMart"}], "3": [{"d": "2026-10-27", "p": 179.0, "platform": "Amazon"}, {"d": "2026-10-27", "p": 178.5, "platform": "Flipkart"}, {"d": "2026-10-27", "p": 199.0, "platform": "JioMart"}, {"d": "2026-10-29", "p": 179.0, "platform": "Amazon"}, {"d": "2026-10-29", "p": 138.0, "platform": "Flipkart"}, {"d": "2026-10-29", "p": 199.0, "platform": "JioMart"}], "4": [{"d": "2026-10-29", "p": 233.0, "platform": "Meesho"}]};
   </script>
 
   
@@ -1508,5 +1426,29 @@
   </script>
   
   
-</body>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Intercept Add/Edit form submission on static GitHub Pages
+      var skuForm = document.getElementById("skuForm");
+      if (skuForm) {
+        skuForm.addEventListener("submit", function(e) {
+          e.preventDefault();
+          alert("🔒 Public Live View Mode:\n\nGitHub Pages ek view-only snapshot hai (yahan backend database nahi chalta).\n\nNaye SKU add karne ya edit karne ke liye apne computer par local link open karein:\n👉 http://localhost:5000\n\nWahan save karne ke baad daily sync se ye public link apne aap update ho jayegi!");
+          return false;
+        });
+      }
+
+      // Intercept any local admin action buttons/links
+      document.querySelectorAll("a[href*='/sku/delete']").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+          e.preventDefault();
+          alert("🔒 SKU delete karne ke liye apne local machine (http://localhost:5000) ka upyog karein.");
+          return false;
+        });
+      });
+    });
+    </script>
+    </body>
+    
 </html>
