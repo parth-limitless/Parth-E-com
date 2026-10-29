@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spice Nest Hub - Multi-Platform Price Monitor & Competitor Spy Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0f1d;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --card-hover: #1e293b;
+      --border: #24324f;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+      --flipkart: #2874f0;
+      --amazon: #ff9900;
+      --danger: #ef4444;
+      --danger-bg: #451215;
+      --badge-live: #064e3b;
+      --badge-live-txt: #34d399;
+      --badge-off: #4c1d24;
+      --badge-off-txt: #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4);
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Security Status Banner */
+    .security-banner {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(59, 130, 246, 0.1));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+    .sec-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Buttons */
+    button, .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 18px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: var(--text);
+      background: #1f2937;
+    }
+    button:hover, .btn:hover { background: #374151; }
+    button.primary, .btn.primary {
+      background: var(--primary);
+      color: #042f2e;
+    }
+    button.primary:hover, .btn.primary:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+    button.accent, .btn.accent {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #fff;
+    }
+    button.accent:hover, .btn.accent:hover {
+      box-shadow: 0 0 18px rgba(99, 102, 241, 0.45);
+    }
+    button.danger, .btn.danger {
+      background: #2c1a1d;
+      color: #f87171;
+      border-color: #551d24;
+    }
+    button.danger:hover { background: var(--danger-bg); color: #ff9999; }
+    button.sm, .btn.sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+
+    /* Inputs */
+    input, select {
+      font-family: inherit;
+      font-size: 13px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #0b1324;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    /* Spy Scanner Grid */
+    .spy-grid {
+      display: grid;
+      grid-template-columns: 2.5fr 1.5fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    @media(max-width: 850px) {
+      .spy-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Battle Card (Competitor vs Spice Nest) */
+    .battle-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      background: #0c1222;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin: 18px 0;
+    }
+    @media(max-width: 768px) {
+      .battle-card { grid-template-columns: 1fr; }
+    }
+    .battle-side {
+      padding: 14px;
+      border-radius: 10px;
+      background: #111827;
+      border: 1px solid #1f2937;
+    }
+    .side-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .side-comp { border-left: 4px solid #ef4444; }
+    .side-mine { border-left: 4px solid #10b981; }
+
+    /* Strategy Advice Cards */
+    .advice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .advice-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+    }
+    .advice-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .advice-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #f3f4f6;
+    }
+    .advice-action {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    /* Tabs */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: #0b1324;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .tab-btn:hover { color: var(--text); background: #19243d; }
+    .tab-btn.active { background: var(--accent-blue); color: #fff; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: #0c1427;
+      padding: 12px 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+    td {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      background: var(--card-bg);
+    }
+    tr:hover td { background: var(--card-hover); }
+    tr.mismatch td:first-child { border-left: 4px solid var(--danger); }
+
+    .sku-title { font-weight: 600; color: #fff; font-size: 14px; margin-bottom: 3px; }
+    .sku-grams {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #1e293b;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .price-tag { font-size: 15px; font-weight: 700; color: #fff; }
+    .unit-price { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .badge-live { background: var(--badge-live); color: var(--badge-live-txt); }
+    .badge-off { background: var(--badge-off); color: var(--badge-off-txt); }
+    .badge-none { color: var(--text-muted); font-style: italic; }
+    .portal-link {
+      color: #60a5fa;
+      font-size: 11px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      margin-top: 4px;
+    }
+    .portal-link:hover { text-decoration: underline; }
+    .mismatch-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--danger-bg);
+      color: var(--danger);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .row-actions { display: flex; gap: 6px; align-items: center; }
+
+    /* Form styling */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .platform-links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .input-group { display: flex; flex-direction: column; gap: 4px; }
+    .input-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .auto-hint {
+      font-size: 12px;
+      color: var(--primary);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .tag-flipkart { color: #5aa1ff; }
+    .tag-amazon { color: #fba42b; }
+    .tag-meesho { color: #ff68b5; }
+    .tag-blinkit { color: #fbd658; }
+    .tag-jiomart { color: #32d0ff; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🌶️</div>
+      <div>
+        <h1>Spice Nest Hub</h1>
+        <div class="subtitle">Multi-Platform Price Monitoring & Competitor Intelligence Engine</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <span class="btn" style="background: #1e293b; border: 1px solid #3b82f6; color: #fff; padding: 8px 16px; font-weight: 700; border-radius: 8px;">
+        🌶️ Price Hub
+      </span>
+      <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+        🟢 Live Public Snapshot
+      </span>
+    </div>
+  </header>
+
+  <!-- Anti-Bot Security & Random 24h Scheduler Banner -->
+  <div class="security-banner">
+    <div>
+      <span class="sec-badge">🛡️ Stealth Anti-Bot Mode Active</span>
+      <span style="margin-left: 10px; color: #e2e8f0;">
+        <b>Last Run:</b> - &nbsp;|&nbsp; 
+        <b>Next Randomized Auto-Check:</b> Scheduling...
+      </span>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+        Fixed time par bot nahi chalta. Har 24h me random time + 3-8s human jitter delay se portals aapko block nahi kar sakte.
+      </div>
+    </div>
+    <div style="font-size: 12px; color: #94a3b8;">
+      Price gap alert: <b>&gt; 20%</b>
+    </div>
+  </div>
+
+  <!-- SECTION: 🔍 Competitor Live Spy & Action Advice Card -->
+  <div class="card" style="border: 1px solid rgba(139, 92, 246, 0.35); background: linear-gradient(180deg, #131b2e 0%, #111827 100%);">
+    <div class="card-title">
+      <span style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size: 20px;">🔍</span> Competitor Live Spy & Action Advice Engine
+      </span>
+      <span style="font-size: 12px; font-weight: normal; color: #c4b5fd;">
+        Paste any Flipkart / Amazon / Meesho / Blinkit link to spy orders & get strategic advice
+      </span>
+    </div>
+
+    <div class="spy-grid">
+      <div class="input-group">
+        <label class="input-label">Competitor Product Link</label>
+        <input type="text" id="compUrl" placeholder="https://www.flipkart.com/... ya Amazon / Meesho link paste karein">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Compare With Your Spice Nest SKU</label>
+        <select id="compTargetSku">
+          
+          <option value="3">2x Chilli Oil (120g)</option>
+          
+          <option value="4">Ginger Garlic Paste - 750g (0g)</option>
+          
+          <option value="2">Spice Nest Gochujang Korean chilli paste | Authentic Fermented Red Chilli Hot Pepper Sauce (170g)</option>
+          
+          <option value="5">gdfgg (0g)</option>
+          
+        </select>
+      </div>
+      <div style="margin-top: 20px;">
+        <button class="accent" type="button" id="spyBtn" onclick="runCompetitorSpy()">
+          🚀 Spy & Get Action Plan
+        </button>
+      </div>
+    </div>
+
+    <!-- Spinner / Loading state -->
+    <div id="spyLoading" style="display:none; padding: 20px; text-align: center; color: #a78bfa;">
+      ⏳ Analyzing Competitor link... Fetching live price, stock, ratings & estimated monthly orders...
+    </div>
+
+    <!-- Spy Results Box -->
+    <div id="spyResultBox" style="display:none;">
+      <div class="battle-card">
+        <!-- Competitor Side -->
+        <div class="battle-side side-comp">
+          <div class="side-title" style="color: #f87171;">🎯 Competitor Listing</div>
+          <h3 id="resCompName" style="font-size: 15px; margin-bottom: 6px; color:#fff;">-</h3>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+            Brand: <b id="resCompBrand" style="color:#e2e8f0;">-</b> | Platform: <b id="resCompPlatform" style="color:#60a5fa;">-</b>
+          </div>
+          <div style="display:flex; gap: 14px; align-items:baseline; margin-bottom: 8px;">
+            <div style="font-size: 20px; font-weight:800; color:#fff;" id="resCompPrice">₹0</div>
+            <div style="font-size: 12px; color:#94a3b8;" id="resCompP100">₹0 / 100g</div>
+            <div id="resCompStockBadge" class="badge badge-live">In Stock</div>
+          </div>
+          <div style="font-size: 12px; color: #e2e8f0; background: #1e293b; padding: 8px 12px; border-radius: 6px; margin-top: 8px;">
+            ⭐ <b id="resCompRating">-</b> &nbsp;|&nbsp; 
+            📊 <b>Est. Orders:</b> <span id="resCompOrders" style="color:#34d399; font-weight:700;">-</span>
+          </div>
+        </div>
+
+        <!-- Spice Nest Side -->
+        <div class="battle-side side-mine">
+          <div class="side-title" style="color: #34d399;">🌶️ Your Spice Nest Product</div>
+          <h3 id="resMyName" style="font-size: 15px; margin-bottom: 6px; color:#fff;">-</h3>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+            Pack Weight: <b id="resMyGrams" style="color:#e2e8f0;">-</b>
+          </div>
+          <div style="display:flex; gap: 14px; align-items:baseline; margin-bottom: 8px;">
+            <div style="font-size: 20px; font-weight:800; color:#10b981;" id="resMyPrice">₹0</div>
+            <div style="font-size: 12px; color:#94a3b8;" id="resMyP100">₹0 / 100g</div>
+            <div class="badge badge-live">Your Product</div>
+          </div>
+          <div style="font-size: 12px; color: #94a3b8; background: #1e293b; padding: 8px 12px; border-radius: 6px; margin-top: 8px;">
+            Rate Gap Status: <b id="resGapStatus" style="color:#38bdf8;">-</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actionable AI Recommendations -->
+      <div style="margin-top: 14px;">
+        <h4 style="font-size: 15px; font-weight:700; color:#c4b5fd; margin-bottom: 10px;">
+          💡 Hamein Kya Action Lena Chahiye (Strategic Action Plan):
+        </h4>
+        <div class="advice-grid" id="adviceContainer"></div>
+      </div>
+
+      <div style="margin-top: 16px; display:flex; justify-content: flex-end; gap:10px;">
+        <button class="primary" type="button" onclick="saveAnalyzedCompetitor()">
+          💾 Save This Competitor to Watchlist
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: 📋 Competitor Watchlist Table -->
+  
+
+  <!-- SECTION: ➕ SKU Add/Edit Form Card -->
+  <div class="card">
+    <div class="card-title">
+      <span>➕ Naya SKU / Link Add Karo</span>
+      <span style="font-size: 12px; font-weight: normal; color: var(--text-muted);">
+        Tip: Direct link paste karenge toh portal aur product details auto-detect ho jayenge!
+      </span>
+    </div>
+
+    <div id="autoHint" class="auto-hint"></div>
+
+    <form method="post" action="/sku/save" id="skuForm">
+      <input type="hidden" name="id" id="skuId">
+
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="input-label">Product / SKU Naam</label>
+          <input name="name" id="skuName" placeholder="Jaise: Spice Nest Gochujang Korean Chilli Paste" required oninput="handleNameInput(this)">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Pack Weight (Grams)</label>
+          <input name="grams" id="skuGrams" placeholder="Jaise: 170" type="number" step="any">
+        </div>
+      </div>
+
+      <div class="input-label" style="margin-bottom: 6px;">Portal Links (Jo portal ka link ho bas wahi dalein, baaki khali chhod sakte hain):</div>
+      <div class="platform-links-grid">
+        
+        <div class="input-group">
+          <label class="input-label">
+            <span class="tag-flipkart">●</span> Flipkart Link
+          </label>
+          <input name="Flipkart" id="link_Flipkart" placeholder="Flipkart link paste karein" onpaste="handleLinkPaste(event, 'Flipkart')">
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label">
+            <span class="tag-amazon">●</span> Amazon Link
+          </label>
+          <input name="Amazon" id="link_Amazon" placeholder="Amazon link paste karein" onpaste="handleLinkPaste(event, 'Amazon')">
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label">
+            <span class="tag-meesho">●</span> Meesho Link
+          </label>
+          <input name="Meesho" id="link_Meesho" placeholder="Meesho link paste karein" onpaste="handleLinkPaste(event, 'Meesho')">
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label">
+            <span class="tag-blinkit">●</span> Blinkit Link
+          </label>
+          <input name="Blinkit" id="link_Blinkit" placeholder="Blinkit link paste karein" onpaste="handleLinkPaste(event, 'Blinkit')">
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label">
+            <span class="tag-jiomart">●</span> JioMart Link
+          </label>
+          <input name="JioMart" id="link_JioMart" placeholder="JioMart link paste karein" onpaste="handleLinkPaste(event, 'JioMart')">
+        </div>
+        
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="primary" type="submit">💾 Save SKU</button>
+        <button type="button" onclick="clearForm()">✕ Clear</button>
+      </div>
+    </form>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:12px; color:var(--text-muted); flex-wrap:wrap; gap:12px;">
+      <form method="post" action="/import" enctype="multipart/form-data" style="display:inline-flex; align-items:center; gap:8px;">
+        <span>Bulk CSV Import:</span>
+        <input type="file" name="file" accept=".csv" style="padding: 4px;">
+        <button class="sm">Upload CSV</button>
+      </form>
+      <a class="btn sm" href="/export.csv">📥 Download CSV Template</a>
+    </div>
+  </div>
+
+  <!-- SECTION: 📊 SKU Table Card -->
+  <div class="card">
+    <div class="filter-bar">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="setPortalFilter('all', this)">Sabhi Portals</button>
+        <button class="tab-btn" onclick="setPortalFilter('Flipkart', this)">⚡ Sirf Flipkart</button>
+        <button class="tab-btn" onclick="setPortalFilter('Amazon', this)">Amazon</button>
+        <button class="tab-btn" onclick="setPortalFilter('Meesho', this)">Meesho</button>
+        <button class="tab-btn" onclick="setPortalFilter('Blinkit', this)">Blinkit</button>
+        <button class="tab-btn" onclick="setPortalFilter('JioMart', this)">JioMart</button>
+      </div>
+
+      <label style="font-size: 12px; color: var(--text-muted); display:flex; align-items:center; gap:6px; cursor:pointer;">
+        <input type="checkbox" id="hideEmpty" onchange="applyPortalFilter()"> Sirf active links dikhao
+      </label>
+    </div>
+
+    <div class="table-container">
+      <table id="skuTable">
+        <thead>
+          <tr>
+            <th style="min-width: 220px;">SKU Product</th>
+            
+            <th class="col-Flipkart">Flipkart</th>
+            
+            <th class="col-Amazon">Amazon</th>
+            
+            <th class="col-Meesho">Meesho</th>
+            
+            <th class="col-Blinkit">Blinkit</th>
+            
+            <th class="col-JioMart">JioMart</th>
+            
+            <th style="text-align: right; width: 140px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr class="mismatch">
+            <td>
+              <div class="sku-title">2x Chilli Oil</div>
+              <span class="sku-grams">120 g</span>
+              
+              <br><span class="mismatch-badge">Price mismatch &gt; 20%</span>
+              
+            </td>
+
+            
+            
+            
+            <td class="col-Flipkart" data-has-portal="1">
+              
+                
+                  <div class="price-tag">₹138</div>
+                  
+                  <div class="unit-price">₹115.0 / 100g</div>
+                  
+                
+
+                
+                  <span class="badge badge-live">● Live</span>
+                
+
+                
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">In Stock</div>
+                
+
+                <br><a href="https://dl.flipkart.com/s/ROEhOTNNNN" target="_blank" class="portal-link">Open Flipkart ↗</a>
+              
+            </td>
+            
+            
+            
+            <td class="col-Amazon" data-has-portal="1">
+              
+                
+                  <div class="price-tag">₹179</div>
+                  
+                  <div class="unit-price">₹149.2 / 100g</div>
+                  
+                
+
+                
+                  <span class="badge badge-live">● Live</span>
+                
+
+                
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">Last verified</div>
+                
+
+                <br><a href="https://amzn.in/d/0g3PeaDW" target="_blank" class="portal-link">Open Amazon ↗</a>
+              
+            </td>
+            
+            
+            
+            <td class="col-Meesho" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-Blinkit" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-JioMart" data-has-portal="1">
+              
+                
+                  <div class="price-tag">₹199</div>
+                  
+                  <div class="unit-price">₹165.8 / 100g</div>
+                  
+                
+
+                
+                  <span class="badge badge-live">● Live</span>
+                
+
+                
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">approx</div>
+                
+
+                <br><a href="https://www.jiomart.com/product/spice-nest-2x-spicy-chilli-oil-120-gm-hot-spicy-masala-oil-for-cooking-momos-noodles-chinese-dishes-mnucuk-78727283" target="_blank" class="portal-link">Open JioMart ↗</a>
+              
+            </td>
+            
+
+            <td style="text-align: right;">
+              <div class="row-actions" style="justify-content: flex-end;">
+                <form method="post" action="/sku/check/3" style="display:inline" title="Is SKU ka price abhi refresh karo">
+                  <button class="sm">🔄</button>
+                </form>
+                <button type="button" class="sm" onclick='editSku({"grams": 120.0, "id": 3, "latest": {"Amazon": {"cmp": 149.2, "id": 37, "live": 1, "note": "Last verified", "p100": 149.2, "platform": "Amazon", "price": 179.0, "sku_id": 3, "ts": "2026-10-29 13:28:01"}, "Flipkart": {"cmp": 115.0, "id": 38, "live": 1, "note": "In Stock", "p100": 115.0, "platform": "Flipkart", "price": 138.0, "sku_id": 3, "ts": "2026-10-29 13:28:02"}, "JioMart": {"cmp": 165.8, "id": 39, "live": 1, "note": "approx", "p100": 165.8, "platform": "JioMart", "price": 199.0, "sku_id": 3, "ts": "2026-10-29 13:28:11"}}, "links": {"Amazon": "https://amzn.in/d/0g3PeaDW", "Blinkit": "", "Flipkart": "https://dl.flipkart.com/s/ROEhOTNNNN", "JioMart": "https://www.jiomart.com/product/spice-nest-2x-spicy-chilli-oil-120-gm-hot-spicy-masala-oil-for-cooking-momos-noodles-chinese-dishes-mnucuk-78727283", "Meesho": ""}, "mismatch": true, "name": "2x Chilli Oil"})'>Edit</button>
+                <form method="post" action="/sku/delete/3" style="display:inline" onsubmit="return confirm('Kya aap is SKU ko delete karna chahte hain?')">
+                  <button class="danger sm">✕</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="">
+            <td>
+              <div class="sku-title">Ginger Garlic Paste - 750g</div>
+              <span class="sku-grams">0 g</span>
+              
+            </td>
+
+            
+            
+            
+            <td class="col-Flipkart" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-Amazon" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-Meesho" data-has-portal="1">
+              
+                
+
+                
+                  <span class="badge badge-off">● Not Live</span>
+                
+
+                
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">HTTP 403</div>
+                
+
+                <br><a href="https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp?ms=2&amp;source=Meri+Shop" target="_blank" class="portal-link">Open Meesho ↗</a>
+              
+            </td>
+            
+            
+            
+            <td class="col-Blinkit" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-JioMart" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+
+            <td style="text-align: right;">
+              <div class="row-actions" style="justify-content: flex-end;">
+                <form method="post" action="/sku/check/4" style="display:inline" title="Is SKU ka price abhi refresh karo">
+                  <button class="sm">🔄</button>
+                </form>
+                <button type="button" class="sm" onclick='editSku({"grams": 0.0, "id": 4, "latest": {"Meesho": {"cmp": null, "id": 40, "live": 0, "note": "HTTP 403", "p100": null, "platform": "Meesho", "price": null, "sku_id": 4, "ts": "2026-10-29 14:51:10"}}, "links": {"Amazon": "", "Blinkit": "", "Flipkart": "", "JioMart": "", "Meesho": "https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp?ms=2\u0026source=Meri+Shop"}, "mismatch": false, "name": "Ginger Garlic Paste - 750g"})'>Edit</button>
+                <form method="post" action="/sku/delete/4" style="display:inline" onsubmit="return confirm('Kya aap is SKU ko delete karna chahte hain?')">
+                  <button class="danger sm">✕</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="mismatch">
+            <td>
+              <div class="sku-title">Spice Nest Gochujang Korean chilli paste | Authentic Fermented Red Chilli Hot Pepper Sauce</div>
+              <span class="sku-grams">170 g</span>
+              
+              <br><span class="mismatch-badge">Price mismatch &gt; 20%</span>
+              
+            </td>
+
+            
+            
+            
+            <td class="col-Flipkart" data-has-portal="1">
+              
+                
+                  <div class="price-tag">₹140</div>
+                  
+                  <div class="unit-price">₹82.4 / 100g</div>
+                  
+                
+
+                
+                  <span class="badge badge-live">● Live</span>
+                
+
+                
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">In Stock</div>
+                
+
+                <br><a href="https://dl.flipkart.com/s/esaUOTNNNN" target="_blank" class="portal-link">Open Flipkart ↗</a>
+              
+            </td>
+            
+            
+            
+            <td class="col-Amazon" data-has-portal="1">
+              
+                
+                  <div class="price-tag">₹183</div>
+                  
+                  <div class="unit-price">₹107.6 / 100g</div>
+                  
+                
+
+                
+                  <span class="badge badge-live">● Live</span>
+                
+
+                
+
+                <br><a href="https://amzn.in/d/0c4dk1zJ" target="_blank" class="portal-link">Open Amazon ↗</a>
+              
+            </td>
+            
+            
+            
+            <td class="col-Meesho" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-Blinkit" data-has-portal="1">
+              
+                
+                  <div class="price-tag">₹199</div>
+                  
+                  <div class="unit-price">₹117.1 / 100g</div>
+                  
+                
+
+                
+                  <span class="badge badge-live">● Live</span>
+                
+
+                
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">In Stock</div>
+                
+
+                <br><a href="https://blinkit.com/prn/spice-nest-gochujang-korean-hot-chilli-paste/prid/748272" target="_blank" class="portal-link">Open Blinkit ↗</a>
+              
+            </td>
+            
+            
+            
+            <td class="col-JioMart" data-has-portal="1">
+              
+                
+                  <div class="price-tag">₹199</div>
+                  
+                  <div class="unit-price">₹117.1 / 100g</div>
+                  
+                
+
+                
+                  <span class="badge badge-live">● Live</span>
+                
+
+                
+                <div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">approx</div>
+                
+
+                <br><a href="https://www.jiomart.com/product/spice-nest-korean-gochujang-paste-160g-authentic-fermented-red-chilli-hot-pepper-sauce-sweet-spicy-umami-for-tteokbokki-bibimbap-ramen-marinades-mknl77-72445640" target="_blank" class="portal-link">Open JioMart ↗</a>
+              
+            </td>
+            
+
+            <td style="text-align: right;">
+              <div class="row-actions" style="justify-content: flex-end;">
+                <form method="post" action="/sku/check/2" style="display:inline" title="Is SKU ka price abhi refresh karo">
+                  <button class="sm">🔄</button>
+                </form>
+                <button type="button" class="sm" onclick='editSku({"grams": 170.0, "id": 2, "latest": {"Amazon": {"cmp": 107.6, "id": 21, "live": 1, "note": "", "p100": 107.6, "platform": "Amazon", "price": 183.0, "sku_id": 2, "ts": "2026-10-27 18:24:26"}, "Blinkit": {"cmp": 117.1, "id": 22, "live": 1, "note": "In Stock", "p100": 117.1, "platform": "Blinkit", "price": 199.0, "sku_id": 2, "ts": "2026-10-27 18:24:26"}, "Flipkart": {"cmp": 82.4, "id": 23, "live": 1, "note": "In Stock", "p100": 82.4, "platform": "Flipkart", "price": 140.0, "sku_id": 2, "ts": "2026-10-27 18:24:27"}, "JioMart": {"cmp": 117.1, "id": 24, "live": 1, "note": "approx", "p100": 117.1, "platform": "JioMart", "price": 199.0, "sku_id": 2, "ts": "2026-10-27 18:24:38"}}, "links": {"Amazon": "https://amzn.in/d/0c4dk1zJ", "Blinkit": "https://blinkit.com/prn/spice-nest-gochujang-korean-hot-chilli-paste/prid/748272", "Flipkart": "https://dl.flipkart.com/s/esaUOTNNNN", "JioMart": "https://www.jiomart.com/product/spice-nest-korean-gochujang-paste-160g-authentic-fermented-red-chilli-hot-pepper-sauce-sweet-spicy-umami-for-tteokbokki-bibimbap-ramen-marinades-mknl77-72445640", "Meesho": ""}, "mismatch": true, "name": "Spice Nest Gochujang Korean chilli paste | Authentic Fermented Red Chilli Hot Pepper Sauce"})'>Edit</button>
+                <form method="post" action="/sku/delete/2" style="display:inline" onsubmit="return confirm('Kya aap is SKU ko delete karna chahte hain?')">
+                  <button class="danger sm">✕</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="">
+            <td>
+              <div class="sku-title">gdfgg</div>
+              <span class="sku-grams">0 g</span>
+              
+            </td>
+
+            
+            
+            
+            <td class="col-Flipkart" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-Amazon" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-Meesho" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-Blinkit" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+            
+            
+            <td class="col-JioMart" data-has-portal="0">
+              
+                <span class="badge-none">-</span>
+              
+            </td>
+            
+
+            <td style="text-align: right;">
+              <div class="row-actions" style="justify-content: flex-end;">
+                <form method="post" action="/sku/check/5" style="display:inline" title="Is SKU ka price abhi refresh karo">
+                  <button class="sm">🔄</button>
+                </form>
+                <button type="button" class="sm" onclick='editSku({"grams": 0.0, "id": 5, "latest": {}, "links": {"Amazon": "", "Blinkit": "", "Flipkart": "", "JioMart": "", "Meesho": ""}, "mismatch": false, "name": "gdfgg"})'>Edit</button>
+                <form method="post" action="/sku/delete/5" style="display:inline" onsubmit="return confirm('Kya aap is SKU ko delete karna chahte hain?')">
+                  <button class="danger sm">✕</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION: 📈 Price History Trend Card -->
+  <div class="card">
+    <div class="card-title">📈 Price History Trend</div>
+    <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+      <select id="skuSelect" onchange="loadChart()">
+        
+        <option value="3">2x Chilli Oil</option>
+        
+        <option value="4">Ginger Garlic Paste - 750g</option>
+        
+        <option value="2">Spice Nest Gochujang Korean chilli paste | Authentic Fermented Red Chilli Hot Pepper Sauce</option>
+        
+        <option value="5">gdfgg</option>
+        
+      </select>
+      <select id="granularity" onchange="loadChart()">
+        <option value="day">Din-wise (Daily)</option>
+        <option value="month">Mahine-wise (Monthly)</option>
+      </select>
+    </div>
+    <div style="position: relative; height: 260px;">
+      <canvas id="historyChart"></canvas>
+    </div>
+  </div>
+
+  
+  <script>
+    const PLATFORMS = ["Flipkart", "Amazon", "Meesho", "Blinkit", "JioMart"];
+    let chartInstance = null;
+    let currentFilter = 'all';
+    let lastAnalyzedComp = null;
+
+    // --- Competitor Spy Logic ---
+    async function runCompetitorSpy() {
+      const url = document.getElementById('compUrl').value.trim();
+      const skuId = document.getElementById('compTargetSku').value;
+      if (!url) {
+        alert('Pehle Competitor ka link paste karein!');
+        return;
+      }
+
+      document.getElementById('spyLoading').style.display = 'block';
+      document.getElementById('spyResultBox').style.display = 'none';
+
+      try {
+        const resp = await fetch('/api/competitor/spy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url, sku_id: skuId })
+        });
+        const data = await resp.json();
+        document.getElementById('spyLoading').style.display = 'none';
+
+        if (data.error) {
+          alert('Error: ' + data.error);
+          return;
+        }
+
+        lastAnalyzedComp = data.competitor;
+        lastAnalyzedComp.sku_id = skuId;
+
+        // Populate Competitor Side
+        const comp = data.competitor;
+        document.getElementById('resCompName').innerText = comp.name || 'Competitor Product';
+        document.getElementById('resCompBrand').innerText = comp.brand || 'Competitor';
+        document.getElementById('resCompPlatform').innerText = comp.platform;
+        document.getElementById('resCompPrice').innerText = comp.price ? '₹' + comp.price : 'N/A';
+        document.getElementById('resCompP100').innerText = comp.p100 ? '₹' + comp.p100 + ' / 100g (' + (comp.grams || '') + 'g)' : (comp.grams ? comp.grams + 'g' : '');
+        
+        const stockBadge = document.getElementById('resCompStockBadge');
+        if (comp.live === 1) {
+          stockBadge.className = 'badge badge-live';
+          stockBadge.innerText = comp.stock || 'In Stock';
+        } else {
+          stockBadge.className = 'badge badge-off';
+          stockBadge.innerText = comp.stock || 'Out of Stock';
+        }
+
+        document.getElementById('resCompRating').innerText = (comp.rating ? comp.rating + '★' : 'Rating N/A') + (comp.reviews ? ' (' + comp.reviews + ' reviews)' : '');
+        document.getElementById('resCompOrders').innerText = comp.est_orders || 'N/A';
+
+        // Populate My SKU Side
+        const mySku = data.my_sku || {};
+        document.getElementById('resMyName').innerText = mySku.name || 'Spice Nest Product';
+        document.getElementById('resMyGrams').innerText = (mySku.grams || 0) + ' g';
+        document.getElementById('resMyPrice').innerText = mySku.price ? '₹' + mySku.price : 'N/A';
+        const myP100 = (mySku.price && mySku.grams) ? Math.round((mySku.price / mySku.grams) * 1000) / 10 : null;
+        document.getElementById('resMyP100').innerText = myP100 ? '₹' + myP100 + ' / 100g' : '';
+
+        if (myP100 && comp.p100) {
+          const diff = Math.round((myP100 - comp.p100) * 10) / 10;
+          if (diff > 0) {
+            document.getElementById('resGapStatus').innerHTML = `<span style="color:#f87171;">Competitor is ₹${diff}/100g cheaper</span>`;
+          } else if (diff < 0) {
+            document.getElementById('resGapStatus').innerHTML = `<span style="color:#34d399;">You are ₹${Math.abs(diff)}/100g cheaper!</span>`;
+          } else {
+            document.getElementById('resGapStatus').innerText = 'Both rates are identical';
+          }
+        } else {
+          document.getElementById('resGapStatus').innerText = 'Rate compared';
+        }
+
+        // Populate Action Advice
+        const adviceContainer = document.getElementById('adviceContainer');
+        adviceContainer.innerHTML = '';
+        (data.advice || []).forEach(adv => {
+          const card = document.createElement('div');
+          card.className = 'advice-card';
+          card.style.borderLeft = `4px solid ${adv.color || '#3b82f6'}`;
+          card.innerHTML = `
+            <span class="advice-badge" style="background:${adv.color}22; color:${adv.color};">${adv.badge}</span>
+            <div class="advice-title">${adv.title}</div>
+            <div class="advice-action">${adv.action}</div>
+          `;
+          adviceContainer.appendChild(card);
+        });
+
+        document.getElementById('spyResultBox').style.display = 'block';
+      } catch (e) {
+        document.getElementById('spyLoading').style.display = 'none';
+        alert('Failed to analyze competitor link: ' + e);
+      }
+    }
+
+    async function saveAnalyzedCompetitor() {
+      if (!lastAnalyzedComp) return;
+      try {
+        const resp = await fetch('/api/competitor/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lastAnalyzedComp)
+        });
+        const res = await resp.json();
+        if (res.success) {
+          alert('✅ ' + res.msg);
+          location.reload();
+        }
+      } catch (e) {
+        alert('Save error: ' + e);
+      }
+    }
+
+    // Filter Logic
+    function setPortalFilter(portal, btn) {
+      currentFilter = portal;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPortalFilter();
+    }
+
+    function applyPortalFilter() {
+      const hideEmpty = document.getElementById('hideEmpty').checked;
+      PLATFORMS.forEach(p => {
+        const th = document.querySelector('th.col-' + p);
+        const tds = document.querySelectorAll('td.col-' + p);
+        const show = (currentFilter === 'all' || currentFilter === p);
+        if (th) th.style.display = show ? '' : 'none';
+        tds.forEach(td => td.style.display = show ? '' : 'none');
+      });
+
+      document.querySelectorAll('#skuTable tbody tr').forEach(tr => {
+        if (tr.children.length <= 1) return;
+        if (hideEmpty && currentFilter !== 'all') {
+          const portalTd = tr.querySelector('td.col-' + currentFilter);
+          const hasPortal = portalTd && portalTd.getAttribute('data-has-portal') === '1';
+          tr.style.display = hasPortal ? '' : 'none';
+        } else {
+          tr.style.display = '';
+        }
+      });
+    }
+
+    // Auto-detect URL input
+    async function handleNameInput(input) {
+      const val = input.value.trim();
+      const hint = document.getElementById('autoHint');
+      const skuGrams = document.getElementById('skuGrams');
+      if (val.startsWith('http://') || val.startsWith('https://')) {
+        let pf = null;
+        if (val.includes('flipkart')) pf = 'Flipkart';
+        else if (val.includes('amazon')) pf = 'Amazon';
+        else if (val.includes('meesho')) pf = 'Meesho';
+        else if (val.includes('blinkit')) pf = 'Blinkit';
+        else if (val.includes('jiomart')) pf = 'JioMart';
+
+        if (pf) {
+          const target = document.getElementById('link_' + pf);
+          if (target && !target.value) target.value = val;
+          hint.style.display = 'block';
+          hint.innerHTML = `✨ <b>${pf} link detected!</b> Fetching product name and pack weight...`;
+          try {
+            const res = await (await fetch('/api/preview_url?url=' + encodeURIComponent(val))).json();
+            if (res.name) {
+              input.value = res.name;
+            }
+            if (res.grams && (!skuGrams.value || skuGrams.value === '0')) {
+              skuGrams.value = res.grams;
+            }
+            hint.innerHTML = `✅ Auto-filled: <b>${res.name || input.value}</b> (${res.grams || ''}g). Live price: ₹${res.price || 'N/A'}`;
+          } catch(e) {
+            hint.innerHTML = `✨ <b>${pf} link set!</b>`;
+          }
+        }
+      }
+    }
+
+    async function handleLinkPaste(e, platform) {
+      setTimeout(async () => {
+        const val = document.getElementById('link_' + platform).value.trim();
+        if (val.startsWith('http://') || val.startsWith('https://')) {
+          const skuName = document.getElementById('skuName');
+          const skuGrams = document.getElementById('skuGrams');
+          const hint = document.getElementById('autoHint');
+          if (!skuName.value || !skuGrams.value || skuGrams.value === '0') {
+            try {
+              if (hint) {
+                hint.style.display = 'block';
+                hint.innerHTML = `🔍 <b>${platform} link detected!</b> Fetching pack weight and details...`;
+              }
+              const res = await (await fetch('/api/preview_url?url=' + encodeURIComponent(val))).json();
+              if (res.name && !skuName.value) {
+                skuName.value = res.name;
+              }
+              if (res.grams && (!skuGrams.value || skuGrams.value === '0')) {
+                skuGrams.value = res.grams;
+              }
+              if (hint) {
+                hint.style.display = 'block';
+                hint.innerHTML = `✅ <b>Auto-detected:</b> ${res.name || skuName.value} ${res.grams ? '— ' + res.grams + 'g' : ''} ${res.price ? '(₹' + res.price + ')' : ''}`;
+              }
+            } catch(e) {}
+          }
+        }
+      }, 50);
+    }
+
+    function editSku(s) {
+      document.getElementById('skuId').value = s.id;
+      document.getElementById('skuName').value = s.name;
+      document.getElementById('skuGrams').value = s.grams || '';
+      PLATFORMS.forEach(p => {
+        document.getElementById('link_' + p).value = (s.links && s.links[p]) || '';
+      });
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+
+    function clearForm() {
+      document.getElementById('skuForm').reset();
+      document.getElementById('skuId').value = '';
+      document.getElementById('autoHint').style.display = 'none';
+    }
+
+    async function loadChart() {
+      const sid = document.getElementById('skuSelect').value;
+      if (!sid) return;
+      const gr = document.getElementById('granularity').value;
+      const rows = await (await fetch('/api/history?sku=' + sid + '&g=' + gr)).json();
+
+      const labels = [...new Set(rows.map(r => r.d))];
+      const pfs = [...new Set(rows.map(r => r.platform))];
+
+      const colors = {
+        'Flipkart': '#3b82f6',
+        'Amazon': '#f59e0b',
+        'Meesho': '#ec4899',
+        'Blinkit': '#eab308',
+        'JioMart': '#06b6d4'
+      };
+
+      const datasets = pfs.map(p => ({
+        label: p,
+        borderColor: colors[p] || '#10b981',
+        backgroundColor: colors[p] || '#10b981',
+        spanGaps: true,
+        tension: 0.3,
+        data: labels.map(l => {
+          const r = rows.find(x => x.d === l && x.platform === p);
+          return r ? Math.round(r.p * 100) / 100 : null;
+        })
+      }));
+
+      if (chartInstance) chartInstance.destroy();
+      const ctx = document.getElementById('historyChart').getContext('2d');
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8' } }
+          },
+          scales: {
+            x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+            y: {
+              grid: { color: '#1e293b' },
+              ticks: { color: '#94a3b8' },
+              title: { display: true, text: 'Price (₹)', color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    loadChart();
+  </script>
+  
+  
+</body>
+</html>
