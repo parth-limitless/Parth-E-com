@@ -345,12 +345,54 @@ def resolve_shopsy_product(url):
     return None
 
 
+def resolve_jiomart_product(url):
+    """
+    Extracts accurate JioMart product name and pack grams from window.APP_DATA SSR state.
+    """
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": get_ua(),
+                "Accept-Language": "en-IN,en;q=0.9",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            }
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            html = resp.read().decode("utf-8", errors="ignore")
+
+        name = None
+        idx = html.find('window.APP_DATA = ')
+        if idx != -1:
+            script_end = html.find('</script>', idx)
+            script_content = html[idx + len('window.APP_DATA = '):script_end].strip()
+            if script_content.endswith(';'):
+                script_content = script_content[:-1].strip()
+            fixed_json = re.sub(r':\s*undefined\b', ': null', script_content)
+            data = json.loads(fixed_json)
+            prod = data.get("reduxData", {}).get("catalog", {}).get("product_details", {})
+            name = prod.get("name")
+
+        if not name:
+            m_title = re.search(r'<title[^>]*>(.*?)</title>', html, re.I | re.S)
+            if m_title and m_title.group(1).strip() and "Access Denied" not in m_title.group(1):
+                name = m_title.group(1).strip().split("Online at Best Prices")[0].strip()
+
+        grams = extract_grams(name, html) if name else 0.0
+        return None, 1, "In Stock", name, grams
+    except Exception:
+        pass
+    return None
+
+
 def fast_http_scrape(platform, url):
     """Fast extraction using lightweight HTTP request without launching heavy browser."""
     if platform == "Meesho":
         return resolve_meesho_product(url)
     if platform == "Shopsy":
         return resolve_shopsy_product(url)
+    if platform == "JioMart":
+        return resolve_jiomart_product(url)
 
     try:
         req = urllib.request.Request(
@@ -436,6 +478,11 @@ def read_page(page, platform, url):
             page.wait_for_selector("div.Nx9bqj, div._30jeq3, div.hl05eU, div[dir='auto']", timeout=8000)
         except Exception:
             pass
+    elif platform == "JioMart":
+        try:
+            page.wait_for_selector("span.PriceContainer__currentPrice, [class*='currentPrice']", timeout=8000)
+        except Exception:
+            pass
 
     page.wait_for_timeout(random.randint(1500, 2500))
     if resp and resp.status >= 400:
@@ -503,6 +550,23 @@ def read_page(page, platform, url):
                 p = text_price(el.text_content())
                 if p:
                     price = p
+                    break
+
+    elif platform == "JioMart":
+        jm_selectors = [
+            "span.PriceContainer__currentPrice",
+            "[class*='PriceContainer__currentPrice']",
+            ".PriceContainer__priceWrapperSec span",
+            "[class*='currentPrice']",
+            "[class*='priceContainer'] span"
+        ]
+        for sel in jm_selectors:
+            el = page.query_selector(sel)
+            if el:
+                p = text_price(el.text_content())
+                if p:
+                    price = p
+                    note = "In Stock"
                     break
 
     if price is None:
@@ -803,7 +867,7 @@ def check_sku_links(sku_id):
     try:
         for r in rows:
             fast_res = fast_http_scrape(r["platform"], r["url"])
-            if fast_res:
+            if fast_res and fast_res[0] is not None:
                 price, live, note = fast_res[0], fast_res[1], fast_res[2]
             else:
                 if browser is None:
@@ -866,7 +930,7 @@ def check_all_headless():
 
         for r in sku_links:
             fast_res = fast_http_scrape(r["platform"], r["url"])
-            if fast_res:
+            if fast_res and fast_res[0] is not None:
                 price, live, note = fast_res[0], fast_res[1], fast_res[2]
             else:
                 if browser is None:
