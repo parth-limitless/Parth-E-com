@@ -1613,7 +1613,7 @@ def api_meesho_tracker_run_live():
     from meesho_tracker.runner import TrackerRunner
     try:
         runner = TrackerRunner()
-        res = runner.run(mode="live")
+        res = runner.run(mode="live", force=True)
     except Exception as e:
         res = {"status": "ERROR", "error": str(e)}
 

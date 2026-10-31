@@ -54,7 +54,13 @@ class PlaywrightSession:
         context_kwargs = {
             "viewport": self.viewport,
             "locale": "en-IN",
-            "timezone_id": "Asia/Kolkata"
+            "timezone_id": "Asia/Kolkata",
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "extra_http_headers": {
+                "Accept-Language": "en-IN,en;q=0.9",
+                "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124"',
+                "sec-ch-ua-platform": '"Windows"'
+            }
         }
 
         # Load existing storage state if available

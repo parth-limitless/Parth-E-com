@@ -36,7 +36,10 @@ def main():
     # 1. Run local price & competitor check
     run_cmd(f'"{python_exe}" spice-nest-hub/check_runner.py', "Running Price & Stock Check")
 
-    # 2. Export updated Price Hub HTML for GitHub Pages
+    # 2. Visit Meesho Storefront & Discover All Store SKUs (Every 24 Hours)
+    run_cmd(f'"{python_exe}" spice-nest-hub/meesho_watchdog.py', "Visiting Meesho Storefront & Syncing Catalog SKUs")
+
+    # 3. Export updated Price Hub HTML for GitHub Pages
     run_cmd(f'"{python_exe}" export_price_hub.py', "Exporting Price Hub to docs/index.html")
 
     # 3. Check git changes and auto push to GitHub
@@ -58,3 +61,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

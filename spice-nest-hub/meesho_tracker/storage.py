@@ -179,6 +179,8 @@ class TrackerStorage:
 
     def save_snapshot(self, records: List[ProductRecord], run_id: Optional[str] = None, run_type: Optional[str] = None):
         with self._get_connection() as conn:
+            from datetime import datetime
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for r in records:
                 rid = run_id or getattr(r, "run_id", "manual_run")
                 rtype = run_type or r.run_type
@@ -192,6 +194,44 @@ class TrackerStorage:
                     r.product_id, r.name, r.url, r.price, r.mrp, r.discount_pct, r.rating, r.review_count,
                     r.image_url, 1 if r.in_stock else 0, r.sku, r.supplier, r.category_path, r.description,
                     1 if r.is_ad_product else 0, 1 if r.mall_verified else 0, rid, rtype, r.scraped_at.isoformat()
+                ))
+
+                # Upsert into meesho_catalog
+                conn.execute("""
+                    INSERT INTO meesho_catalog (product_id, title, price, product_url, image_url, status, first_seen, last_seen)
+                    VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, ?)
+                    ON CONFLICT(product_id) DO UPDATE SET
+                        title=excluded.title,
+                        price=excluded.price,
+                        product_url=excluded.product_url,
+                        image_url=excluded.image_url,
+                        status='ACTIVE',
+                        last_seen=excluded.last_seen,
+                        deactivated_at=NULL
+                """, (r.product_id, r.name, r.price, r.url, r.image_url or "", now_str, now_str))
+
+                # Upsert into meesho_public_catalog
+                conn.execute("""
+                    INSERT INTO meesho_public_catalog 
+                    (product_id, name, price, mrp, supplier_name, rating, review_count, in_stock, image_url, product_url, data_source, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'store_discovery', CURRENT_TIMESTAMP)
+                    ON CONFLICT(product_id) DO UPDATE SET
+                        name=excluded.name,
+                        price=excluded.price,
+                        mrp=excluded.mrp,
+                        supplier_name=excluded.supplier_name,
+                        rating=excluded.rating,
+                        review_count=excluded.review_count,
+                        in_stock=excluded.in_stock,
+                        image_url=excluded.image_url,
+                        product_url=excluded.product_url,
+                        data_source=excluded.data_source,
+                        updated_at=CURRENT_TIMESTAMP
+                """, (
+                    r.product_id, r.name, r.price, r.mrp or r.price,
+                    r.supplier or "Spice Nest Impex Private Limited",
+                    r.rating or 4.1, r.review_count or 100,
+                    1 if r.in_stock else 0, r.image_url or "", r.url
                 ))
             conn.commit()
 

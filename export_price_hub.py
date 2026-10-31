@@ -17,13 +17,11 @@ if sys.stdout.encoding != 'utf-8':
 
 from pathlib import Path
 
-# Add project root and inner directory to path
+# Add inner directory as the primary import path
 repo_root = Path(__file__).resolve().parent
 inner_dir = repo_root / "spice-nest-hub"
-if str(inner_dir) not in sys.path:
+if sys.path[0] != str(inner_dir):
     sys.path.insert(0, str(inner_dir))
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
 
 os.chdir(inner_dir)
 import app

@@ -664,9 +664,21 @@ def get_meesho_dashboard_analytics(db_path: str = "spicenest.db") -> Dict[str, A
     except Exception as e:
         logger.debug(f"Monthly orders fetch note: {e}")
 
+    deactivated_products = []
+    try:
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            deact_rows = conn.execute(
+                "SELECT * FROM meesho_catalog WHERE status = 'DEACTIVATED' ORDER BY deactivated_at DESC"
+            ).fetchall()
+            deactivated_products = [dict(r) for r in deact_rows]
+    except Exception:
+        pass
+
     return {
         "store": STORE_PROFILE,
         "monthly_orders": monthly_orders,
+        "deactivated_products": deactivated_products,
         "kpis": {
             "total_products": total_products,
             "in_stock_count": in_stock_count,
