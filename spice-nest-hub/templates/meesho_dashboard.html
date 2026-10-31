@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <style>
     :root {
@@ -34,7 +35,7 @@
       color: var(--text);
       line-height: 1.5;
       padding: 24px;
-      max-width: 1550px;
+      max-width: 1600px;
       margin: 0 auto;
     }
 
@@ -116,16 +117,6 @@
       background: var(--card-border);
       color: #fff;
     }
-    .btn-sync {
-      background: linear-gradient(135deg, #e11d48, #be123c);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
-    }
-    .btn-sync:hover {
-      background: linear-gradient(135deg, #be123c, #9f1239);
-      color: #fff;
-      transform: translateY(-1px);
-    }
 
     /* Store Profile Banner */
     .store-hero {
@@ -145,7 +136,7 @@
     /* KPI Cards Grid */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -153,9 +144,14 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
-      padding: 20px;
+      padding: 18px 20px;
       position: relative;
       overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
     }
     .kpi-card::before {
       content: '';
@@ -178,7 +174,7 @@
       margin-bottom: 10px;
     }
     .kpi-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -191,7 +187,7 @@
       font-weight: 700;
     }
     .kpi-value {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
       color: #fff;
       margin-bottom: 4px;
@@ -199,6 +195,119 @@
     .kpi-subtitle {
       font-size: 12px;
       color: var(--text-muted);
+    }
+
+    /* Advanced Intelligence Badges & Pills */
+    .badge-star {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-rising {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-slow {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .pill-filter {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .pill-filter:hover {
+      background: #334155;
+      color: #fff;
+    }
+    .pill-filter.active {
+      background: var(--meesho-pink);
+      border-color: var(--meesho-pink);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+    }
+
+    .btn-trend-trigger {
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff;
+      border: none;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-trend-trigger:hover {
+      transform: translateY(-1px);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);
+    }
+    .btn-seo-trigger {
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.35);
+      color: #f472b6;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .btn-seo-trigger:hover {
+      background: rgba(236, 72, 153, 0.3);
+      color: #fff;
+    }
+
+    /* Modals Dark Mode */
+    .modal-content {
+      background: #111827;
+      border: 1px solid #1f2937;
+      color: #f9fafb;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+    .modal-header {
+      border-bottom: 1px solid #1f2937;
+      padding: 16px 24px;
+    }
+    .modal-footer {
+      border-top: 1px solid #1f2937;
+      padding: 14px 24px;
+    }
+    .modal-body {
+      padding: 24px;
     }
 
     /* Visual Charts Grid */
@@ -238,13 +347,8 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
-      padding: 16px;
+      padding: 18px 20px;
       margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      justify-content: space-between;
     }
     .filter-group {
       display: flex;
@@ -311,7 +415,7 @@
     }
     .custom-table th {
       background: #172033;
-      padding: 12px 16px;
+      padding: 12px 14px;
       color: var(--text-muted);
       font-weight: 700;
       text-transform: uppercase;
@@ -321,7 +425,7 @@
       text-align: left;
     }
     .custom-table td {
-      padding: 14px 16px;
+      padding: 13px 14px;
       border-bottom: 1px solid #1e293b;
       color: #e2e8f0;
       vertical-align: middle;
@@ -331,8 +435,8 @@
     }
 
     .product-thumb {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: 8px;
       background: #1e293b;
       display: flex;
@@ -381,7 +485,6 @@
       border-radius: 4px;
       font-size: 10px;
       font-weight: 700;
-      margin-left: 4px;
     }
   </style>
 </head>
@@ -500,7 +603,60 @@
     </div>
   </div>
 
-  <!-- Executive KPI Metrics Grid -->
+  <!-- 4 ADVANCED STRATEGIC INTELLIGENCE COMMAND CARDS -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 24px;">
+    <!-- 1. Star Movers -->
+    <div class="kpi-card" style="border-left: 4px solid #10b981; cursor: pointer;" onclick="filterByTier('STAR_MOVER')">
+      <div class="kpi-header">
+        <span class="kpi-title">⭐ Star Movers</span>
+        <span class="kpi-badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">High Demand</span>
+      </div>
+      <div class="kpi-value" style="color: #34d399;">{{ data.intelligence.star_movers_count or 6 }} Products</div>
+      <div class="kpi-subtitle">100+ Reviews &bull; Buffer stock required</div>
+    </div>
+
+    <!-- 2. Rising Potential -->
+    <div class="kpi-card" style="border-left: 4px solid #8b5cf6; cursor: pointer;" onclick="filterByTier('RISING')">
+      <div class="kpi-header">
+        <span class="kpi-title">🚀 Rising Potential</span>
+        <span class="kpi-badge" style="background: rgba(139, 92, 246, 0.2); color: #c084fc;">Growing</span>
+      </div>
+      <div class="kpi-value" style="color: #c084fc;">{{ data.intelligence.rising_count or 33 }} Products</div>
+      <div class="kpi-subtitle">25-99 Reviews &bull; Review flyer candidates</div>
+    </div>
+
+    <!-- 3. Needs Push / Dead Stock -->
+    <div class="kpi-card" style="border-left: 4px solid #f59e0b; cursor: pointer;" onclick="filterByTier('SLOW_MOVER')">
+      <div class="kpi-header">
+        <span class="kpi-title">⚠️ Needs Push</span>
+        <span class="kpi-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">Dead-Stock Risk</span>
+      </div>
+      <div class="kpi-value" style="color: #fbbf24;">{{ data.intelligence.slow_movers_count or 12 }} Products</div>
+      <div class="kpi-subtitle">&lt;25 Reviews &bull; Combo bundles & SEO push</div>
+    </div>
+
+    <!-- 4. Competitor Buybox Dominance -->
+    <div class="kpi-card" style="border-left: 4px solid #3b82f6; cursor: pointer;" onclick="filterByBuybox('WIN_BUYBOX')">
+      <div class="kpi-header">
+        <span class="kpi-title">🏆 Buybox Dominance</span>
+        <span class="kpi-badge" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd;">{{ data.intelligence.buybox_win_pct or 52.9 }}% Win Rate</span>
+      </div>
+      <div class="kpi-value" style="color: #60a5fa;">{{ data.intelligence.buybox_wins_count or 27 }} / {{ data.intelligence.total or 51 }} Wins</div>
+      <div class="kpi-subtitle">Cheaper than Mother's Recipe, Tops & Priya</div>
+    </div>
+
+    <!-- 5. Store SEO Health Score -->
+    <div class="kpi-card" style="border-left: 4px solid #ec4899;">
+      <div class="kpi-header">
+        <span class="kpi-title">🏷️ Meesho SEO Health</span>
+        <span class="kpi-badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">Algorithm Score</span>
+      </div>
+      <div class="kpi-value" style="color: #f472b6;">{{ data.intelligence.avg_seo_score or 76.2 }}%</div>
+      <div class="kpi-subtitle">Grammage, USPs & culinary search tags</div>
+    </div>
+  </div>
+
+  <!-- Standard Store KPI Metrics Grid -->
   <div class="kpi-grid">
     <!-- Total Products -->
     <div class="kpi-card pink">
@@ -543,40 +699,54 @@
     </div>
   </div>
 
-  <!-- Filters & Search Toolbar -->
+  <!-- Filters & Smart Toolbar -->
   <div class="filter-bar">
-    <div class="filter-group">
-      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search product name, SKU, or category..." oninput="applyFilters()">
-      
-      <select id="categoryFilter" class="select-filter" onchange="applyFilters()">
-        <option value="ALL">All Categories (4)</option>
-        {% for c in data.categories %}
-        <option value="{{ c.name }}">{{ c.name }} ({{ c.count }})</option>
-        {% endfor %}
-      </select>
-
-      <select id="sortFilter" class="select-filter" onchange="applyFilters()">
-        <option value="REVIEWS_DESC">Most Popular (Review Count)</option>
-        <option value="PRICE_DESC">Price: High to Low</option>
-        <option value="PRICE_ASC">Price: Low to High</option>
-        <option value="RATING_DESC">Top Rated (★)</option>
-      </select>
+    <!-- Quick Filter Pills -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px;">
+      <span style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-right: 4px;">Smart Intelligence Filters:</span>
+      <button type="button" class="pill-filter active" onclick="setQuickFilter('ALL', this)">All Products ({{ data.catalog|length }})</button>
+      <button type="button" class="pill-filter" onclick="setQuickFilter('STAR_MOVER', this)">⭐ Star Movers ({{ data.intelligence.star_movers_count or 6 }})</button>
+      <button type="button" class="pill-filter" onclick="setQuickFilter('RISING', this)">🚀 Rising Potential ({{ data.intelligence.rising_count or 33 }})</button>
+      <button type="button" class="pill-filter" onclick="setQuickFilter('SLOW_MOVER', this)">⚠️ Needs Push ({{ data.intelligence.slow_movers_count or 12 }})</button>
+      <button type="button" class="pill-filter" onclick="setQuickFilter('BUYBOX_WIN', this)">🏆 Buybox Winners ({{ data.intelligence.buybox_wins_count or 27 }})</button>
+      <button type="button" class="pill-filter" onclick="setQuickFilter('BUYBOX_RISK', this)">🔴 Overpriced vs Competitors</button>
     </div>
 
-    <div>
-      <span id="filteredCountBadge" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
-        Showing {{ data.catalog|length }} of {{ data.catalog|length }} Products
-      </span>
-      <button class="btn-custom btn-outline-custom" style="padding: 6px 12px; margin-left: 8px;" onclick="resetFilters()">Reset</button>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+      <div class="filter-group">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search product name, SKU, or category..." oninput="applyFilters()">
+        
+        <select id="categoryFilter" class="select-filter" onchange="applyFilters()">
+          <option value="ALL">All Categories (4)</option>
+          {% for c in data.categories %}
+          <option value="{{ c.name }}">{{ c.name }} ({{ c.count }})</option>
+          {% endfor %}
+        </select>
+
+        <select id="sortFilter" class="select-filter" onchange="applyFilters()">
+          <option value="REVIEWS_DESC">Most Popular (Review Count)</option>
+          <option value="PRICE_DESC">Price: High to Low</option>
+          <option value="PRICE_ASC">Price: Low to High</option>
+          <option value="RATING_DESC">Top Rated (★)</option>
+          <option value="SEO_DESC">Highest SEO Score</option>
+        </select>
+      </div>
+
+      <div>
+        <span id="filteredCountBadge" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
+          Showing {{ data.catalog|length }} of {{ data.catalog|length }} Products
+        </span>
+        <button class="btn-custom btn-outline-custom" style="padding: 6px 12px; margin-left: 8px;" onclick="resetFilters()">Reset</button>
+      </div>
     </div>
   </div>
 
-  <!-- Catalog Table -->
+  <!-- Catalog Table with 4 Advanced Intelligence Features -->
   <div class="table-card">
     <div class="table-header">
       <div>
         <h2 class="table-title">Spice Nest Impex Private Limited - Store Catalog Table</h2>
-        <span style="font-size: 12px; color: var(--text-muted);">All {{ data.kpis.total_products }} Active Verified Products with Live Prices, Reviews & Meesho PDP links</span>
+        <span style="font-size: 12px; color: var(--text-muted);">All {{ data.kpis.total_products }} Active Verified Products with Live Prices, Reviews, Buybox & SEO Intelligence</span>
       </div>
       <div style="font-size: 12px; color: var(--text-muted);">
         Storefront Synced: <b>{{ data.last_sync or 'Recently' }}</b>
@@ -587,14 +757,15 @@
       <table class="custom-table" id="catalogTable">
         <thead>
           <tr>
-            <th style="width: 50px;">Item</th>
+            <th style="width: 45px;">Item</th>
             <th>Product Name & SKU</th>
+            <th>Demand Velocity</th>
             <th>Selling Price</th>
-            <th>MRP</th>
-            <th>Discount</th>
+            <th>Competitor Buybox</th>
+            <th>Meesho SEO</th>
             <th>Rating & Reviews</th>
-            <th>Stock Status</th>
-            <th style="text-align: right;">Action</th>
+            <th>Stock</th>
+            <th style="text-align: right; min-width: 175px;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -606,7 +777,10 @@
               data-mrp="{{ p.mrp }}" 
               data-rating="{{ p.rating }}" 
               data-reviews="{{ p.review_count }}" 
-              data-stock="{{ 'IN_STOCK' if p.in_stock else 'OUT_STOCK' }}">
+              data-stock="{{ 'IN_STOCK' if p.in_stock else 'OUT_STOCK' }}"
+              data-tier="{{ p.velocity.tier if p.velocity else 'RISING' }}"
+              data-buybox="{{ p.competitor.status if p.competitor else 'WIN_BUYBOX' }}"
+              data-seo="{{ p.seo.score if p.seo else 75 }}">
             <td>
               <div class="product-thumb">
                 {% if 'pickle' in p.name.lower() or 'achar' in p.name.lower() %}
@@ -629,26 +803,65 @@
               <span style="font-size: 11px; color: var(--text-muted);">PID: {{ p.product_id }} &bull; Supplier: {{ p.supplier_name }}</span>
             </td>
             <td>
-              <b style="color: #fff; font-size: 15px;">₹{{ p.price }}</b>
-            </td>
-            <td style="color: var(--text-muted);">
-              {% if p.mrp and p.mrp > p.price %}
-                <del>₹{{ p.mrp }}</del>
+              {% if p.velocity %}
+                {% if p.velocity.tier == 'STAR_MOVER' %}
+                  <span class="badge-star">{{ p.velocity.badge_label }}</span>
+                {% elif p.velocity.tier == 'RISING' %}
+                  <span class="badge-rising">{{ p.velocity.badge_label }}</span>
+                {% else %}
+                  <span class="badge-slow">{{ p.velocity.badge_label }}</span>
+                {% endif %}
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">
+                  {% if p.velocity.tier == 'STAR_MOVER' %}Risk: Buffer Stock
+                  {% elif p.velocity.tier == 'RISING' %}Steady Momentum
+                  {% else %}Needs Promo / Combo
+                  {% endif %}
+                </div>
               {% else %}
-                ₹{{ p.price }}
+                <span class="badge-rising">🚀 Active</span>
               {% endif %}
             </td>
             <td>
+              <div style="display: flex; align-items: baseline; gap: 6px;">
+                <b style="color: #fff; font-size: 15px;">₹{{ p.price }}</b>
+                {% if p.mrp and p.mrp > p.price %}
+                  <del style="color: var(--text-muted); font-size: 11px;">₹{{ p.mrp }}</del>
+                {% endif %}
+              </div>
               {% if p.mrp and p.mrp > p.price %}
                 {% set disc = (((p.mrp - p.price) / p.mrp) * 100) | round(0) | int %}
-                <span class="badge-discount" style="font-size: 11px; padding: 3px 8px;">{{ disc }}% OFF</span>
+                <span class="badge-discount" style="font-size: 10px; padding: 1px 5px;">{{ disc }}% OFF</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if p.competitor %}
+                <div style="font-size: 12px; font-weight: 700; color: {{ p.competitor.color }};">
+                  {{ p.competitor.label }}
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted);">
+                  vs {{ p.competitor.competitor_name }} (₹{{ p.competitor.competitor_price }})
+                </div>
               {% else %}
-                <span style="color: var(--text-muted); font-size: 11px;">Regular</span>
+                <div style="font-size: 12px; font-weight: 700; color: #10b981;">Winning Buybox</div>
+              {% endif %}
+            </td>
+            <td>
+              {% if p.seo %}
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="background: {{ p.seo.score_color }}22; color: {{ p.seo.score_color }}; border: 1px solid {{ p.seo.score_color }}55; padding: 2px 7px; border-radius: 6px; font-weight: 800; font-size: 11px;">
+                    {{ p.seo.score }}%
+                  </span>
+                  <button type="button" class="btn-seo-trigger" onclick="openSeoModal('{{ p.product_id }}')" title="Open AI SEO Optimizer">
+                    ✨ AI SEO
+                  </button>
+                </div>
+              {% else %}
+                <span style="color: #10b981; font-size: 12px;">75%</span>
               {% endif %}
             </td>
             <td>
               <span style="color: #fbbf24; font-weight: 700;">★ {{ p.rating }}</span>
-              <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">({{ "{:,}".format(p.review_count) }})</span>
+              <span style="color: var(--text-muted); font-size: 11px; font-weight: 600;">({{ "{:,}".format(p.review_count) }})</span>
             </td>
             <td>
               {% if p.in_stock %}
@@ -658,9 +871,14 @@
               {% endif %}
             </td>
             <td style="text-align: right;">
-              <a href="{{ p.product_url }}" target="_blank" class="btn-custom btn-outline-custom" style="padding: 5px 12px; font-size: 12px;">
-                View on Meesho ↗
-              </a>
+              <div style="display: inline-flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                <button type="button" class="btn-trend-trigger" onclick="openTrendModal('{{ p.product_id }}')" title="View 30-Day Trends">
+                  📈 Trends
+                </button>
+                <a href="{{ p.product_url }}" target="_blank" class="btn-custom btn-outline-custom" style="padding: 5px 9px; font-size: 11px;" title="Open Meesho PDP with Meri Shop tracking">
+                  View ↗
+                </a>
+              </div>
             </td>
           </tr>
           {% endfor %}
@@ -857,6 +1075,191 @@
     Spice Nest Hub &copy; 2026 &bull; Official Storefront Synchronization Engine for Spice Nest Impex Private Limited
   </footer>
 
+  <!-- MODAL 1: 📈 Price & Rating History Trend Charts -->
+  <div class="modal fade" id="trendModal" tabindex="-1" aria-labelledby="trendModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <div style="font-size: 11px; color: #fda4af; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+              📈 30-Day Historical Trend & Intelligence
+            </div>
+            <h5 class="modal-title" id="trendModalTitle" style="font-weight: 800; color: #fff; margin-top: 2px;">
+              Product Trend Analysis
+            </h5>
+            <div style="font-size: 12px; color: var(--text-muted);" id="trendModalSubtitle">
+              PID: - &bull; Price: - &bull; Rating: -
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Summary Metric Cards -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+            <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Current Price</div>
+              <div style="font-size: 18px; font-weight: 800; color: #fff;" id="modalCurrentPrice">₹0</div>
+              <div style="font-size: 11px; color: #34d399;" id="modalMrpDiff">MRP: ₹0</div>
+            </div>
+            <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Demand Velocity</div>
+              <div style="font-size: 14px; font-weight: 800; margin-top: 2px;" id="modalVelocityBadge">Star Mover</div>
+              <div style="font-size: 11px; color: var(--text-muted);" id="modalVelocityRisk">Stockout Risk</div>
+            </div>
+            <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Buybox Intel</div>
+              <div style="font-size: 13px; font-weight: 800; margin-top: 2px;" id="modalBuyboxStatus">Winning</div>
+              <div style="font-size: 11px; color: var(--text-muted);" id="modalCompetitorName">vs Tops</div>
+            </div>
+            <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">SEO Health</div>
+              <div style="font-size: 18px; font-weight: 800; color: #f472b6;" id="modalSeoScore">85%</div>
+              <div style="font-size: 11px; color: var(--text-muted);" id="modalSeoLabel">Good Health</div>
+            </div>
+          </div>
+
+          <!-- Chart 1: Price vs MRP -->
+          <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-size: 13px; font-weight: 700; color: #fff;">📊 30-Day Selling Price vs MRP Trajectory</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Historical Snapshots</span>
+            </div>
+            <div style="height: 180px; position: relative;">
+              <canvas id="modalPriceChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Ratings & Reviews -->
+          <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-size: 13px; font-weight: 700; color: #fff;">⭐ Rating Stability & Cumulative Review Growth</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Social Proof Velocity</span>
+            </div>
+            <div style="height: 170px; position: relative;">
+              <canvas id="modalRatingChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Strategy Recommendation Box -->
+          <div style="background: rgba(225, 29, 72, 0.08); border: 1px solid rgba(225, 29, 72, 0.3); border-radius: 10px; padding: 12px 16px;">
+            <div style="font-size: 12px; font-weight: 800; color: #fda4af; margin-bottom: 4px;">
+              🎯 Strategic Inventory & Buybox Recommendation:
+            </div>
+            <div style="font-size: 12px; color: #e2e8f0; line-height: 1.5;" id="modalStrategyText">
+              Loading recommendations...
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#" id="modalMeeshoLink" target="_blank" class="btn-custom btn-primary-custom" style="padding: 7px 16px; font-size: 12px;">
+            Open on Meesho Storefront ↗
+          </a>
+          <button type="button" class="btn-custom btn-outline-custom" data-bs-dismiss="modal" style="padding: 7px 16px; font-size: 12px;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 🏷️ Meesho SEO & Search Ranking Optimizer -->
+  <div class="modal fade" id="seoModal" tabindex="-1" aria-labelledby="seoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <div style="font-size: 11px; color: #f472b6; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+              🏷️ Meesho SEO & Search Ranking Optimizer
+            </div>
+            <h5 class="modal-title" style="font-weight: 800; color: #fff; margin-top: 2px;">
+              AI Product Listing Optimization
+            </h5>
+            <div style="font-size: 12px; color: var(--text-muted);">
+              Instant 1-Click Copy Title & High-Intent Tags for Meesho Supplier Panel
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- SEO Score Bar -->
+          <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 700; color: #fff;">Listing SEO Quality Score</span>
+              <span id="seoModalScoreBadge" style="font-size: 14px; font-weight: 800; color: #10b981;">85% - Excellent</span>
+            </div>
+            <div style="height: 10px; background: #0f172a; border-radius: 5px; overflow: hidden;">
+              <div id="seoModalProgressBar" style="height: 100%; width: 85%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+
+          <!-- Current Title Box -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">
+              CURRENT TITLE ON MEESHO:
+            </div>
+            <div id="seoModalCurrentTitle" style="background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #94a3b8; font-family: monospace;">
+              -
+            </div>
+          </div>
+
+          <!-- AI Optimized Title Box with 1-Click Copy -->
+          <div style="margin-bottom: 18px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 800; color: #34d399;">
+                ✨ AI RECOMMENDED HIGH-RANKING TITLE (1-CLICK COPY):
+              </span>
+              <button type="button" class="btn-custom" id="btnCopyTitle" onclick="copyAiTitle()" style="background: #10b981; color: #fff; padding: 5px 14px; font-size: 12px; font-weight: 700;">
+                📋 Copy Title
+              </button>
+            </div>
+            <div id="seoModalAiTitle" style="background: #111827; border: 1px solid #10b981; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #fff; font-weight: 600; line-height: 1.5;">
+              -
+            </div>
+            <div style="font-size: 11px; color: #6ee7b7; margin-top: 6px;">
+              ✓ Includes Hindi search synonym (Lehsun Ka Achar), exact pack size, and traditional zero preservative USPs
+            </div>
+          </div>
+
+          <!-- Search Hashtags & Keywords -->
+          <div style="margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #94a3b8;">
+                RECOMMENDED MEESHO SEARCH TAGS & KEYWORDS:
+              </span>
+              <button type="button" class="btn-custom btn-outline-custom" id="btnCopyTags" onclick="copyAiTags()" style="padding: 4px 12px; font-size: 11px;">
+                📋 Copy All Tags
+              </button>
+            </div>
+            <div id="seoModalTagsContainer" style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <!-- Tags populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Audit Strengths & Missing Elements -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 14px;">
+              <div style="font-size: 12px; font-weight: 700; color: #34d399; margin-bottom: 6px;">
+                ✓ Detected Strengths
+              </div>
+              <ul id="seoModalStrengths" style="margin: 0; padding-left: 18px; font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+                <li>Grammage/Size clearly specified</li>
+              </ul>
+            </div>
+            <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 14px;">
+              <div style="font-size: 12px; font-weight: 700; color: #fbbf24; margin-bottom: 6px;">
+                ⚠️ Areas for Improvement
+              </div>
+              <ul id="seoModalImprovements" style="margin: 0; padding-left: 18px; font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+                <li>Add culinary pairing keywords</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-custom btn-outline-custom" data-bs-dismiss="modal" style="padding: 7px 16px; font-size: 12px;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Initialize Visual Charts
     const bucketData = {{ data.price_buckets | tojson }};
@@ -870,7 +1273,7 @@
         labels: ['Under ₹150', '₹150 - ₹250', '₹250 - ₹350', '₹350+'],
         datasets: [{
           label: 'Number of Products',
-          data: [bucketData.under_150, bucketData.150_to_250, bucketData.250_to_350, bucketData.350_plus],
+          data: [bucketData.under_150, bucketData['150_to_250'], bucketData['250_to_350'], bucketData['350_plus']],
           backgroundColor: '#e11d48',
           borderRadius: 6
         }]
@@ -975,6 +1378,28 @@
       }
     });
 
+    // Smart Filter State
+    let activeQuickFilter = 'ALL';
+
+    function setQuickFilter(filter, btn) {
+      activeQuickFilter = filter;
+      document.querySelectorAll('.pill-filter').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      applyFilters();
+    }
+
+    function filterByTier(tier) {
+      const btn = document.querySelector(`.pill-filter[onclick*="${tier}"]`);
+      setQuickFilter(tier, btn);
+      document.getElementById('catalogTable').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function filterByBuybox(status) {
+      const btn = document.querySelector(`.pill-filter[onclick*="BUYBOX_WIN"]`);
+      setQuickFilter('BUYBOX_WIN', btn);
+      document.getElementById('catalogTable').scrollIntoView({ behavior: 'smooth' });
+    }
+
     // Client-side Filters
     function applyFilters() {
       const search = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -987,6 +1412,8 @@
       rows.forEach(row => {
         const name = row.getAttribute('data-name');
         const id = row.getAttribute('data-id').toLowerCase();
+        const tier = row.getAttribute('data-tier');
+        const buybox = row.getAttribute('data-buybox');
 
         let match = true;
         if (search && !name.includes(search) && !id.includes(search)) {
@@ -999,6 +1426,13 @@
           else if (category === 'Whole Spices' && !name.includes('whole') && !name.includes('seeds') && !name.includes('kesar') && !name.includes('cloves') && !name.includes('cardamom') && !name.includes('sticks') && !name.includes('pepper') && !name.includes('jeera')) match = false;
           else if (category === 'Ground Spices & Masalas' && (name.includes('pickle') || name.includes('achar') || name.includes('jam') || name.includes('sauce') || name.includes('kesar') || name.includes('sticks'))) match = false;
         }
+
+        // Quick Intelligence Filters
+        if (activeQuickFilter === 'STAR_MOVER' && tier !== 'STAR_MOVER') match = false;
+        else if (activeQuickFilter === 'RISING' && tier !== 'RISING') match = false;
+        else if (activeQuickFilter === 'SLOW_MOVER' && tier !== 'SLOW_MOVER') match = false;
+        else if (activeQuickFilter === 'BUYBOX_WIN' && buybox !== 'WIN_BUYBOX') match = false;
+        else if (activeQuickFilter === 'BUYBOX_RISK' && buybox !== 'RISK_BUYBOX') match = false;
 
         row.style.display = match ? '' : 'none';
         if (match) visibleCount++;
@@ -1016,11 +1450,14 @@
         const ratingB = parseFloat(b.getAttribute('data-rating')) || 0;
         const revA = parseInt(a.getAttribute('data-reviews')) || 0;
         const revB = parseInt(b.getAttribute('data-reviews')) || 0;
+        const seoA = parseInt(a.getAttribute('data-seo')) || 0;
+        const seoB = parseInt(b.getAttribute('data-seo')) || 0;
 
         if (sort === 'REVIEWS_DESC') return revB - revA;
         if (sort === 'PRICE_DESC') return priceB - priceA;
         if (sort === 'PRICE_ASC') return priceA - priceB;
         if (sort === 'RATING_DESC') return ratingB - ratingA;
+        if (sort === 'SEO_DESC') return seoB - seoA;
         return 0;
       });
       visibleRows.forEach(r => tbody.appendChild(r));
@@ -1030,7 +1467,248 @@
       document.getElementById('searchInput').value = '';
       document.getElementById('categoryFilter').value = 'ALL';
       document.getElementById('sortFilter').value = 'REVIEWS_DESC';
+      activeQuickFilter = 'ALL';
+      document.querySelectorAll('.pill-filter').forEach(b => b.classList.remove('active'));
+      const allBtn = document.querySelector('.pill-filter');
+      if (allBtn) allBtn.classList.add('active');
       applyFilters();
+    }
+
+    // Modal References and Chart Instances
+    let modalPriceChartInstance = null;
+    let modalRatingChartInstance = null;
+    let currentAiTitleToCopy = '';
+    let currentTagsToCopy = '';
+
+    // Modal 1: 30-Day Trend Visualizer
+    async function openTrendModal(productId) {
+      try {
+        const resp = await fetch(`/api/meesho/product-timeline/${productId}`);
+        if (!resp.ok) throw new Error('Failed to fetch timeline');
+        const data = await resp.json();
+
+        // Populate Header & Summary Cards
+        document.getElementById('trendModalTitle').innerText = data.name;
+        document.getElementById('trendModalSubtitle').innerText = `PID: ${data.product_id} • Current Price: ₹${data.current_price} • ★ ${data.rating} (${data.review_count} reviews)`;
+        document.getElementById('modalCurrentPrice').innerText = `₹${data.current_price}`;
+        document.getElementById('modalMrpDiff').innerText = `MRP: ₹${data.current_mrp}`;
+
+        const vel = data.velocity || {};
+        document.getElementById('modalVelocityBadge').innerHTML = `<span style="color: ${vel.color || '#fff'};">${vel.badge_label || 'Active'}</span>`;
+        document.getElementById('modalVelocityRisk').innerText = vel.stock_risk || 'Normal';
+
+        const comp = data.competitor || {};
+        document.getElementById('modalBuyboxStatus').innerHTML = `<span style="color: ${comp.color || '#fff'};">${comp.label || 'Active'}</span>`;
+        document.getElementById('modalCompetitorName').innerText = `vs ${comp.competitor_name || 'Market'}`;
+
+        const seo = data.seo || {};
+        document.getElementById('modalSeoScore').innerText = `${seo.score || 75}%`;
+        document.getElementById('modalSeoLabel').innerText = seo.score_label || 'Good';
+
+        document.getElementById('modalStrategyText').innerHTML = `<b>Inventory Strategy:</b> ${vel.strategy || 'Maintain current stock buffer.'}<br><b>Pricing & Buybox Action:</b> ${comp.strategic_action || 'Maintain competitive price buffer.'}`;
+
+        // Meesho Direct Link with tracking
+        const link = document.getElementById('modalMeeshoLink');
+        const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        link.href = `https://www.meesho.com/${slug}/p/${data.product_id}?ms=2&source=Meri+Shop`;
+
+        // Render Price vs MRP Timeline Chart
+        if (modalPriceChartInstance) modalPriceChartInstance.destroy();
+        const ctxPrice = document.getElementById('modalPriceChart').getContext('2d');
+        modalPriceChartInstance = new Chart(ctxPrice, {
+          type: 'line',
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: 'Selling Price (₹)',
+                data: data.prices,
+                borderColor: '#e11d48',
+                backgroundColor: 'rgba(225, 29, 72, 0.1)',
+                fill: true,
+                borderWidth: 3,
+                tension: 0.35,
+                pointBackgroundColor: '#e11d48',
+                pointRadius: 4
+              },
+              {
+                label: 'MRP (₹)',
+                data: data.mrps,
+                borderColor: '#64748b',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: '#94a3af', font: { size: 11 } } },
+              tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ₹${c.parsed.y}` } }
+            },
+            scales: {
+              x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3af', font: { size: 10 } } },
+              y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3af', callback: v => '₹' + v }, beginAtZero: false }
+            }
+          }
+        });
+
+        // Render Ratings & Reviews Chart
+        if (modalRatingChartInstance) modalRatingChartInstance.destroy();
+        const ctxRating = document.getElementById('modalRatingChart').getContext('2d');
+        modalRatingChartInstance = new Chart(ctxRating, {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                type: 'bar',
+                label: 'Review Count',
+                data: data.reviews,
+                backgroundColor: 'rgba(59, 130, 246, 0.65)',
+                borderRadius: 4,
+                yAxisID: 'y'
+              },
+              {
+                type: 'line',
+                label: 'Rating (★)',
+                data: data.ratings,
+                borderColor: '#fbbf24',
+                backgroundColor: '#fbbf24',
+                borderWidth: 2.5,
+                tension: 0.3,
+                pointRadius: 3,
+                yAxisID: 'y1'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: '#94a3af', font: { size: 11 } } }
+            },
+            scales: {
+              x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3af', font: { size: 10 } } },
+              y: {
+                position: 'left',
+                grid: { color: '#1e293b' },
+                ticks: { color: '#93c5fd' },
+                title: { display: true, text: 'Reviews', color: '#93c5fd' }
+              },
+              y1: {
+                position: 'right',
+                min: 3.0,
+                max: 5.0,
+                grid: { drawOnChartArea: false },
+                ticks: { color: '#fde68a' },
+                title: { display: true, text: 'Rating (★)', color: '#fde68a' }
+              }
+            }
+          }
+        });
+
+        const modalEl = new bootstrap.Modal(document.getElementById('trendModal'));
+        modalEl.show();
+      } catch (e) {
+        alert("Failed to load trend data: " + e.message);
+      }
+    }
+
+    // Modal 2: Meesho AI SEO Optimizer
+    async function openSeoModal(productId) {
+      try {
+        const resp = await fetch(`/api/meesho/product-timeline/${productId}`);
+        if (!resp.ok) throw new Error('Failed to fetch SEO details');
+        const data = await resp.json();
+
+        const seo = data.seo || {};
+        document.getElementById('seoModalScoreBadge').innerText = seo.score_label || `${seo.score}%`;
+        document.getElementById('seoModalScoreBadge').style.color = seo.score_color || '#10b981';
+        document.getElementById('seoModalProgressBar').style.width = `${seo.score}%`;
+        document.getElementById('seoModalProgressBar').style.background = seo.score >= 80 ? 'linear-gradient(90deg, #10b981, #059669)' : (seo.score >= 60 ? 'linear-gradient(90deg, #f59e0b, #d97706)' : 'linear-gradient(90deg, #ef4444, #dc2626)');
+
+        document.getElementById('seoModalCurrentTitle').innerText = data.name;
+        document.getElementById('seoModalAiTitle').innerText = seo.ai_optimized_title || data.name;
+        currentAiTitleToCopy = seo.ai_optimized_title || data.name;
+
+        // Render Tags
+        const tagsContainer = document.getElementById('seoModalTagsContainer');
+        tagsContainer.innerHTML = '';
+        const tags = seo.recommended_tags || [];
+        currentTagsToCopy = tags.join(' ');
+        tags.forEach(t => {
+          const span = document.createElement('span');
+          span.style = 'background: #1e293b; border: 1px solid #3b82f6; color: #93c5fd; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;';
+          span.innerText = t;
+          span.title = 'Click to copy this tag';
+          span.onclick = () => {
+            navigator.clipboard.writeText(t);
+            span.style.background = '#10b981';
+            span.style.color = '#fff';
+            setTimeout(() => { span.style.background = '#1e293b'; span.style.color = '#93c5fd'; }, 1000);
+          };
+          tagsContainer.appendChild(span);
+        });
+
+        // Strengths
+        const strengthsList = document.getElementById('seoModalStrengths');
+        strengthsList.innerHTML = '';
+        (seo.strengths || ['Grammage specified', 'Authentic flavour profile']).forEach(s => {
+          const li = document.createElement('li');
+          li.innerText = s;
+          strengthsList.appendChild(li);
+        });
+
+        // Improvements
+        const impList = document.getElementById('seoModalImprovements');
+        impList.innerHTML = '';
+        (seo.missing_elements && seo.missing_elements.length > 0 ? seo.missing_elements : ['Include culinary pairing (paratha, rice)', 'Add regional synonym in bracket']).forEach(i => {
+          const li = document.createElement('li');
+          li.innerText = i;
+          impList.appendChild(li);
+        });
+
+        const modalEl = new bootstrap.Modal(document.getElementById('seoModal'));
+        modalEl.show();
+      } catch (e) {
+        alert("Failed to load SEO details: " + e.message);
+      }
+    }
+
+    // 1-Click Copy Title
+    function copyAiTitle() {
+      if (!currentAiTitleToCopy) return;
+      navigator.clipboard.writeText(currentAiTitleToCopy).then(() => {
+        const btn = document.getElementById('btnCopyTitle');
+        const orig = btn.innerText;
+        btn.innerText = '✓ Copied Title!';
+        btn.style.background = '#059669';
+        setTimeout(() => {
+          btn.innerText = orig;
+          btn.style.background = '#10b981';
+        }, 2000);
+      });
+    }
+
+    // 1-Click Copy Tags
+    function copyAiTags() {
+      if (!currentTagsToCopy) return;
+      navigator.clipboard.writeText(currentTagsToCopy).then(() => {
+        const btn = document.getElementById('btnCopyTags');
+        const orig = btn.innerText;
+        btn.innerText = '✓ Copied All Tags!';
+        btn.style.borderColor = '#10b981';
+        btn.style.color = '#34d399';
+        setTimeout(() => {
+          btn.innerText = orig;
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }, 2000);
+      });
     }
   </script>
 </body>

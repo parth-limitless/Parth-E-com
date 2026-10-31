@@ -1589,6 +1589,10 @@ def meesho_catalog_dashboard():
     from meesho_tracker.runner import TrackerRunner
     api_key = get_system_setting("SCRAPINGBEE_API_KEY", "")
     data = meesho_catalog_sync.get_meesho_dashboard_analytics(DB)
+    import meesho_analytics_engine
+    intel = meesho_analytics_engine.enrich_catalog_with_intelligence(data.get("catalog", []))
+    data["catalog"] = intel["products"]
+    data["intelligence"] = intel["summary"]
     masked_key = f"{api_key[:6]}...{api_key[-4:]}" if len(api_key) > 10 else ("Configured" if api_key else "")
     
     # Fetch Tracker Health & Diagnostics
@@ -1700,8 +1704,20 @@ def api_meesho_sync():
 def api_meesho_data():
     """JSON API returning Meesho public catalog items & metrics."""
     import meesho_catalog_sync
+    import meesho_analytics_engine
     data = meesho_catalog_sync.get_meesho_dashboard_analytics(DB)
+    intel = meesho_analytics_engine.enrich_catalog_with_intelligence(data.get("catalog", []))
+    data["catalog"] = intel["products"]
+    data["intelligence"] = intel["summary"]
     return jsonify(data)
+
+
+@app.get("/api/meesho/product-timeline/<product_id>")
+def api_meesho_product_timeline(product_id):
+    """Returns 30-day price, rating, SEO and competitor intelligence for a product."""
+    import meesho_analytics_engine
+    res = meesho_analytics_engine.get_product_timeline_history(product_id, DB)
+    return jsonify(res)
 
 
 @app.get("/meesho/export")
