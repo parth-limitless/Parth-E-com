@@ -40,12 +40,20 @@ jobs:
         run: |
           python spice-nest-hub/check_runner.py
 
+      - name: 🌸 Run Meesho Storefront Watchdog & Catalog Sync
+        run: |
+          python spice-nest-hub/meesho_watchdog.py
+
+      - name: 📊 Export Price Hub to docs/index.html
+        run: |
+          python export_price_hub.py
+
       - name: 💾 Commit & Push Updated Database & Report
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "Spice Nest Hub Bot"
-          git add spice-nest-hub/spicenest.db spice-nest-hub/spicenest_daily_report.csv
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: Daily price & competitor monitor scan [skip ci]" && git push)
+          git add docs/ spicenest.db spice-nest-hub/spicenest.db meesho_catalog.csv spice-nest-hub/meesho_catalog.csv spice-nest-hub/spicenest_daily_report.csv spice-nest-hub/output/meesho_store_tracker.xlsx
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: Daily 24h Price Hub & Meesho Storefront scan [skip ci]" && git push)
 
       - name: 📤 Upload Daily Report Artifact
         uses: actions/upload-artifact@v4
