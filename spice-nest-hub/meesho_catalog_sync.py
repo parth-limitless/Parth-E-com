@@ -380,7 +380,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/494406266/legyx_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spicy-tangy-garlic-pickle-200gm/p/86cube"
+        "product_url": "https://www.meesho.com/spicy-tangy-garlic-pickle-200gm/p/86cube?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "85k4dq",
@@ -393,7 +393,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/493066286/u36mr_512.webp?width=360",
-        "product_url": "https://www.meesho.com/pineapple-jam-370gm-jar/p/85k4dq"
+        "product_url": "https://www.meesho.com/pineapple-jam-370gm-jar/p/85k4dq?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "828zt5",
@@ -406,7 +406,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/487508297/qwml3_512.webp?width=360",
-        "product_url": "https://www.meesho.com/mixed-fruit-jam-by-spice-nest/p/828zt5"
+        "product_url": "https://www.meesho.com/mixed-fruit-jam-by-spice-nest/p/828zt5?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "85k06f",
@@ -419,7 +419,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/493060839/jlbu4_512.webp?width=360",
-        "product_url": "https://www.meesho.com/dark-soya-sauce-220gm-bottle/p/85k06f"
+        "product_url": "https://www.meesho.com/dark-soya-sauce-220gm-bottle/p/85k06f?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "8fje2u",
@@ -432,7 +432,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/509828358/viboe_512.webp?width=360",
-        "product_url": "https://www.meesho.com/premium-green-chilli-pickle-500gm/p/8fje2u"
+        "product_url": "https://www.meesho.com/premium-green-chilli-pickle-500gm/p/8fje2u?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "81ocey",
@@ -445,7 +445,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/486544858/o45cw_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mixed-pickle-200gm-pack-of-1/p/81ocey"
+        "product_url": "https://www.meesho.com/spice-nest-mixed-pickle-200gm-pack-of-1/p/81ocey?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "axi3yp",
@@ -458,7 +458,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/660934033/8umd4_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp"
+        "product_url": "https://www.meesho.com/spice-nest-ginger-garlic-paste-750g-pure-adrak-lehsun-paste-no-preservatives-fresh-ginger-garlic-for-curries-biryani-indian-cooking-ready-to-use-jar/p/axi3yp?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "aykhr0",
@@ -471,7 +471,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/662724828/5vmou_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-premium-mix-fruit-jam-370g-strawberry-jam-370g-combo-rich-natural-flavor-for-your-breakfast-and-snacks/p/aykhr0"
+        "product_url": "https://www.meesho.com/spice-nest-premium-mix-fruit-jam-370g-strawberry-jam-370g-combo-rich-natural-flavor-for-your-breakfast-and-snacks/p/aykhr0?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h0jvhs",
@@ -484,7 +484,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1028852272/xk5sq_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mixed-pickle-garlic-pickle-combo-500g-each-pack-of-2-indian-achar-for-roti-paratha-rice-meals/p/h0jvhs"
+        "product_url": "https://www.meesho.com/spice-nest-mixed-pickle-garlic-pickle-combo-500g-each-pack-of-2-indian-achar-for-roti-paratha-rice-meals/p/h0jvhs?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "hofy3n",
@@ -497,7 +497,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1068979811/xl6cg_512.webp?width=360",
-        "product_url": "https://www.meesho.com/sweet-lemon-pickle-200-g-each-pack-of-3/p/hofy3n"
+        "product_url": "https://www.meesho.com/sweet-lemon-pickle-200-g-each-pack-of-3/p/hofy3n?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "b0i9ej",
@@ -510,7 +510,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/665979931/qq3g3_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370gm-raspberry-jam-370gm-combo-a-perfect-pair-of-sweet-and-tangy-flavors-for-spreads-desserts-and-more/p/b0i9ej"
+        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370gm-raspberry-jam-370gm-combo-a-perfect-pair-of-sweet-and-tangy-flavors-for-spreads-desserts-and-more/p/b0i9ej?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "ayrop3",
@@ -523,7 +523,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/663060423/9pde8_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mix-fruit-jam-pineapple-jam-370g-combo-pack-pure-homemade-spread-no-preservatives/p/ayrop3"
+        "product_url": "https://www.meesho.com/spice-nest-mix-fruit-jam-pineapple-jam-370g-combo-pack-pure-homemade-spread-no-preservatives/p/ayrop3?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "fsqsgb",
@@ -536,7 +536,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/955271819/hhtu0_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-jhal-muri-sauce-230g-spicy-tangy-bengali-street-style-flavor/p/fsqsgb"
+        "product_url": "https://www.meesho.com/spice-nest-jhal-muri-sauce-230g-spicy-tangy-bengali-street-style-flavor/p/fsqsgb?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "axxpmt",
@@ -549,7 +549,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/661661957/mrfgl_512.webp?width=360",
-        "product_url": "https://www.meesho.com/premium-quality-ginger-garlic-paste-750gm-by-spice-nest/p/axxpmt"
+        "product_url": "https://www.meesho.com/premium-quality-ginger-garlic-paste-750gm-by-spice-nest/p/axxpmt?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "ailpze",
@@ -562,7 +562,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/635908298/rqkap_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-red-chilli-pickle-spicy-tangy-authentic-indian-achar-made-with-sun-dried-red-chilies-and-traditional-spices-preservative-free-homemade-style-pickle-for-parathas-rice-curries-meals-pack-of-1-red-chilli-pickle-500gm/p/ailpze"
+        "product_url": "https://www.meesho.com/spice-nest-red-chilli-pickle-spicy-tangy-authentic-indian-achar-made-with-sun-dried-red-chilies-and-traditional-spices-preservative-free-homemade-style-pickle-for-parathas-rice-curries-meals-pack-of-1-red-chilli-pickle-500gm/p/ailpze?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "azu9z6",
@@ -575,7 +575,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/664860930/493nc_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-370g-mix-fruit-strawberry-jam-duo-classic-fruit-spread-deal/p/azu9z6"
+        "product_url": "https://www.meesho.com/spice-nest-370g-mix-fruit-strawberry-jam-duo-classic-fruit-spread-deal/p/azu9z6?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "abgtow",
@@ -588,7 +588,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/623922512/vfyl9_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mixed-fruit-jam-370-gm-pack-of-1/p/abgtow"
+        "product_url": "https://www.meesho.com/spice-nest-mixed-fruit-jam-370-gm-pack-of-1/p/abgtow?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "9zbyw5",
@@ -601,7 +601,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/603540581/ae0if_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-garlic-paste-ready-to-use-lahsun-paste-naturally-processed-fresh-homemade-ingredients-no-added-flavor-or-preservatives-premium-quality-thick-aromatic-garlic-paste-for-cooking-1000gm-pack-of-1/p/9zbyw5"
+        "product_url": "https://www.meesho.com/spice-nest-garlic-paste-ready-to-use-lahsun-paste-naturally-processed-fresh-homemade-ingredients-no-added-flavor-or-preservatives-premium-quality-thick-aromatic-garlic-paste-for-cooking-1000gm-pack-of-1/p/9zbyw5?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "9220r3",
@@ -614,7 +614,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/547649103/qfjdv_512.webp?width=360",
-        "product_url": "https://www.meesho.com/mix-fruit-jam-1kg/p/9220r3"
+        "product_url": "https://www.meesho.com/mix-fruit-jam-1kg/p/9220r3?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h36cko",
@@ -627,7 +627,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1033260072/hoczj_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mix-pickle-1kg-premium-mixed-vegetable-pickle/p/h36cko"
+        "product_url": "https://www.meesho.com/spice-nest-mix-pickle-1kg-premium-mixed-vegetable-pickle/p/h36cko?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "ayz2yo",
@@ -640,7 +640,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/663405504/kkklx_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370g-pineapple-jam-370g-twin-pack-perfect-for-daily-snacks-cakes-gifts/p/ayz2yo"
+        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370g-pineapple-jam-370g-twin-pack-perfect-for-daily-snacks-cakes-gifts/p/ayz2yo?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "92e7on",
@@ -653,7 +653,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/548217959/ncxfx_512.webp?width=360",
-        "product_url": "https://www.meesho.com/apricot-jam-370gm/p/92e7on"
+        "product_url": "https://www.meesho.com/apricot-jam-370gm/p/92e7on?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "hofsqs",
@@ -666,7 +666,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1068972868/jktm4_512.webp?width=360",
-        "product_url": "https://www.meesho.com/garlic-pickle-200-g-each-pack-of-3/p/hofsqs"
+        "product_url": "https://www.meesho.com/garlic-pickle-200-g-each-pack-of-3/p/hofsqs?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "cunvk5",
@@ -679,7 +679,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/777096581/sdmmy_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-schezwan-sauce-250ml/p/cunvk5"
+        "product_url": "https://www.meesho.com/spice-nest-schezwan-sauce-250ml/p/cunvk5?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h36clc",
@@ -692,7 +692,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1033260096/txxbg_512.webp?width=360",
-        "product_url": "https://www.meesho.com/mixed-pickle-500g-pack-of-2-assorted-vegetable-spiced-and-homemade-style-pickle-combo/p/h36clc"
+        "product_url": "https://www.meesho.com/mixed-pickle-500g-pack-of-2-assorted-vegetable-spiced-and-homemade-style-pickle-combo/p/h36clc?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "axx39n",
@@ -705,7 +705,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/661632971/n3ftb_512.webp?width=360",
-        "product_url": "https://www.meesho.com/aromatic-ginger-garlic-paste-spice-nest-750gm-jar/p/axx39n"
+        "product_url": "https://www.meesho.com/aromatic-ginger-garlic-paste-spice-nest-750gm-jar/p/axx39n?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "aeuvav",
@@ -718,7 +718,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/629616631/7iphl_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-classic-strawberry-jam-370gm-made-from-fresh-strawberries/p/aeuvav"
+        "product_url": "https://www.meesho.com/spice-nest-classic-strawberry-jam-370gm-made-from-fresh-strawberries/p/aeuvav?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "azu93e",
@@ -731,7 +731,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/664859786/sau9u_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-370g-mix-fruit-pineapple-jam-pack-fresh-fruit-spread-combo/p/azu93e"
+        "product_url": "https://www.meesho.com/spice-nest-370g-mix-fruit-pineapple-jam-pack-fresh-fruit-spread-combo/p/azu93e?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "b0i8lu",
@@ -744,7 +744,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/665978898/swhlc_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370gm-pineapple-jam-370gm-combo-perfect-blend-of-sweet-tangy-flavors-for-spreads-desserts-and-snacks/p/b0i8lu"
+        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370gm-pineapple-jam-370gm-combo-perfect-blend-of-sweet-tangy-flavors-for-spreads-desserts-and-snacks/p/b0i8lu?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "ewkkta",
@@ -757,7 +757,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/901234270/pjvvc_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-hot-spicy-chilli-oil-120gm-perfect-for-momos-noodles-fried-rice/p/ewkkta"
+        "product_url": "https://www.meesho.com/spice-nest-hot-spicy-chilli-oil-120gm-perfect-for-momos-noodles-fried-rice/p/ewkkta?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h0jvht",
@@ -770,7 +770,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1028852273/fbruq_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-garlic-pickle-500g-mixed-pickle-200g-combo-indian-achar-pack-of-2-total-700g/p/h0jvht"
+        "product_url": "https://www.meesho.com/spice-nest-garlic-pickle-500g-mixed-pickle-200g-combo-indian-achar-pack-of-2-total-700g/p/h0jvht?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "aen2qe",
@@ -783,7 +783,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/629253014/vzzyy_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370gm/p/aen2qe"
+        "product_url": "https://www.meesho.com/spice-nest-strawberry-jam-370gm/p/aen2qe?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "djcu1d",
@@ -796,7 +796,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/818571793/x0pgu_512.webp?width=360",
-        "product_url": "https://www.meesho.com/fruity-delight-jam-pack-strawberry-pineapple-mixed-fruit-jars-combo/p/djcu1d"
+        "product_url": "https://www.meesho.com/fruity-delight-jam-pack-strawberry-pineapple-mixed-fruit-jars-combo/p/djcu1d?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "ap5y65",
@@ -809,7 +809,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/646929725/egb4q_512.webp?width=360",
-        "product_url": "https://www.meesho.com/ready-to-eat-paneer-tikka-masala-gravy-base-spicy-smoky-creamy-indian-curry-heat-and-eat-curry-authentic-north-indian-ready-meal-no-preservatives-300g-pack-pack-of-1-paneer-tika-masala-300-gm/p/ap5y65"
+        "product_url": "https://www.meesho.com/ready-to-eat-paneer-tikka-masala-gravy-base-spicy-smoky-creamy-indian-curry-heat-and-eat-curry-authentic-north-indian-ready-meal-no-preservatives-300g-pack-pack-of-1-paneer-tika-masala-300-gm/p/ap5y65?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h36clx",
@@ -822,7 +822,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1033260117/rrbsu_512.webp?width=360",
-        "product_url": "https://www.meesho.com/red-chilli-pickle-500g-pack-of-2-authentic-spiced-and-tangy-red-chilli-pickle-combo/p/h36clx"
+        "product_url": "https://www.meesho.com/red-chilli-pickle-500g-pack-of-2-authentic-spiced-and-tangy-red-chilli-pickle-combo/p/h36clx?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "fggmdx",
@@ -835,7 +835,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/934642005/prmzg_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-green-chilli-oil-120g-spicy-green-mirchi-flavour-oil-for-momos-noodles-fried-rice-pasta-rolls-snacks-daily-cooking/p/fggmdx"
+        "product_url": "https://www.meesho.com/spice-nest-green-chilli-oil-120g-spicy-green-mirchi-flavour-oil-for-momos-noodles-fried-rice-pasta-rolls-snacks-daily-cooking/p/fggmdx?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "a1e9p0",
@@ -848,7 +848,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/607007124/qinji_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-ginger-garlic-paste-premium-fresh-natural-thick-aromatic-ready-to-use-cooking-essential-for-curries-marinades-soups-stir-fries-preservative-free-pack-of-2-ginger-garlic-paste-500gm/p/a1e9p0"
+        "product_url": "https://www.meesho.com/spice-nest-ginger-garlic-paste-premium-fresh-natural-thick-aromatic-ready-to-use-cooking-essential-for-curries-marinades-soups-stir-fries-preservative-free-pack-of-2-ginger-garlic-paste-500gm/p/a1e9p0?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "8uplk7",
@@ -861,7 +861,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/535312231/eqw0y_512.webp?width=360",
-        "product_url": "https://www.meesho.com/red-chilli-green-chilli-soya-sauce-220gm-each-combo-sauce/p/8uplk7"
+        "product_url": "https://www.meesho.com/red-chilli-green-chilli-soya-sauce-220gm-each-combo-sauce/p/8uplk7?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "86o55m",
@@ -874,7 +874,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/494933530/fs5cl_512.webp?width=360",
-        "product_url": "https://www.meesho.com/pineapple-jam-740gm-370370gm/p/86o55m"
+        "product_url": "https://www.meesho.com/pineapple-jam-740gm-370370gm/p/86o55m?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "abk09h",
@@ -887,7 +887,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/624070997/z1u2h_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mixed-fruit-jam-370gm-made-with-real-fruits-delicious-healthy-spread/p/abk09h"
+        "product_url": "https://www.meesho.com/spice-nest-mixed-fruit-jam-370gm-made-with-real-fruits-delicious-healthy-spread/p/abk09h?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h36cl9",
@@ -900,7 +900,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1033260093/gecvd_512.webp?width=360",
-        "product_url": "https://www.meesho.com/garlic-pickle-500g-pack-of-2-savoury-spiced-and-tangy-indian-style-pickle-combo/p/h36cl9"
+        "product_url": "https://www.meesho.com/garlic-pickle-500g-pack-of-2-savoury-spiced-and-tangy-indian-style-pickle-combo/p/h36cl9?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "fgfvjf",
@@ -913,7 +913,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/934607211/srj95_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-red-chilli-oil-120g-hot-spicy-chilli-garlic-crisp-for-momos-noodles-fried-rice-pizza-pasta-tadka-cooking/p/fgfvjf"
+        "product_url": "https://www.meesho.com/spice-nest-red-chilli-oil-120g-hot-spicy-chilli-garlic-crisp-for-momos-noodles-fried-rice-pizza-pasta-tadka-cooking/p/fgfvjf?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h0jvhu",
@@ -926,7 +926,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1028852274/5jlcb_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mixed-pickle-combo-pack-500g-200g-traditional-indian-achar-spicy-tangy-pickle-for-roti-paratha-rice-and-dal-total-700g/p/h0jvhu"
+        "product_url": "https://www.meesho.com/spice-nest-mixed-pickle-combo-pack-500g-200g-traditional-indian-achar-spicy-tangy-pickle-for-roti-paratha-rice-and-dal-total-700g/p/h0jvhu?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h36cl2",
@@ -939,7 +939,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1033260086/r2gpu_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-garlic-pickle-1kg-premium-homemade-style-garlic-achar/p/h36cl2"
+        "product_url": "https://www.meesho.com/spice-nest-garlic-pickle-1kg-premium-homemade-style-garlic-achar/p/h36cl2?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "hofryh",
@@ -952,7 +952,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1068971849/zuxvq_512.webp?width=360",
-        "product_url": "https://www.meesho.com/garlic-pickle-200-g-each-pack-of-2/p/hofryh"
+        "product_url": "https://www.meesho.com/garlic-pickle-200-g-each-pack-of-2/p/hofryh?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "aztlwe",
@@ -965,7 +965,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/664829726/9cp4w_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mix-fruit-jam-370g-apricot-jam-370g-combo-pack-pure-spread-delight/p/aztlwe"
+        "product_url": "https://www.meesho.com/spice-nest-mix-fruit-jam-370g-apricot-jam-370g-combo-pack-pure-spread-delight/p/aztlwe?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "h36clf",
@@ -978,7 +978,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/1033260099/ge5vx_512.webp?width=360",
-        "product_url": "https://www.meesho.com/green-chilli-pickle-500g-pack-of-2-authentic-spiced-and-tangy-green-chilli-pickle-combo/p/h36clf"
+        "product_url": "https://www.meesho.com/green-chilli-pickle-500g-pack-of-2-authentic-spiced-and-tangy-green-chilli-pickle-combo/p/h36clf?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "abk64v",
@@ -991,7 +991,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/624078607/wafiy_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mixed-fruit-jam-370gm-made-with-real-fruits-no-artificial-flavors/p/abk64v"
+        "product_url": "https://www.meesho.com/spice-nest-mixed-fruit-jam-370gm-made-with-real-fruits-no-artificial-flavors/p/abk64v?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "fix7tb",
@@ -1004,7 +1004,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/938775503/wvqfr_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-red-chilli-oil-450g-hot-spicy-chilli-garlic-crisp-for-momos-noodles-fried-rice-pizza-pasta-tadka-cooking/p/fix7tb"
+        "product_url": "https://www.meesho.com/spice-nest-red-chilli-oil-450g-hot-spicy-chilli-garlic-crisp-for-momos-noodles-fried-rice-pizza-pasta-tadka-cooking/p/fix7tb?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "aymssf",
@@ -1017,7 +1017,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/662832447/ld7oz_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-mix-fruit-jam-apricot-jam-370g-combo-pack-pure-homemade-spread-no-preservatives/p/aymssf"
+        "product_url": "https://www.meesho.com/spice-nest-mix-fruit-jam-apricot-jam-370g-combo-pack-pure-homemade-spread-no-preservatives/p/aymssf?ms=2&source=Meri+Shop"
     },
     {
         "product_id": "ewjvdj",
@@ -1030,7 +1030,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
         "supplier_name": "Spice Nest Impex Private Limited",
         "in_stock": True,
         "image_url": "https://images.meesho.com/images/products/901201303/dpwdv_512.webp?width=360",
-        "product_url": "https://www.meesho.com/spice-nest-green-chilli-oil-120gm-spicy-flavoring-oil-for-cooking-tadka/p/ewjvdj"
+        "product_url": "https://www.meesho.com/spice-nest-green-chilli-oil-120gm-spicy-flavoring-oil-for-cooking-tadka/p/ewjvdj?ms=2&source=Meri+Shop"
     }
     ]
 
