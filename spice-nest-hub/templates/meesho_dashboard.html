@@ -500,113 +500,6 @@
     </div>
   </div>
 
-  <!-- Meesho Store Tracker - Production Guard & Circuit Breaker Control Center -->
-  <div style="background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; border-bottom: 1px solid #1f2937; padding-bottom: 14px;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span style="font-size: 22px;">🛡️</span>
-        <div>
-          <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin: 0;">Meesho Store Tracker & 24-Hour Circuit Breaker</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Crawlee Playwright discovery engine &bull; Power BI automated daily sync &bull; Zero fingerprint spoofing</p>
-        </div>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        {% if tracker.status == 'HEALTHY' %}
-          <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
-            ● Engine Status: HEALTHY
-          </span>
-        {% else %}
-          <span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
-            ● Cooldown Active Until: {{ tracker.cooldown_until }}
-          </span>
-        {% endif %}
-        <span style="background: #1e293b; color: #94a3b8; padding: 4px 10px; border-radius: 8px; font-size: 12px;">
-          Blocks: <b>{{ tracker.consecutive_blocks }} / 3</b>
-        </span>
-      </div>
-    </div>
-
-    <!-- Tracker Diagnostics Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
-      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
-        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Last Successful Scan</div>
-        <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">{{ tracker.last_success_time }}</div>
-      </div>
-      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
-        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">24h Rule Guard Status</div>
-        <div style="font-size: 13px; font-weight: 600; color: {% if tracker.can_run_scheduled %}#34d399{% else %}#fbbf24{% endif %}; margin-top: 4px;">
-          {{ tracker.scheduled_guard_reason }}
-        </div>
-      </div>
-      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
-        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Tracked Products in SQLite</div>
-        <div style="font-size: 14px; font-weight: 700; color: #60a5fa; margin-top: 4px;">{{ tracker.tracked_products_count }} Products</div>
-      </div>
-    </div>
-
-    <!-- Action Buttons with Guard Tooltips -->
-    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-      <!-- Live Scan Form -->
-      <form method="post" action="/api/meesho-tracker/run-live" style="display:inline;">
-        <button type="submit" class="btn-custom" style="background: #2563eb; color: #fff; padding: 9px 18px;" {% if not tracker.can_run_live %}disabled title="{{ tracker.live_guard_reason }}" style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
-          ⚡ Run Live Refresh (Catalog Only)
-        </button>
-      </form>
-
-      <!-- Full Scan Form -->
-      <form method="post" action="/api/meesho-tracker/run-full" style="display:flex; align-items: center; gap: 10px;">
-        <button type="submit" class="btn-custom" style="background: var(--meesho-pink); color: #fff; padding: 9px 18px;" {% if not tracker.can_run_scheduled %}disabled title="{{ tracker.scheduled_guard_reason }}" style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
-          🚀 Run Full Scan (24h Enforced)
-        </button>
-        {% if not tracker.can_run_scheduled and tracker.status == 'HEALTHY' %}
-          <label style="font-size: 12px; color: #fbbf24; display: flex; align-items: center; gap: 4px; cursor: pointer;">
-            <input type="checkbox" name="force" value="1"> Force once/24h
-          </label>
-        {% endif %}
-      </form>
-
-      <!-- Excel Export -->
-      <a href="/download/meesho-tracker-excel" class="btn-custom btn-outline-custom" style="padding: 9px 18px;">
-        📊 Open Power BI Excel (Latest + History)
-      </a>
-    </div>
-
-    <!-- Recent Run Logs Preview -->
-    {% if tracker.recent_runs %}
-      <div style="margin-top: 20px; border-top: 1px solid #1f2937; padding-top: 16px;">
-        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Recent Scrape Run History</div>
-        <div style="overflow-x: auto;">
-          <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
-            <thead>
-              <tr style="color: #64748b; border-bottom: 1px solid #24324f; text-align: left;">
-                <th style="padding: 6px 10px;">Run ID</th>
-                <th style="padding: 6px 10px;">Status</th>
-                <th style="padding: 6px 10px;">Products Saved</th>
-                <th style="padding: 6px 10px;">Duration</th>
-                <th style="padding: 6px 10px;">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for r in tracker.recent_runs %}
-                <tr style="border-bottom: 1px solid #1e293b;">
-                  <td style="padding: 8px 10px; font-family: monospace; color: #93c5fd;">{{ r.run_id }}</td>
-                  <td style="padding: 8px 10px;">
-                    <span style="background: {% if r.status == 'SUCCESS' %}rgba(16, 185, 129, 0.2); color: #34d399;{% elif r.status == 'PARTIAL' %}rgba(245, 158, 11, 0.2); color: #fbbf24;{% else %}rgba(239, 68, 68, 0.2); color: #f87171;{% endif %} padding: 2px 8px; border-radius: 6px; font-weight: 700;">
-                      {{ r.status }}
-                    </span>
-                  </td>
-                  <td style="padding: 8px 10px; color: #fff; font-weight: 600;">{{ r.products_saved }}</td>
-                  <td style="padding: 8px 10px; color: #94a3b8;">{{ r.elapsed_sec }}s</td>
-                  <td style="padding: 8px 10px; color: #94a3b8;">{{ r.started_at }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    {% endif %}
-  </div>
-
   <!-- Executive KPI Metrics Grid -->
   <div class="kpi-grid">
     <!-- Total Products -->
@@ -647,83 +540,6 @@
       </div>
       <div class="kpi-value">{{ data.kpis.stock_rate_pct }}%</div>
       <div class="kpi-subtitle">{{ data.kpis.in_stock_count }} In Stock | 0 Out of Stock</div>
-    </div>
-  </div>
-
-  <!-- Visual Analytics Charts -->
-  <div class="charts-grid">
-    <!-- Price Bucket Histogram -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <span class="chart-title">📊 Store Price Distribution</span>
-        <span style="font-size: 12px; color: var(--text-muted);">Products per Price Bracket</span>
-      </div>
-      <div class="chart-container">
-        <canvas id="priceBucketChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Category Share Doughnut -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <span class="chart-title">🏷️ Product Categories</span>
-        <span style="font-size: 12px; color: var(--text-muted);">Inventory Spread</span>
-      </div>
-      <div class="chart-container">
-        <canvas id="categoryShareChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Month-Wise Orders Breakdown Card -->
-  <div class="table-card" style="margin-bottom: 24px;">
-    <div class="table-header" style="background: #172033;">
-      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <h2 class="table-title">📅 Meesho Month-Wise Order Volume & Sales Revenue</h2>
-        <span style="background: rgba(225, 29, 72, 0.2); color: #fda4af; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
-          Store Order Ledger
-        </span>
-      </div>
-      <div style="font-size: 12px; color: var(--text-muted);">
-        Aggregated from Spice Nest Customer Orders Database &bull; <a href="/clv" style="color: #60a5fa; text-decoration: none;">View CLV Matrix ↗</a>
-      </div>
-    </div>
-    
-    <div style="padding: 16px 20px;">
-      <div style="display: grid; grid-template-columns: 1.1fr 1.9fr; gap: 20px; align-items: center;">
-        <!-- Left: Month Table -->
-        <div style="max-height: 240px; overflow-y: auto;">
-          <table class="custom-table" style="font-size: 12px;">
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Orders</th>
-                <th>Total Revenue</th>
-                <th>Avg Basket</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for m in data.monthly_orders %}
-              <tr>
-                <td><b>{{ m.month }}</b></td>
-                <td><span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 4px; font-weight: 700;">{{ m.orders_count }} Orders</span></td>
-                <td><b style="color: #34d399;">₹{{ "{:,}".format(m.total_revenue) }}</b></td>
-                <td style="color: var(--text-muted);">₹{{ m.avg_order_value }}</td>
-              </tr>
-              {% else %}
-              <tr>
-                <td colspan="4" style="text-align: center; color: var(--text-muted);">No monthly transactions logged yet.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Right: Monthly Orders Trend Bar Chart -->
-        <div style="height: 230px; position: relative;">
-          <canvas id="monthlyOrdersChart"></canvas>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -851,6 +667,190 @@
         </tbody>
       </table>
     </div>
+  </div>
+
+  <!-- Visual Analytics Charts -->
+  <div class="charts-grid">
+    <!-- Price Bucket Histogram -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">📊 Store Price Distribution</span>
+        <span style="font-size: 12px; color: var(--text-muted);">Products per Price Bracket</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="priceBucketChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Category Share Doughnut -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">🏷️ Product Categories</span>
+        <span style="font-size: 12px; color: var(--text-muted);">Inventory Spread</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="categoryShareChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Month-Wise Orders Breakdown Card -->
+  <div class="table-card" style="margin-bottom: 24px;">
+    <div class="table-header" style="background: #172033;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <h2 class="table-title">📅 Meesho Month-Wise Order Volume & Sales Revenue</h2>
+        <span style="background: rgba(225, 29, 72, 0.2); color: #fda4af; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+          Store Order Ledger
+        </span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted);">
+        Aggregated from Spice Nest Customer Orders Database &bull; <a href="/clv" style="color: #60a5fa; text-decoration: none;">View CLV Matrix ↗</a>
+      </div>
+    </div>
+    
+    <div style="padding: 16px 20px;">
+      <div style="display: grid; grid-template-columns: 1.1fr 1.9fr; gap: 20px; align-items: center;">
+        <!-- Left: Month Table -->
+        <div style="max-height: 240px; overflow-y: auto;">
+          <table class="custom-table" style="font-size: 12px;">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Orders</th>
+                <th>Total Revenue</th>
+                <th>Avg Basket</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in data.monthly_orders %}
+              <tr>
+                <td><b>{{ m.month }}</b></td>
+                <td><span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 4px; font-weight: 700;">{{ m.orders_count }} Orders</span></td>
+                <td><b style="color: #34d399;">₹{{ "{:,}".format(m.total_revenue) }}</b></td>
+                <td style="color: var(--text-muted);">₹{{ m.avg_order_value }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted);">No monthly transactions logged yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Right: Monthly Orders Trend Bar Chart -->
+        <div style="height: 230px; position: relative;">
+          <canvas id="monthlyOrdersChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meesho Store Tracker - Production Guard & Circuit Breaker Control Center -->
+  <div style="background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; border-bottom: 1px solid #1f2937; padding-bottom: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 22px;">🛡️</span>
+        <div>
+          <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin: 0;">Meesho Store Tracker & 24-Hour Circuit Breaker</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Crawlee Playwright discovery engine &bull; Power BI automated daily sync &bull; Zero fingerprint spoofing</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        {% if tracker.status == 'HEALTHY' %}
+          <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+            ● Engine Status: HEALTHY
+          </span>
+        {% else %}
+          <span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+            ● Cooldown Active Until: {{ tracker.cooldown_until }}
+          </span>
+        {% endif %}
+        <span style="background: #1e293b; color: #94a3b8; padding: 4px 10px; border-radius: 8px; font-size: 12px;">
+          Blocks: <b>{{ tracker.consecutive_blocks }} / 3</b>
+        </span>
+      </div>
+    </div>
+
+    <!-- Tracker Diagnostics Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Last Successful Scan</div>
+        <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">{{ tracker.last_success_time }}</div>
+      </div>
+      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">24h Rule Guard Status</div>
+        <div style="font-size: 13px; font-weight: 600; color: {% if tracker.can_run_scheduled %}#34d399{% else %}#fbbf24{% endif %}; margin-top: 4px;">
+          {{ tracker.scheduled_guard_reason }}
+        </div>
+      </div>
+      <div style="background: #1a2234; border: 1px solid #24324f; border-radius: 10px; padding: 12px 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Tracked Products in SQLite</div>
+        <div style="font-size: 14px; font-weight: 700; color: #60a5fa; margin-top: 4px;">{{ tracker.tracked_products_count }} Products</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons with Guard Tooltips -->
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <!-- Live Scan Form -->
+      <form method="post" action="/api/meesho-tracker/run-live" style="display:inline;">
+        <button type="submit" class="btn-custom" style="background: #2563eb; color: #fff; padding: 9px 18px;" {% if not tracker.can_run_live %}disabled title="{{ tracker.live_guard_reason }}" style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+          ⚡ Run Live Refresh (Catalog Only)
+        </button>
+      </form>
+
+      <!-- Full Scan Form -->
+      <form method="post" action="/api/meesho-tracker/run-full" style="display:flex; align-items: center; gap: 10px;">
+        <button type="submit" class="btn-custom" style="background: var(--meesho-pink); color: #fff; padding: 9px 18px;" {% if not tracker.can_run_scheduled %}disabled title="{{ tracker.scheduled_guard_reason }}" style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+          🚀 Run Full Scan (24h Enforced)
+        </button>
+        {% if not tracker.can_run_scheduled and tracker.status == 'HEALTHY' %}
+          <label style="font-size: 12px; color: #fbbf24; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+            <input type="checkbox" name="force" value="1"> Force once/24h
+          </label>
+        {% endif %}
+      </form>
+
+      <!-- Excel Export -->
+      <a href="/download/meesho-tracker-excel" class="btn-custom btn-outline-custom" style="padding: 9px 18px;">
+        📊 Open Power BI Excel (Latest + History)
+      </a>
+    </div>
+
+    <!-- Recent Run Logs Preview -->
+    {% if tracker.recent_runs %}
+      <div style="margin-top: 20px; border-top: 1px solid #1f2937; padding-top: 16px;">
+        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Recent Scrape Run History</div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+            <thead>
+              <tr style="color: #64748b; border-bottom: 1px solid #24324f; text-align: left;">
+                <th style="padding: 6px 10px;">Run ID</th>
+                <th style="padding: 6px 10px;">Status</th>
+                <th style="padding: 6px 10px;">Products Saved</th>
+                <th style="padding: 6px 10px;">Duration</th>
+                <th style="padding: 6px 10px;">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in tracker.recent_runs %}
+                <tr style="border-bottom: 1px solid #1e293b;">
+                  <td style="padding: 8px 10px; font-family: monospace; color: #93c5fd;">{{ r.run_id }}</td>
+                  <td style="padding: 8px 10px;">
+                    <span style="background: {% if r.status == 'SUCCESS' %}rgba(16, 185, 129, 0.2); color: #34d399;{% elif r.status == 'PARTIAL' %}rgba(245, 158, 11, 0.2); color: #fbbf24;{% else %}rgba(239, 68, 68, 0.2); color: #f87171;{% endif %} padding: 2px 8px; border-radius: 6px; font-weight: 700;">
+                      {{ r.status }}
+                    </span>
+                  </td>
+                  <td style="padding: 8px 10px; color: #fff; font-weight: 600;">{{ r.products_saved }}</td>
+                  <td style="padding: 8px 10px; color: #94a3b8;">{{ r.elapsed_sec }}s</td>
+                  <td style="padding: 8px 10px; color: #94a3b8;">{{ r.started_at }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
   </div>
 
   <footer style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 20px 0; border-top: 1px solid var(--border);">
