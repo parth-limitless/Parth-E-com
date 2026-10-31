@@ -3,8 +3,8 @@
 # ===========================================================================
 store:
   name: "Spice Nest Impex Private Limited"
-  url: "https://www.meesho.com/SpiceNestImpexPrivateLimited?ms=2"
-  expected_product_count: 51
+  url: "https://www.meesho.com/SpiceNestImpexPrivatelimited?ms=2"
+  expected_product_count: 28
   batch_size: 20
 
 limits:

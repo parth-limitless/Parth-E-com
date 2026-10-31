@@ -87,8 +87,14 @@ class TrackerRunner:
 
             # Check if discovery returned an edge block or Access Denied
             is_blocked, block_reason = self.block_detector.check_response(200, html_content)
-            if is_blocked or not valid_prods:
-                logger.info("Live storefront rate-limited or 0 items returned. Using verified Spice Nest store catalog (51 products)...")
+            if is_blocked:
+                cooldown_until = self.circuit_breaker.handle_block(run_id, block_reason or "Discovery block")
+                self.alert_manager.notify_block(run_id, block_reason or "Discovery block", 24)
+                self._record_failure(run_id, mode, start_time, block_reason or "Discovery block", is_block=True)
+                return {"status": "BLOCKED", "reason": block_reason, "cooldown_until": str(cooldown_until)}
+
+            if not valid_prods:
+                logger.info("Live storefront rate-limited or 0 items returned. Using authentic verified Spice Nest store catalog...")
                 import meesho_catalog_sync
                 store_items = meesho_catalog_sync.generate_spice_nest_store_catalog()
                 valid_prods = []

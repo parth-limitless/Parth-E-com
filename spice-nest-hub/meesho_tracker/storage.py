@@ -55,6 +55,37 @@ class TrackerStorage:
 
             # 2. Run Log Table
             conn.execute("""
+                CREATE TABLE IF NOT EXISTS meesho_catalog (
+                    product_id TEXT PRIMARY KEY,
+                    title TEXT,
+                    price REAL,
+                    product_url TEXT,
+                    image_url TEXT,
+                    status TEXT,
+                    first_seen TEXT,
+                    last_seen TEXT,
+                    deactivated_at TEXT
+                )
+            """)
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS meesho_public_catalog (
+                    product_id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    price REAL NOT NULL,
+                    mrp REAL,
+                    supplier_name TEXT,
+                    rating REAL,
+                    review_count INTEGER,
+                    in_stock INTEGER DEFAULT 1,
+                    image_url TEXT,
+                    product_url TEXT,
+                    data_source TEXT,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS meesho_run_logs (
                     run_id TEXT PRIMARY KEY,
                     mode TEXT NOT NULL,

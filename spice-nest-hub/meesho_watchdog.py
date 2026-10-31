@@ -41,7 +41,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 
 DB_PATH = "spicenest.db"
 BRAND_QUERY = "Spice Nest Impex Private Limited"
-STORE_URL = "https://www.meesho.com/SpiceNestImpexPrivateLimited?ms=2"
+STORE_URL = "https://www.meesho.com/SpiceNestImpexPrivatelimited?ms=2"
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")

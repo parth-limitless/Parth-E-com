@@ -78,7 +78,7 @@ class ProductPageEnricher:
         pacer = TaskPacer(
             min_action_delay=self.config.limits.min_delay_product_sec,
             max_action_delay=self.config.limits.max_delay_product_sec,
-            max_requests_per_minute=self.config.limits.max_requests_per_minute,
+            max_actions_per_minute=self.config.limits.max_requests_per_minute,
         )
         actions = ResilientActions(pacer=pacer)
         intervention_handler = ManualInterventionHandler(timeout_sec=120.0)

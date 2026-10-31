@@ -106,6 +106,10 @@ def check_execution_guard(
                 next_allowed = state.last_success_time + timedelta(hours=min_hours)
                 
                 if force:
+                    if state.force_used_at:
+                        hours_since_force = (now - state.force_used_at).total_seconds() / 3600.0
+                        if hours_since_force < min_hours:
+                            return False, f"--force override already used within the last 24 hours ({hours_since_force:.1f}h ago). Next allowed run: {next_allowed.strftime('%Y-%m-%d %H:%M:%S')}"
                     storage.update_state(force_used_at=now, reset_blocks=True, cooldown_until="CLEAR")
                     print(f"⚠️ [WARNING] --force override applied! Run executing on demand. Next allowed standard: {next_allowed.strftime('%Y-%m-%d %H:%M:%S')}")
                     return True, "Force allowed"
