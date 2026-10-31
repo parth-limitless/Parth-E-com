@@ -48,7 +48,8 @@ class ChangeDetector:
                 changes.append(ChangeRecord(
                     run_id=run_id,
                     product_id=pid,
-                    field_changed="product_added",
+                    name=curr.name,
+                    change_type="NEW_PRODUCT",
                     old_value=None,
                     new_value=curr.name,
                     detected_at=now
@@ -59,12 +60,15 @@ class ChangeDetector:
 
             # Price change
             if curr.price is not None and prev.price is not None and round(curr.price, 2) != round(prev.price, 2):
+                pct = round(((curr.price - prev.price) / prev.price) * 100, 1) if prev.price else 0.0
                 changes.append(ChangeRecord(
                     run_id=run_id,
                     product_id=pid,
-                    field_changed="price",
+                    name=curr.name,
+                    change_type="PRICE_CHANGE",
                     old_value=str(prev.price),
                     new_value=str(curr.price),
+                    pct_change=pct,
                     detected_at=now
                 ))
 
@@ -73,7 +77,8 @@ class ChangeDetector:
                 changes.append(ChangeRecord(
                     run_id=run_id,
                     product_id=pid,
-                    field_changed="discount_pct",
+                    name=curr.name,
+                    change_type="DISCOUNT_CHANGE",
                     old_value=str(prev.discount_pct),
                     new_value=str(curr.discount_pct),
                     detected_at=now
@@ -86,7 +91,8 @@ class ChangeDetector:
                     changes.append(ChangeRecord(
                         run_id=run_id,
                         product_id=pid,
-                        field_changed="rating_drop",
+                        name=curr.name,
+                        change_type="RATING_DROP",
                         old_value=str(prev.rating),
                         new_value=str(curr.rating),
                         detected_at=now
@@ -97,7 +103,8 @@ class ChangeDetector:
                 changes.append(ChangeRecord(
                     run_id=run_id,
                     product_id=pid,
-                    field_changed="review_count",
+                    name=curr.name,
+                    change_type="REVIEW_COUNT_DELTA",
                     old_value=str(prev.review_count),
                     new_value=str(curr.review_count),
                     detected_at=now
@@ -108,7 +115,8 @@ class ChangeDetector:
                 changes.append(ChangeRecord(
                     run_id=run_id,
                     product_id=pid,
-                    field_changed="in_stock",
+                    name=curr.name,
+                    change_type="STOCK_CHANGE",
                     old_value=str(prev.in_stock),
                     new_value=str(curr.in_stock),
                     detected_at=now
@@ -120,7 +128,8 @@ class ChangeDetector:
                 changes.append(ChangeRecord(
                     run_id=run_id,
                     product_id=pid,
-                    field_changed="product_removed",
+                    name=prev.name,
+                    change_type="REMOVED_PRODUCT",
                     old_value=prev.name,
                     new_value=None,
                     detected_at=now

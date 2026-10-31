@@ -126,11 +126,19 @@ class TrackerState(BaseModel):
 
 class ChangeRecord(BaseModel):
     """Record of delta changes compared against the previous snapshot."""
+    run_id: Optional[str] = "manual_run"
     product_id: str
     name: str
     change_type: str  # PRICE_CHANGE, DISCOUNT_CHANGE, RATING_DROP, STOCK_CHANGE, NEW_PRODUCT, REMOVED_PRODUCT
+    field_changed: Optional[str] = None
     old_value: Optional[str] = None
     new_value: Optional[str] = None
     pct_change: Optional[float] = None
     detected_at: datetime = Field(default_factory=datetime.now)
+
+    def model_post_init(self, __context: Any) -> None:
+        if not self.field_changed:
+            self.field_changed = "price" if self.change_type == "PRICE_CHANGE" else (
+                "in_stock" if self.change_type == "STOCK_CHANGE" else self.change_type.lower()
+            )
 

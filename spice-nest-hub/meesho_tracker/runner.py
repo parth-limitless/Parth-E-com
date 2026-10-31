@@ -152,7 +152,7 @@ class TrackerRunner:
 
             # Save snapshot to SQLite (unless suspect, where Latest is preserved)
             if not is_suspect:
-                self.storage.save_snapshot(valid_prods)
+                self.storage.save_snapshot(valid_prods, run_id=run_id, run_type=mode)
                 self.storage.update_state(
                     last_success_time=datetime.now(),
                     last_run_time=datetime.now(),
