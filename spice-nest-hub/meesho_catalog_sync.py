@@ -372,7 +372,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     {
         "product_id": "86cube",
         "name": "Spicy Tangy Garlic Pickle 200Gm",
-        "price": 154.0,
+        "price": 125.0,
         "mrp": 234.0,
         "discount_pct": 34.2,
         "rating": 4.0,
@@ -384,7 +384,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     },
     {
         "product_id": "85k4dq",
-        "name": "Classy Jams, Spreads & Sauces",
+        "name": "Pineapple Jam 370gm jar",
         "price": 188.0,
         "mrp": 220.0,
         "discount_pct": 14.5,
@@ -397,8 +397,8 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     },
     {
         "product_id": "828zt5",
-        "name": "Amazing Jams, Spreads & Sauces",
-        "price": 236.0,
+        "name": "Mixed Fruit Jam by spice nest",
+        "price": 226.0,
         "mrp": 335.0,
         "discount_pct": 29.6,
         "rating": 4.0,
@@ -605,7 +605,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     },
     {
         "product_id": "9220r3",
-        "name": "Amazing Jams, Spreads & Sauces",
+        "name": "Mixed Fruit Jam by spice nest",
         "price": 290.0,
         "mrp": 413.0,
         "discount_pct": 29.8,
@@ -644,7 +644,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     },
     {
         "product_id": "92e7on",
-        "name": "Classy Jams, Spreads & Sauces",
+        "name": "Pineapple Jam 370gm jar",
         "price": 235.0,
         "mrp": 403.0,
         "discount_pct": 41.7,
@@ -865,7 +865,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     },
     {
         "product_id": "86o55m",
-        "name": "Amazing Jams, Spreads & Sauces",
+        "name": "Mixed Fruit Jam by spice nest",
         "price": 205.0,
         "mrp": 323.0,
         "discount_pct": 36.5,
@@ -918,7 +918,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     {
         "product_id": "h0jvhu",
         "name": "Spice Nest Mixed Pickle Combo Pack 500G 200G Traditional Indian Achar Spicy Tangy Pickle For Roti Paratha Rice And Dal Total 700G",
-        "price": 236.0,
+        "price": 226.0,
         "mrp": 367.0,
         "discount_pct": 35.7,
         "rating": 4.1,

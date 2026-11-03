@@ -372,7 +372,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
 {
         "product_id": "86cube",
         "name": "Spice Nest Spicy Tangy Garlic Pickle 200g",
-        "price": 154.0,
+        "price": 125.0,
         "mrp": 234.0,
         "discount_pct": 34.0,
         "rating": 4.0,
@@ -397,8 +397,8 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     },
     {
         "product_id": "828zt5",
-        "name": "Spice Nest Mixed Fruit Jam 370g",
-        "price": 236.0,
+        "name": "Mixed Fruit Jam by spice nest",
+        "price": 226.0,
         "mrp": 335.0,
         "discount_pct": 30.0,
         "rating": 4.0,
@@ -632,7 +632,7 @@ def generate_spice_nest_store_catalog() -> List[Dict[str, Any]]:
     {
         "product_id": "h0jvhu",
         "name": "Spice Nest Mixed Pickle Combo Pack 500g + 200g",
-        "price": 236.0,
+        "price": 226.0,
         "mrp": 318.0,
         "discount_pct": 26.0,
         "rating": 4.1,

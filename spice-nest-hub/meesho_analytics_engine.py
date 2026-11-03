@@ -284,6 +284,8 @@ def enrich_catalog_with_intelligence(products: List[Dict[str, Any]], db_path: Op
             alerts = None
 
     price_drop_map = {}
+    price_hike_map = {}
+    price_change_map = {}
     new_sku_set = set()
     out_of_stock_set = set()
     unlisted_set = set()
@@ -291,6 +293,10 @@ def enrich_catalog_with_intelligence(products: List[Dict[str, Any]], db_path: Op
     if alerts:
         for pd in alerts.get("price_drops", []):
             price_drop_map[str(pd.get("product_id"))] = pd
+        for ph in alerts.get("price_hikes", []):
+            price_hike_map[str(ph.get("product_id"))] = ph
+        for pc in alerts.get("price_changes", []):
+            price_change_map[str(pc.get("product_id"))] = pc
         for ns in alerts.get("new_skus", []):
             new_sku_set.add(str(ns.get("product_id")))
         for oos in alerts.get("out_of_stock", []):
@@ -321,6 +327,10 @@ def enrich_catalog_with_intelligence(products: List[Dict[str, Any]], db_path: Op
         # Attach Alert Flags to individual product row
         if pid in price_drop_map:
             p_copy["price_drop"] = price_drop_map[pid]
+        if pid in price_hike_map:
+            p_copy["price_hike"] = price_hike_map[pid]
+        if pid in price_change_map:
+            p_copy["price_change"] = price_change_map[pid]
         if pid in new_sku_set:
             p_copy["is_new_sku"] = True
         if pid in out_of_stock_set or not p_copy.get("in_stock", 1):
@@ -374,13 +384,15 @@ def get_meesho_store_alerts(db_path: str = "spicenest.db") -> Dict[str, Any]:
         current_rows = cur.execute("SELECT * FROM meesho_public_catalog").fetchall()
         curr_map = {r["product_id"]: dict(r) for r in current_rows}
 
-        # 1. Price Drops (deduplicated by product_id)
+        # 1. Price Changes (Drops & Hikes deduplicated by product_id)
         price_drops = []
-        seen_price_drop_pids = set()
+        price_hikes = []
+        price_changes = []
+        seen_price_change_pids = set()
         recent_changes = cur.execute("""
             SELECT * FROM meesho_changes 
             WHERE change_type = 'PRICE_CHANGE' 
-            ORDER BY id DESC LIMIT 50
+            ORDER BY id DESC LIMIT 100
         """).fetchall()
 
         for c in recent_changes:
@@ -388,24 +400,36 @@ def get_meesho_store_alerts(db_path: str = "spicenest.db") -> Dict[str, Any]:
                 old_p = float(c["old_value"])
                 new_p = float(c["new_value"])
                 pid = str(c["product_id"])
-                if new_p < old_p and pid not in seen_price_drop_pids:
-                    seen_price_drop_pids.add(pid)
-                    drop = round(old_p - new_p, 1)
-                    pct = abs(c["pct_change"] or round((drop / old_p) * 100, 1))
+                if pid not in seen_price_change_pids and old_p != new_p:
+                    seen_price_change_pids.add(pid)
+                    diff = round(new_p - old_p, 1)
+                    pct = abs(c["pct_change"] or round((abs(diff) / old_p) * 100, 1))
                     p_info = curr_map.get(pid, {})
                     raw_name = c["name"] or p_info.get("name") or "product"
                     clean_slug = re.sub(r'[^a-zA-Z0-9]+', '-', raw_name).strip('-').lower()
                     p_url = p_info.get("product_url") or f"https://www.meesho.com/{clean_slug}/p/{pid}?ms=2&source=Meri+Shop"
-                    price_drops.append({
+                    
+                    item = {
                         "product_id": pid,
                         "name": raw_name,
                         "old_price": old_p,
                         "new_price": new_p,
-                        "drop_amount": drop,
-                        "drop_pct": pct,
+                        "diff_amount": abs(diff),
+                        "diff_pct": pct,
                         "detected_at": str(c["detected_at"])[:16].replace("T", " ") if c["detected_at"] else "Recently",
                         "product_url": p_url
-                    })
+                    }
+                    if new_p < old_p:
+                        item["drop_amount"] = abs(diff)
+                        item["drop_pct"] = pct
+                        item["type"] = "drop"
+                        price_drops.append(item)
+                    else:
+                        item["hike_amount"] = abs(diff)
+                        item["hike_pct"] = pct
+                        item["type"] = "hike"
+                        price_hikes.append(item)
+                    price_changes.append(item)
             except Exception:
                 continue
 
@@ -464,7 +488,7 @@ def get_meesho_store_alerts(db_path: str = "spicenest.db") -> Dict[str, Any]:
                     new_skus.append({
                         "product_id": pid,
                         "name": raw_name,
-                        "price": p_info.get("price", 199.0),
+                        "price": p_info.get("price", 0.0),
                         "detected_at": str(nr["detected_at"])[:16].replace("T", " "),
                         "product_url": p_url
                     })
@@ -473,15 +497,19 @@ def get_meesho_store_alerts(db_path: str = "spicenest.db") -> Dict[str, Any]:
 
         return {
             "price_drops": price_drops,
+            "price_hikes": price_hikes,
+            "price_changes": price_changes,
             "new_skus": new_skus,
             "out_of_stock": out_of_stock,
             "unlisted": unlisted,
             "summary": {
                 "price_drops_count": len(price_drops),
+                "price_hikes_count": len(price_hikes),
+                "price_changes_count": len(price_changes),
                 "new_skus_count": len(new_skus),
                 "out_of_stock_count": len(out_of_stock),
                 "unlisted_count": len(unlisted),
-                "total_alerts": len(price_drops) + len(out_of_stock) + len(unlisted)
+                "total_alerts": len(price_changes) + len(out_of_stock) + len(unlisted)
             }
         }
 

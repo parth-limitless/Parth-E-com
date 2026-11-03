@@ -27,6 +27,11 @@ Thumbs.db
 .env
 *.env
 spice-nest-hub/.env
+*meesho_session.json
+storage/
+*/storage/
+static/screenshots/
+*/static/screenshots/
 
 # Lock files and raw dumps
 *.lock

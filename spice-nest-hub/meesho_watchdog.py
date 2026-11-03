@@ -50,6 +50,19 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 def init_meesho_db():
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS meesho_changes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id TEXT,
+                product_id TEXT,
+                name TEXT,
+                change_type TEXT,
+                old_value TEXT,
+                new_value TEXT,
+                pct_change REAL,
+                detected_at TEXT
+            )
+        """)
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS meesho_catalog (
                 product_id TEXT PRIMARY KEY,
                 title TEXT,
@@ -247,6 +260,7 @@ def diff_and_sync_catalog(current_snapshot: Optional[dict]):
 
         new_count = 0
         deactivated_count = 0
+        run_id = f"watchdog_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
         # 1. Detect NEW LISTINGS & Update ACTIVE
         for pid, prod in current_snapshot.items():
@@ -256,9 +270,23 @@ def diff_and_sync_catalog(current_snapshot: Optional[dict]):
                     (product_id, title, price, product_url, image_url, status, first_seen, last_seen)
                     VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, ?)
                 """, (pid, prod["title"], prod["price"], prod["product_url"], prod.get("image_url", ""), now_str, now_str))
+                cur.execute("""
+                    INSERT INTO meesho_changes 
+                    (run_id, product_id, name, change_type, old_value, new_value, pct_change, detected_at)
+                    VALUES (?, ?, ?, 'NEW_PRODUCT', NULL, ?, NULL, ?)
+                """, (run_id, pid, prod["title"], prod["title"], now_str))
                 send_alert("NEW_LISTING", prod)
                 new_count += 1
             else:
+                old_price = float(known_products[pid].get("price") or 0.0)
+                new_price = float(prod.get("price") or 0.0)
+                if old_price > 0 and new_price > 0 and old_price != new_price:
+                    pct = round(((new_price - old_price) / old_price) * 100, 1)
+                    cur.execute("""
+                        INSERT INTO meesho_changes 
+                        (run_id, product_id, name, change_type, old_value, new_value, pct_change, detected_at)
+                        VALUES (?, ?, ?, 'PRICE_CHANGE', ?, ?, ?, ?)
+                    """, (run_id, pid, prod.get("title", known_products[pid]["title"]), str(old_price), str(new_price), pct, now_str))
                 cur.execute("""
                     UPDATE meesho_catalog 
                     SET last_seen = ?, price = ?, status = 'ACTIVE', deactivated_at = NULL 
@@ -301,7 +329,6 @@ def diff_and_sync_catalog(current_snapshot: Optional[dict]):
         deactivated_count = cur.execute("SELECT count(*) FROM meesho_catalog WHERE status = 'DEACTIVATED'").fetchone()[0]
 
         # Record in meesho_run_logs
-        run_id = f"watchdog_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         cur.execute("""
             INSERT INTO meesho_run_logs
             (run_id, mode, status, started_at, finished_at, duration_sec, products_found, products_valid, products_rejected, notes)
