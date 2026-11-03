@@ -1654,9 +1654,11 @@ def meesho_catalog_dashboard():
     api_key = get_system_setting("SCRAPINGBEE_API_KEY", "")
     data = meesho_catalog_sync.get_meesho_dashboard_analytics(DB)
     import meesho_analytics_engine
-    intel = meesho_analytics_engine.enrich_catalog_with_intelligence(data.get("catalog", []))
+    alerts = meesho_analytics_engine.get_meesho_store_alerts(DB)
+    intel = meesho_analytics_engine.enrich_catalog_with_intelligence(data.get("catalog", []), alerts=alerts)
     data["catalog"] = intel["products"]
     data["intelligence"] = intel["summary"]
+    data["alerts"] = alerts
     masked_key = f"{api_key[:6]}...{api_key[-4:]}" if len(api_key) > 10 else ("Configured" if api_key else "")
     
     # Fetch Tracker Health & Diagnostics
@@ -1781,6 +1783,24 @@ def api_meesho_product_timeline(product_id):
     """Returns 30-day price, rating, SEO and competitor intelligence for a product."""
     import meesho_analytics_engine
     res = meesho_analytics_engine.get_product_timeline_history(product_id, DB)
+    return jsonify(res)
+
+
+@app.route("/api/meesho/verify-all-prices", methods=["POST", "GET"])
+def api_meesho_verify_all_prices():
+    """Verify & Audit Exact Live Prices for All 51 Meesho SKUs."""
+    import meesho_analytics_engine
+    res = meesho_analytics_engine.verify_and_sync_all_meesho_prices(DB)
+    if "application/json" in request.headers.get("Accept", "") and not request.form:
+        return jsonify(res)
+    return redirect("/meesho-catalog")
+
+
+@app.get("/api/meesho/alerts")
+def api_meesho_alerts():
+    """Returns real-time Price Drop, New SKU, Out-of-Stock and Unlisted alerts."""
+    import meesho_analytics_engine
+    res = meesho_analytics_engine.get_meesho_store_alerts(DB)
     return jsonify(res)
 
 

@@ -90,7 +90,7 @@ def export_price_hub_dashboard(output_dir: str = "../docs"):
           alert("🔒 Public Live View Mode:\\n\\nGitHub Pages ek view-only snapshot hai (yahan backend database nahi chalta).\\n\\nNaye SKU add karne ya edit karne ke liye apne computer par local link open karein:\\n👉 http://localhost:5000\\n\\nWahan save karne ke baad daily sync se ye public link apne aap update ho jayegi!");
           return false;
         });
-      }
+      } 
 
       // Intercept any local admin action buttons/links
       document.querySelectorAll("a[href*='/sku/delete']").forEach(function(el) {

@@ -104,3 +104,4 @@ def test_enrich_catalog_with_intelligence():
     assert summary["slow_movers_count"] == 1
     assert 0 <= summary["buybox_win_pct"] <= 100
     assert 0 <= summary["avg_seo_score"] <= 100
+
