@@ -149,9 +149,45 @@ def jsonld_extract(html):
     return None
 
 
-def text_price(text):
-    m = re.search(r'(?:₹|Rs\.?)\s?([\d,]+(?:\.\d+)?)', text or "")
-    return float(m.group(1).replace(",", "")) if m else None
+def text_price(text, min_price=50.0):
+    """Robust price extraction ignoring discounts, coupons, cashbacks, and percentage savings."""
+    if not text:
+        return None
+    
+    t_clean = text.strip()
+    # If the snippet is short and purely discount, coupon, cashback, or MRP, reject it
+    if len(t_clean) < 50:
+        t_low = t_clean.lower()
+        if any(w in t_low for w in ["save", "cashback", "coupon", "discount", "off", "upto", "up to", "%", "m.r.p", "mrp"]):
+            if not any(k in t_low for k in ["price:", "deal price:"]):
+                return None
+
+    # Find price candidates with surrounding context
+    pattern = re.compile(
+        r'(?:(?P<prefix>\w+)\s+)?(?:₹|Rs\.?)\s*(?P<amount>[\d,]+(?:\.\d+)?)(?:\s*(?P<suffix>off|cashback|discount|coupon|%))?',
+        re.I
+    )
+    
+    for match in pattern.finditer(text):
+        prefix = (match.group('prefix') or '').lower()
+        suffix = (match.group('suffix') or '').lower()
+        
+        # Skip if prefix is discount or MRP related
+        if prefix in ['save', 'discount', 'cashback', 'coupon', 'upto', 'mrp', 'off']:
+            continue
+        # Skip if suffix is discount related
+        if suffix in ['off', 'cashback', 'discount', 'coupon', '%']:
+            continue
+            
+        amt_str = match.group('amount').replace(',', '')
+        try:
+            val = float(amt_str)
+            if val >= min_price:  # Enforce authentic product price threshold (no discounts/cashbacks)
+                return val
+        except ValueError:
+            continue
+            
+    return None
 
 
 def extract_grams(text, html=None):
@@ -516,39 +552,57 @@ def read_page(page, platform, url):
     price, note = None, ""
 
     if platform == "Amazon":
-        amazon_selectors = [
-            "span.a-price span.a-offscreen",
-            "#corePriceDisplay_desktopFeature_div .a-price .a-offscreen",
-            "#corePrice_desktop .a-price .a-offscreen",
-            ".apexPriceToPay .a-offscreen",
-            ".a-price-whole",
+        # 1. Primary: Official Amazon final price container (extract whole price directly)
+        amazon_primary = [
+            "#corePriceDisplay_desktopFeature_div span.priceToPay",
+            "#corePrice_desktop span.priceToPay",
+            "#apex_desktop span.priceToPay",
+            "span.priceToPay",
+            ".apexPriceToPay",
             "#priceblock_ourprice",
-            "#priceblock_dealprice",
-            "#price",
-            ".priceToPay span.a-offscreen",
-            "span[data-a-color='price']"
+            "#priceblock_dealprice"
         ]
-        for sel in amazon_selectors:
+        for sel in amazon_primary:
             el = page.query_selector(sel)
             if el:
-                p = text_price(el.text_content())
-                if p:
+                whole = el.query_selector(".a-price-whole")
+                if whole:
+                    val = num(whole.inner_text().strip())
+                    if val and val >= 50.0:
+                        price = val
+                        break
+                p = text_price(el.inner_text())
+                if p and p >= 50.0:
                     price = p
                     break
+
+        # 2. Secondary: .a-price-whole in core price sections
+        if price is None:
+            for sel in [
+                "#corePriceDisplay_desktopFeature_div .a-price-whole",
+                "#corePrice_desktop .a-price-whole",
+                "#apex_desktop .a-price-whole",
+                "span.a-price:not(.a-text-price) span.a-offscreen"
+            ]:
+                el = page.query_selector(sel)
+                if el:
+                    val = num(el.inner_text().strip()) or text_price(el.text_content())
+                    if val and val >= 50.0:
+                        price = val
+                        break
 
     elif platform in ("Flipkart", "Shopsy"):
         fk_selectors = [
             "div.Nx9bqj",
             "div._30jeq3",
             "div.hl05eU div._30jeq3",
-            "div._16FRp0",
-            "div[dir='auto']"
+            "div._16FRp0"
         ]
         for sel in fk_selectors:
             el = page.query_selector(sel)
             if el:
                 p = text_price(el.text_content())
-                if p:
+                if p and p >= 50.0:
                     price = p
                     break
 
@@ -564,7 +618,7 @@ def read_page(page, platform, url):
             el = page.query_selector(sel)
             if el:
                 p = text_price(el.text_content())
-                if p:
+                if p and p >= 50.0:
                     price = p
                     note = "In Stock"
                     break
@@ -572,7 +626,9 @@ def read_page(page, platform, url):
     if price is None:
         jld = jsonld_extract(html)
         if jld:
-            price = jld.get("price")
+            j_price = jld.get("price")
+            if j_price and float(j_price) >= 50.0:
+                price = float(j_price)
             if jld.get("instock") is False:
                 gone = True
 
@@ -585,6 +641,10 @@ def read_page(page, platform, url):
         page.wait_for_timeout(2000)
         text = page.inner_text("body")
         price = text_price(text)
+
+    # Sanity guard: Food / sauce condiment prices must be at least Rs 50
+    if price is not None and price < 50.0:
+        price = None
 
     if price is None:
         return None, (0 if gone else -1), "price nahi mila"
@@ -721,6 +781,10 @@ def scrape_competitor(url):
         data["grams"] = extract_grams(data["name"], html)
     if not data["name"]:
         data["name"] = f"{pf} Competitor Listing"
+
+    # Guard against invalid discount / cashback extraction
+    if data["price"] is not None and data["price"] < 50.0:
+        data["price"] = None
 
     if data["price"] and data["grams"]:
         data["p100"] = round((data["price"] / data["grams"]) * 100, 1)
