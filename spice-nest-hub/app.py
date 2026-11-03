@@ -378,9 +378,22 @@ def resolve_shopsy_product(url):
 
         # 2. Fallbacks if __NEXT_DATA__ missed
         if price is None:
-            m_p = re.search(r'class="[^"]*(?:Nx9bqj|_30jeq3)[^"]*">₹?([\d,]+)', html)
-            if m_p:
-                price = float(m_p.group(1).replace(",", ""))
+            # Check JSON-LD
+            jld = jsonld_extract(html)
+            if jld and jld.get("price") and float(jld["price"]) >= 50.0:
+                price = float(jld["price"])
+
+            if price is None:
+                # Shopsy React Native Web price tag style or class
+                m_p = re.search(r'style="[^"]*font-size:\s*18px[^"]*">₹\s*([\d,]+)', html)
+                if not m_p:
+                    m_p = re.search(r'class="[^"]*(?:Nx9bqj|_30jeq3|css-146c3p1)[^"]*">₹\s*([\d,]+)', html)
+                if not m_p:
+                    m_p = re.search(r'₹\s*([\d,]+)', html)
+                if m_p:
+                    val = float(m_p.group(1).replace(",", ""))
+                    if val >= 50.0:
+                        price = val
 
         if not name:
             m_title = re.search(r'<title>([^<]+)</title>', html)
@@ -505,18 +518,37 @@ def fast_http_scrape(platform, url):
     return None
 
 
-def create_stealth_context(browser):
-    return browser.new_context(
-        viewport={"width": 1366, "height": 768},
-        locale="en-IN",
-        timezone_id="Asia/Kolkata",
-        user_agent=get_ua(),
-        extra_http_headers={
+def create_stealth_context(browser, platform=None):
+    context_kwargs = {
+        "viewport": {"width": 1366, "height": 768},
+        "locale": "en-IN",
+        "timezone_id": "Asia/Kolkata",
+        "user_agent": get_ua(),
+        "extra_http_headers": {
             "Accept-Language": "en-IN,en;q=0.9",
             "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124"',
             "sec-ch-ua-platform": '"Windows"'
         }
-    )
+    }
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    session_files = []
+    if platform == "Shopsy":
+        session_files = ["storage/shopsy_session.json", "storage/flipkart_session.json"]
+    elif platform == "Meesho":
+        session_files = ["storage/meesho_session.json"]
+    else:
+        session_files = ["storage/shopsy_session.json", "storage/meesho_session.json"]
+
+    for sf in session_files:
+        full_p = os.path.join(base_dir, sf)
+        if os.path.exists(full_p):
+            try:
+                context_kwargs["storage_state"] = full_p
+                break
+            except Exception:
+                pass
+
+    return browser.new_context(**context_kwargs)
 
 
 def read_page(page, platform, url):
@@ -529,9 +561,14 @@ def read_page(page, platform, url):
             page.wait_for_selector(".a-price, #corePriceDisplay_desktopFeature_div, .a-price-whole", timeout=8000)
         except Exception:
             pass
-    elif platform in ("Flipkart", "Shopsy"):
+    elif platform == "Flipkart":
         try:
-            page.wait_for_selector("div.Nx9bqj, div._30jeq3, div.hl05eU, div[dir='auto']", timeout=8000)
+            page.wait_for_selector("div.Nx9bqj, div._30jeq3, div.hl05eU", timeout=8000)
+        except Exception:
+            pass
+    elif platform == "Shopsy":
+        try:
+            page.wait_for_selector("div[class*='css-146c3p1'], div[dir='auto']", timeout=8000)
         except Exception:
             pass
     elif platform == "JioMart":
@@ -611,7 +648,7 @@ def read_page(page, platform, url):
                         price = val
                         break
 
-    elif platform in ("Flipkart", "Shopsy"):
+    elif platform == "Flipkart":
         fk_selectors = [
             "div.Nx9bqj",
             "div._30jeq3",
@@ -624,6 +661,48 @@ def read_page(page, platform, url):
                 p = text_price(el.text_content())
                 if p and p >= 50.0:
                     price = p
+                    break
+
+    elif platform == "Shopsy":
+        # 1. Try Next.js __NEXT_DATA__
+        try:
+            next_data_raw = page.evaluate("() => document.getElementById('__NEXT_DATA__')?.textContent")
+            if next_data_raw:
+                nd = json.loads(next_data_raw)
+                pricing = nd.get("props", {}).get("pageProps", {}).get("initialState", {}).get("pageData", {}).get("RESPONSE", {}).get("pageData", {}).get("pageContext", {}).get("pricing", {})
+                if pricing.get("finalPrice") and isinstance(pricing["finalPrice"], dict):
+                    price = float(pricing["finalPrice"].get("value") or 0)
+                elif pricing.get("minPrice") and isinstance(pricing["minPrice"], dict):
+                    price = float(pricing["minPrice"].get("value") or 0)
+                elif pricing.get("prices"):
+                    for p_item in pricing["prices"]:
+                        if p_item.get("priceType") in ("SPECIAL_PRICE", "FSP") and p_item.get("value"):
+                            price = float(p_item["value"])
+                            break
+        except Exception:
+            pass
+
+        # 2. Try JSON-LD schema fallback
+        if not price and jld and jld.get("price") and float(jld["price"]) >= 50.0:
+            price = float(jld["price"])
+
+        # 3. Try Shopsy React Native Web DOM elements
+        if not price:
+            for sel in [
+                "div[class*='css-146c3p1']:has-text('₹')",
+                "div[dir='auto']:has-text('₹')",
+                "div:has-text('₹')"
+            ]:
+                elements = page.query_selector_all(sel)
+                for el in elements:
+                    txt = el.inner_text().strip()
+                    m_p = re.search(r'₹\s*([\d,]+(?:\.\d+)?)', txt)
+                    if m_p:
+                        val = float(m_p.group(1).replace(",", ""))
+                        if val >= 50.0:
+                            price = val
+                            break
+                if price:
                     break
 
     elif platform == "JioMart":
