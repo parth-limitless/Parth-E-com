@@ -252,6 +252,35 @@
       box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
     }
 
+    .rating-filter-pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .rating-filter-pill:hover {
+      background: #334155;
+      color: #fff;
+    }
+    .rating-filter-pill.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #f59e0b;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+    }
+    .rating-filter-pill.bottom-pill.active {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border-color: #ef4444;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(239, 68, 68, 0.35);
+    }
+
     .btn-trend-trigger {
       background: linear-gradient(135deg, #e11d48, #be123c);
       color: #fff;
@@ -2007,6 +2036,75 @@
     </div>
   </div>
 
+    <!-- ============================================================== -->
+  <!-- ⭐ MEESHO RATING & CUSTOMER SENTIMENT INTELLIGENCE MATRIX -->
+  <!-- ============================================================== -->
+  <div class="table-card" style="margin-bottom: 24px; background: linear-gradient(145deg, #0f172a 0%, #131b2e 100%); border: 1px solid rgba(251, 191, 36, 0.35); box-shadow: 0 8px 30px rgba(0,0,0,0.45); border-radius: 16px; overflow: hidden;">
+    <!-- Card Header with Filters -->
+    <div style="background: rgba(17, 24, 39, 0.95); padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="font-size: 24px;">⭐</span>
+          <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin: 0;">
+            Meesho Customer Ratings & Sentiment Intelligence
+          </h2>
+          <span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;">
+            ★ Top vs Bottom Matrix
+          </span>
+        </div>
+        <p style="margin: 4px 0 0 34px; font-size: 12px; color: #94a3b8;">
+          Filter highest rated customer favorites vs lower-rated items requiring packaging or quality intervention
+        </p>
+      </div>
+
+      <!-- Quick Rating Filter Pills -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Filter:</span>
+        <button type="button" class="rating-filter-pill active" onclick="setRatingFilter('TOP_5', this)">🌟 Top 5</button>
+        <button type="button" class="rating-filter-pill" onclick="setRatingFilter('TOP_10', this)">🌟 Top 10</button>
+        <button type="button" class="rating-filter-pill" onclick="setRatingFilter('TOP_25', this)">🌟 Top 25</button>
+        <button type="button" class="rating-filter-pill bottom-pill" onclick="setRatingFilter('BOTTOM_5', this)">🔻 Bottom 5</button>
+        <button type="button" class="rating-filter-pill bottom-pill" onclick="setRatingFilter('BOTTOM_10', this)">🔻 Bottom 10</button>
+        <button type="button" class="rating-filter-pill bottom-pill" onclick="setRatingFilter('BOTTOM_25', this)">🔻 Bottom 25</button>
+        <button type="button" class="rating-filter-pill" style="border-color: rgba(99, 102, 241, 0.4); color: #c7d2fe;" onclick="setRatingFilter('MOST_REVIEWED', this)">🔥 Most Reviewed</button>
+      </div>
+    </div>
+
+    <!-- Rating Analytics Grid -->
+    <div style="padding: 20px 24px;">
+      <div style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 24px; align-items: start;">
+        <!-- Left: Interactive Horizontal Bar Chart -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; border-radius: 12px; padding: 18px 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <b id="ratingChartHeading" style="font-size: 14px; color: #fde68a;">📊 Customer Rating Comparison (★)</b>
+            <span id="ratingChartSubtitle" style="font-size: 11px; color: #94a3b8;">Scale 0.0 - 5.0 Stars</span>
+          </div>
+          <div style="height: 380px; position: relative;">
+            <canvas id="ratingPerformerChart"></canvas>
+          </div>
+          <div style="display: flex; gap: 16px; margin-top: 14px; font-size: 11px; color: #94a3b8; justify-content: center; flex-wrap: wrap;">
+            <span><span style="color: #10b981;">■</span> 4.2★+ (Top Tier)</span>
+            <span><span style="color: #60a5fa;">■</span> 4.0★ - 4.1★ (Solid)</span>
+            <span><span style="color: #f59e0b;">■</span> 3.5★ - 3.9★ (Average)</span>
+            <span><span style="color: #f43f5e;">■</span> &lt; 3.5★ (Needs Attention)</span>
+          </div>
+        </div>
+
+        <!-- Right: Ranked Product Leaderboard Cards -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; border-radius: 12px; padding: 18px 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <b id="ratingListHeading" style="font-size: 14px; color: #fde68a;">🏆 Ranked Product Insights</b>
+            <span id="ratingListCountBadge" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;">5 Products</span>
+          </div>
+
+          <div id="ratingLeaderboardContainer" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Month-Wise Orders Breakdown Card -->
   <div class="table-card" style="margin-bottom: 24px;">
     <div class="table-header" style="background: #172033;">
@@ -2563,7 +2661,180 @@
       }
     });
 
-    // Smart Filter State
+        // ==============================================================
+    // ⭐ RATING PERFORMER MATRIX JAVASCRIPT LOGIC
+    // ==============================================================
+    let ratingChartInstance = null;
+    let currentRatingFilterMode = 'TOP_5';
+    const allRatingProducts = {{ data.catalog | tojson }};
+
+    function setRatingFilter(mode, btn) {
+      currentRatingFilterMode = mode;
+      document.querySelectorAll('.rating-filter-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderRatingMatrix();
+    }
+
+    function renderRatingMatrix() {
+      let filtered = [...allRatingProducts];
+      let heading = '🌟 Top 5 Highest Rated Products';
+      let isBottom = false;
+
+      if (currentRatingFilterMode === 'TOP_5') {
+        filtered.sort((a, b) => (b.rating - a.rating) || (b.review_count - a.review_count));
+        filtered = filtered.slice(0, 5);
+        heading = '🌟 Top 5 Highest Rated Products';
+      } else if (currentRatingFilterMode === 'TOP_10') {
+        filtered.sort((a, b) => (b.rating - a.rating) || (b.review_count - a.review_count));
+        filtered = filtered.slice(0, 10);
+        heading = '🌟 Top 10 Highest Rated Products';
+      } else if (currentRatingFilterMode === 'TOP_25') {
+        filtered.sort((a, b) => (b.rating - a.rating) || (b.review_count - a.review_count));
+        filtered = filtered.slice(0, 25);
+        heading = '🌟 Top 25 Highest Rated Products';
+      } else if (currentRatingFilterMode === 'BOTTOM_5') {
+        filtered.sort((a, b) => (a.rating - b.rating) || (a.review_count - b.review_count));
+        filtered = filtered.slice(0, 5);
+        heading = '🔻 Bottom 5 Lowest Rated (Needs Attention)';
+        isBottom = true;
+      } else if (currentRatingFilterMode === 'BOTTOM_10') {
+        filtered.sort((a, b) => (a.rating - b.rating) || (a.review_count - b.review_count));
+        filtered = filtered.slice(0, 10);
+        heading = '🔻 Bottom 10 Lowest Rated (Action Required)';
+        isBottom = true;
+      } else if (currentRatingFilterMode === 'BOTTOM_25') {
+        filtered.sort((a, b) => (a.rating - b.rating) || (a.review_count - b.review_count));
+        filtered = filtered.slice(0, 25);
+        heading = '🔻 Bottom 25 Lowest Rated Products';
+        isBottom = true;
+      } else if (currentRatingFilterMode === 'MOST_REVIEWED') {
+        filtered.sort((a, b) => (b.review_count - a.review_count) || (b.rating - a.rating));
+        filtered = filtered.slice(0, 10);
+        heading = '🔥 Most Reviewed Products (Top Customer Volume)';
+      }
+
+      document.getElementById('ratingChartHeading').innerText = heading;
+      document.getElementById('ratingListHeading').innerText = isBottom ? '⚠️ Improvement Action Plan' : '🏆 High Customer Satisfaction';
+      document.getElementById('ratingListCountBadge').innerText = `${filtered.length} Products`;
+
+      // 1. Render Leaderboard Cards
+      const container = document.getElementById('ratingLeaderboardContainer');
+      container.innerHTML = '';
+
+      filtered.forEach((p, idx) => {
+        const rank = idx + 1;
+        let rankBadgeBg = 'background: #334155; color: #94a3b8;';
+        if (!isBottom) {
+          if (rank === 1) rankBadgeBg = 'background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; font-weight: 800;';
+          else if (rank === 2) rankBadgeBg = 'background: #94a3b8; color: #000; font-weight: 800;';
+          else if (rank === 3) rankBadgeBg = 'background: #b45309; color: #fff; font-weight: 800;';
+        } else {
+          rankBadgeBg = 'background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4);';
+        }
+
+        let actionTip = '🌟 Maintain current batch quality';
+        if (isBottom) {
+          if (p.rating < 3.2) actionTip = '🔴 High Return Risk: Check jar seal, cap leakage & taste feedback';
+          else actionTip = '⚠️ Add insert flyer to ask satisfied buyers for reviews';
+        } else {
+          if (p.review_count > 500) actionTip = '👑 Mega Star Performer: Increase Meesho ad spend to scale';
+          else actionTip = '✨ Solid momentum: Bundle with slow movers to cross-sell';
+        }
+
+        const card = document.createElement('div');
+        card.style.cssText = 'background: rgba(17, 24, 39, 0.7); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;';
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-flex; width: 22px; height: 22px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; ${rankBadgeBg}">
+                #${rank}
+              </span>
+              <a href="${p.product_url}" target="_blank" style="color: #fff; font-weight: 700; font-size: 12px; text-decoration: none; line-height: 1.3;" title="${p.name}">
+                ${p.name.length > 34 ? p.name.substring(0, 34) + '...' : p.name}
+              </a>
+            </div>
+            <div style="text-align: right; white-space: nowrap;">
+              <span style="color: #fbbf24; font-weight: 800; font-size: 13px;">★ ${p.rating}</span>
+              <div style="color: #94a3b8; font-size: 10px;">(${p.review_count.toLocaleString()} rev)</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px;">
+            <span style="font-size: 10px; color: ${isBottom ? '#fda4af' : '#6ee7b7'}; font-weight: 600;">
+              ${actionTip}
+            </span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <b style="color: #fff; font-size: 12px;">₹${p.price}</b>
+              <a href="${p.product_url}" target="_blank" style="color: #60a5fa; font-size: 11px; text-decoration: none; font-weight: 700;">View ↗</a>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // 2. Render Chart.js
+      const labels = filtered.map(p => p.name.length > 25 ? p.name.substring(0, 25) + '...' : p.name);
+      const ratings = filtered.map(p => p.rating);
+      const barColors = filtered.map(p => {
+        if (p.rating >= 4.2) return '#10b981';
+        if (p.rating >= 4.0) return '#60a5fa';
+        if (p.rating >= 3.5) return '#f59e0b';
+        return '#f43f5e';
+      });
+
+      const ctx = document.getElementById('ratingPerformerChart').getContext('2d');
+      if (ratingChartInstance) ratingChartInstance.destroy();
+
+      ratingChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Customer Rating (★)',
+            data: ratings,
+            backgroundColor: barColors,
+            borderRadius: 6,
+            barThickness: filtered.length <= 5 ? 24 : (filtered.length <= 10 ? 16 : 8)
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const p = filtered[ctx.dataIndex];
+                  return [
+                    `Rating: ★ ${p.rating} / 5.0`,
+                    `Total Reviews: ${p.review_count.toLocaleString()}`,
+                    `Selling Price: ₹${p.price}`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              min: isBottom ? 2.0 : 3.0,
+              max: 5.0,
+              grid: { color: '#1e293b' },
+              ticks: { color: '#94a3af', font: { size: 10 }, stepSize: 0.5, callback: v => v + '★' }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: '#e2e8f0', font: { size: filtered.length > 15 ? 9 : 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Initialize Rating Matrix
+    renderRatingMatrix();
+
+// Smart Filter State
     let activeQuickFilter = 'ALL';
 
     function setQuickFilter(filter, btn) {
