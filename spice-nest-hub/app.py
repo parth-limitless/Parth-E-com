@@ -282,14 +282,27 @@ def resolve_meesho_product(url):
     if pid:
         try:
             with db() as c:
-                row = c.execute('SELECT * FROM meesho_catalog WHERE product_id = ?', (pid,)).fetchone()
-                if row:
-                    price = row['price']
+                # 1. Prioritize meesho_public_catalog (live updated from console JSON & catalog sync)
+                pub_row = c.execute(
+                    "SELECT * FROM meesho_public_catalog WHERE product_id = ? OR product_url LIKE ?",
+                    (pid, f"%{pid}%")
+                ).fetchone()
+                if pub_row and pub_row["price"] and pub_row["price"] > 0:
+                    price = float(pub_row["price"])
                     if not clean_name:
-                        clean_name = row['title']
-                    if row['status'] == 'DEACTIVATED':
-                        live = 0
-                        note = 'Deactivated'
+                        clean_name = pub_row["name"]
+                    live = 1 if pub_row["in_stock"] else 0
+                    note = "In Stock" if live else "Out of stock"
+                else:
+                    # 2. Fallback: meesho_catalog
+                    row = c.execute('SELECT * FROM meesho_catalog WHERE product_id = ?', (pid,)).fetchone()
+                    if row:
+                        price = row['price']
+                        if not clean_name:
+                            clean_name = row['title']
+                        if row['status'] == 'DEACTIVATED':
+                            live = 0
+                            note = 'Deactivated'
                 if not price:
                     pr_row = c.execute("SELECT price FROM prices WHERE platform = 'Meesho' AND price IS NOT NULL ORDER BY id DESC LIMIT 1").fetchone()
                     if pr_row:
@@ -2028,6 +2041,30 @@ def api_meesho_upload_json():
                     data_source=excluded.data_source,
                     updated_at=excluded.updated_at
             """, (pid, p['name'], new_price, float(p['mrp']), float(p['rating']), int(p['review_count']), p.get('image_url', ''), p_url, now_iso))
+
+            # Also keep meesho_catalog synchronized
+            cur.execute("""
+                INSERT INTO meesho_catalog (product_id, title, price, product_url, image_url, status, first_seen, last_seen)
+                VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, ?)
+                ON CONFLICT(product_id) DO UPDATE SET
+                    title=excluded.title,
+                    price=excluded.price,
+                    product_url=excluded.product_url,
+                    image_url=excluded.image_url,
+                    status='ACTIVE',
+                    last_seen=excluded.last_seen
+            """, (pid, p['name'], new_price, p_url, p.get('image_url', ''), now_iso, now_iso))
+
+            # Automatically sync linked SKUs in Price Hub prices table
+            matched_links = cur.execute(
+                "SELECT sku_id FROM links WHERE platform='Meesho' AND (url LIKE ? OR url LIKE ?)",
+                (f"%{pid}%", f"%{clean_slug}%")
+            ).fetchall()
+            for ml in matched_links:
+                cur.execute(
+                    "INSERT INTO prices (ts, sku_id, platform, price, live, note) VALUES (?, ?, 'Meesho', ?, 1, 'In Stock')",
+                    (now_iso, ml["sku_id"], new_price)
+                )
 
         conn.commit()
 
