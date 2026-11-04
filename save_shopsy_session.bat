@@ -10,3 +10,4 @@ echo.
 ".\spice-nest-hub\venv\Scripts\python.exe" "spice-nest-hub\save_shopsy_session.py"
 echo.
 pause
+

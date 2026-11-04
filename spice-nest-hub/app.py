@@ -2134,10 +2134,10 @@ def api_meesho_upload_json():
                     last_seen=excluded.last_seen
             """, (pid, p['name'], new_price, p_url, p.get('image_url', ''), now_iso, now_iso))
 
-            # Automatically sync linked SKUs in Price Hub prices table
+            # Automatically sync linked SKUs in Price Hub prices table strictly by exact product_id
             matched_links = cur.execute(
-                "SELECT sku_id FROM links WHERE platform='Meesho' AND (url LIKE ? OR url LIKE ?)",
-                (f"%{pid}%", f"%{clean_slug}%")
+                "SELECT sku_id FROM links WHERE platform='Meesho' AND url LIKE ?",
+                (f"%{pid}%",)
             ).fetchall()
             for ml in matched_links:
                 cur.execute(
