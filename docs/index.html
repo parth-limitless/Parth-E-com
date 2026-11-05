@@ -258,6 +258,86 @@
       line-height: 1.45;
     }
 
+    /* Search Bar & Tabs */
+    .sku-search-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+      max-width: 480px;
+    }
+    .search-input-wrap input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px 36px 9px 38px;
+      background: #0b1324;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .search-input-wrap input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: #0d172e;
+    }
+    .search-input-wrap input::placeholder {
+      color: #64748b;
+    }
+    .search-icon-inside {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-clear-btn {
+      display: none;
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      line-height: 20px;
+      text-align: center;
+      padding: 0;
+    }
+    .search-clear-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--text);
+    }
+    .search-stats-badge {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      background: #0b1324;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     /* Tabs */
     .filter-bar {
       display: flex;
@@ -667,6 +747,43 @@
 
   <!-- SECTION: 📊 SKU Table Card -->
   <div class="card">
+    <!-- 🔍 Real-Time Product Search Bar (Sabhi Portal Ke Uper) -->
+    <div class="sku-search-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon-inside">🔍</span>
+        <input 
+          type="text" 
+          id="productSearchInput" 
+          placeholder="Product search karein (e.g. Chilli Oil, Jam, Garlic, 120g, Gochujang)..." 
+          oninput="applyPortalFilter()"
+          autocomplete="off"
+        >
+        <button 
+          id="clearProductSearch" 
+          type="button" 
+          class="search-clear-btn" 
+          onclick="clearProductSearch()" 
+          title="Search clear karein"
+        >✕</button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="searchMatchCount" class="search-stats-badge">
+          Showing all SKUs
+        </span>
+        <button 
+          type="button" 
+          onclick="resetAllTableFilters()" 
+          id="resetFiltersBtn" 
+          style="display: none; font-size: 11px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 5px 10px; border-radius: 6px; cursor: pointer;" 
+          title="Search aur Portal filter reset karein"
+        >
+          ↺ Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Portal Filter Tabs -->
     <div class="filter-bar">
       <div class="tabs">
         <button class="tab-btn active" onclick="setPortalFilter('all', this)">Sabhi Portals</button>
@@ -706,7 +823,7 @@
         </thead>
         <tbody>
           
-          <tr class="mismatch">
+          <tr class="mismatch" data-sku-name="2x chilli oil" data-sku-grams="120">
             <td>
               <div class="sku-title">2x Chilli Oil</div>
               <span class="sku-grams">120 g</span>
@@ -824,7 +941,7 @@
             </td>
           </tr>
           
-          <tr class="">
+          <tr class="" data-sku-name="green chilli oil - 120g" data-sku-grams="120">
             <td>
               <div class="sku-title">Green Chilli Oil - 120g</div>
               <span class="sku-grams">120 g</span>
@@ -924,7 +1041,7 @@
             </td>
           </tr>
           
-          <tr class="">
+          <tr class="" data-sku-name="miix fruit jam - 370g" data-sku-grams="370">
             <td>
               <div class="sku-title">Miix Fruit Jam - 370g</div>
               <span class="sku-grams">370 g</span>
@@ -1040,7 +1157,7 @@
             </td>
           </tr>
           
-          <tr class="mismatch">
+          <tr class="mismatch" data-sku-name="mix fruit jam - 1 kg" data-sku-grams="1000">
             <td>
               <div class="sku-title">Mix Fruit Jam - 1 Kg</div>
               <span class="sku-grams">1000 g</span>
@@ -1190,7 +1307,7 @@
             </td>
           </tr>
           
-          <tr class="mismatch">
+          <tr class="mismatch" data-sku-name="red chili oil - 120g" data-sku-grams="120">
             <td>
               <div class="sku-title">Red Chili Oil - 120g</div>
               <span class="sku-grams">120 g</span>
@@ -1310,7 +1427,7 @@
             </td>
           </tr>
           
-          <tr class="mismatch">
+          <tr class="mismatch" data-sku-name="spice nest garlic paste" data-sku-grams="1000">
             <td>
               <div class="sku-title">Spice Nest Garlic Paste</div>
               <span class="sku-grams">1000 g</span>
@@ -1428,7 +1545,7 @@
             </td>
           </tr>
           
-          <tr class="mismatch">
+          <tr class="mismatch" data-sku-name="spice nest ginger garlic paste 750g" data-sku-grams="750">
             <td>
               <div class="sku-title">Spice Nest Ginger Garlic Paste 750g</div>
               <span class="sku-grams">750 g</span>
@@ -1546,7 +1663,7 @@
             </td>
           </tr>
           
-          <tr class="mismatch">
+          <tr class="mismatch" data-sku-name="spice nest gochujang korean chilli paste | authentic fermented red chilli hot pepper sauce" data-sku-grams="170">
             <td>
               <div class="sku-title">Spice Nest Gochujang Korean chilli paste | Authentic Fermented Red Chilli Hot Pepper Sauce</div>
               <span class="sku-grams">170 g</span>
@@ -1680,7 +1797,7 @@
             </td>
           </tr>
           
-          <tr class="">
+          <tr class="" data-sku-name="zfdf" data-sku-grams="0">
             <td>
               <div class="sku-title">zfdf</div>
               <span class="sku-grams">0 g</span>
@@ -1914,7 +2031,7 @@
       }
     }
 
-    // Filter Logic
+    // Filter & Search Logic
     function setPortalFilter(portal, btn) {
       currentFilter = portal;
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1922,8 +2039,43 @@
       applyPortalFilter();
     }
 
+    function clearProductSearch() {
+      const inp = document.getElementById('productSearchInput');
+      if (inp) {
+        inp.value = '';
+        inp.focus();
+      }
+      applyPortalFilter();
+    }
+
+    function resetAllTableFilters() {
+      currentFilter = 'all';
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        if (b.innerText.includes('Sabhi Portals')) b.classList.add('active');
+      });
+      const hideEmpty = document.getElementById('hideEmpty');
+      if (hideEmpty) hideEmpty.checked = false;
+      const inp = document.getElementById('productSearchInput');
+      if (inp) inp.value = '';
+      applyPortalFilter();
+    }
+
     function applyPortalFilter() {
-      const hideEmpty = document.getElementById('hideEmpty').checked;
+      const hideEmpty = document.getElementById('hideEmpty') ? document.getElementById('hideEmpty').checked : false;
+      const searchInput = document.getElementById('productSearchInput');
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      const clearBtn = document.getElementById('clearProductSearch');
+      const resetBtn = document.getElementById('resetFiltersBtn');
+
+      if (clearBtn) {
+        clearBtn.style.display = query ? 'block' : 'none';
+      }
+      if (resetBtn) {
+        resetBtn.style.display = (query || currentFilter !== 'all' || hideEmpty) ? 'inline-block' : 'none';
+      }
+
+      // Column visibility based on portal filter tab
       PLATFORMS.forEach(p => {
         const th = document.querySelector('th.col-' + p);
         const tds = document.querySelectorAll('td.col-' + p);
@@ -1932,17 +2084,90 @@
         tds.forEach(td => td.style.display = show ? '' : 'none');
       });
 
+      let visibleCount = 0;
+      let totalCount = 0;
+
+      // Filter rows
       document.querySelectorAll('#skuTable tbody tr').forEach(tr => {
+        if (tr.id === 'noSearchMatchRow') return;
         if (tr.children.length <= 1) return;
+        totalCount++;
+
+        // 1. Portal filter check
+        let portalMatch = true;
         if (hideEmpty && currentFilter !== 'all') {
           const portalTd = tr.querySelector('td.col-' + currentFilter);
           const hasPortal = portalTd && portalTd.getAttribute('data-has-portal') === '1';
-          tr.style.display = hasPortal ? '' : 'none';
-        } else {
+          if (!hasPortal) portalMatch = false;
+        }
+
+        // 2. Search query check
+        let searchMatch = true;
+        if (query) {
+          const skuName = tr.getAttribute('data-sku-name') || '';
+          const skuGrams = tr.getAttribute('data-sku-grams') || '';
+          const skuTitle = tr.querySelector('.sku-title')?.textContent?.toLowerCase() || '';
+          const fullText = tr.textContent.toLowerCase();
+          searchMatch = skuName.includes(query) || skuGrams.includes(query) || skuTitle.includes(query) || fullText.includes(query);
+        }
+
+        if (portalMatch && searchMatch) {
           tr.style.display = '';
+          visibleCount++;
+        } else {
+          tr.style.display = 'none';
         }
       });
+
+      // No match row handling
+      let noMatchRow = document.getElementById('noSearchMatchRow');
+      if (visibleCount === 0 && totalCount > 0) {
+        if (!noMatchRow) {
+          noMatchRow = document.createElement('tr');
+          noMatchRow.id = 'noSearchMatchRow';
+          noMatchRow.innerHTML = `
+            <td colspan="10" style="text-align: center; padding: 36px 20px; color: #94a3b8;">
+              <div style="font-size: 24px; margin-bottom: 8px;">🔍</div>
+              <div style="font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px;">Koi product match nahi hua</div>
+              <div style="font-size: 12px; margin-bottom: 12px;">"<b>${query}</b>" ke liye koi result nahi mila.</div>
+              <button type="button" onclick="clearProductSearch()" style="background: var(--accent-blue); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">Search Reset Karein</button>
+            </td>
+          `;
+          document.querySelector('#skuTable tbody').appendChild(noMatchRow);
+        } else {
+          noMatchRow.style.display = '';
+          const queryBold = noMatchRow.querySelector('b');
+          if (queryBold) queryBold.textContent = query;
+        }
+      } else if (noMatchRow) {
+        noMatchRow.style.display = 'none';
+      }
+
+      // Update badge count
+      const countEl = document.getElementById('searchMatchCount');
+      if (countEl) {
+        if (query) {
+          countEl.innerHTML = `🔍 <b style="color:#38bdf8;">${visibleCount}</b> of ${totalCount} SKUs`;
+        } else if (currentFilter !== 'all' && hideEmpty) {
+          countEl.innerHTML = `⚡ <b style="color:#38bdf8;">${visibleCount}</b> active on ${currentFilter}`;
+        } else {
+          countEl.innerHTML = `Showing all <b>${totalCount}</b> SKUs`;
+        }
+      }
     }
+
+    // Keyboard shortcuts: '/' to search, 'Esc' to clear
+    document.addEventListener('keydown', function(e) {
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        const inp = document.getElementById('productSearchInput');
+        if (inp) {
+          e.preventDefault();
+          inp.focus();
+        }
+      } else if (e.key === 'Escape' && document.activeElement && document.activeElement.id === 'productSearchInput') {
+        clearProductSearch();
+      }
+    });
 
     // Auto-detect URL input
     async function handleNameInput(input) {
