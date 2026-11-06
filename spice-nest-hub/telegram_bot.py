@@ -190,6 +190,30 @@ def handle_search_query(text: str) -> str:
     return resp
 
 
+
+def start_health_server():
+    port = int(os.environ.get("PORT", 0))
+    if port <= 0:
+        return
+    import threading
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    class HealthHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Spice Nest Telegram Bot is Active 24x7!")
+        def log_message(self, format, *args):
+            pass
+    def serve():
+        try:
+            s = HTTPServer(("0.0.0.0", port), HealthHandler)
+            print(f"📡 Cloud Health Server listening on port {port}")
+            s.serve_forever()
+        except Exception as e:
+            print(f"Health server note: {e}")
+    threading.Thread(target=serve, daemon=True).start()
+
 def run_bot(token: str):
     print("=" * 60)
     print(f"🚀 SPICE NEST TELEGRAM 24x7 BOT LAUNCHED")
@@ -210,6 +234,7 @@ def run_bot(token: str):
         print(f"❌ Failed to connect to bot with token: {e}")
         return False
 
+    start_health_server()
     offset = 0
     print("\n🟢 Listening for user messages 24x7 (Press Ctrl+C to stop)...\n", flush=True)
 
