@@ -1,32 +1,33 @@
 // ==============================================================================
-// 🌶️ SPICE NEST - FLIPKART MULTI-PAGE CRAWLER (NO REVIEWS / 100% CLEAN PRODUCTS)
+// 🌶️ SPICE NEST - FLIPKART ALL-PAGES CRAWLER (NO REVIEWS / 100% CLEAN PRODUCTS)
 // ==============================================================================
-// KAISE CHALAYEIN:
-// 1. Flipkart par apni Brand/Search page kholein:
+// WORKS ON BOTH:
+// 1. Flipkart Brand Store:
+//    👉 https://www.flipkart.com/food-products/spice-nest~brand/pr?sid=eat
+// 2. Flipkart Search:
 //    👉 https://www.flipkart.com/search?q=Spice+Nest
+//
+// KAISE CHALAYEIN:
+// 1. Upar diya gaya koi bhi Spice Nest Flipkart page kholein.
 // 2. F12 dabayein (Console tab kholein)
 // 3. Neeche diya gaya poora code paste karke ENTER dabayein.
 //
 // YEH SCRIPT:
-// - Page 1, Page 2, Page 3... sabhi pages ke SARE products capture karega.
-// - "Reviews for Popular Spice Nest Products" wale section ko 100% IGNORE karega.
-// - Sirf genuine catalog products (data-id) aur unke exact selling prices lega.
-// - Cart ya header button ko touch nahi karega.
-// - `flipkart_all_products_YYYY-MM-DD.json` automatically download karega!
-// - Spice Nest Hub (localhost:5000) me direct sync karega!
+// - Page 1, Page 2... sabhi pages ke SARE products capture karega.
+// - Footer ke "Reviews for Popular Spice Nest Products" wale section ko 100% IGNORE karega.
+// - Sabhi genuine products, exact selling prices, MRP aur ratings lega.
+// - `flipkart_all_products_YYYY-MM-DD.json` file automatically download karega!
+// - Spice Nest Hub (localhost:5000) me direct auto-sync karega!
 // ==============================================================================
 
 (async () => {
   console.clear();
-  console.log("%c🌶️ SPICE NEST FLIPKART CLEAN MULTI-PAGE CRAWLER (v3.0)", "color: #2874f0; font-weight: bold; font-size: 16px;");
+  console.log("%c🌶️ SPICE NEST FLIPKART MULTI-PAGE CLEAN CRAWLER (v4.0)", "color: #2874f0; font-weight: bold; font-size: 16px;");
 
-  const STORE_URL = "https://www.flipkart.com/search?q=Spice+Nest";
-
-  // 1. Safety Check: If on Cart or Checkout, prompt redirect
+  // 1. Safety Check: Only warn if accidentally on Cart or Checkout
   const currentUrl = window.location.href.toLowerCase();
   if (currentUrl.includes("/cart") || currentUrl.includes("/mcheckout")) {
-    const go = confirm("⚠️ DHYAN DEIN!\n\nAap abhi Flipkart Cart page par hain.\n\nKya aap Spice Nest Search page par jana chahte hain?");
-    if (go) window.location.href = STORE_URL;
+    alert("⚠️ DHYAN DEIN!\n\nAap abhi Flipkart Cart page par hain.\nKripya Spice Nest Brand ya Search page kholein.");
     return;
   }
 
@@ -67,31 +68,30 @@
     `;
   };
 
-  // 3. Strict Product Extractor (Strictly excludes review widgets)
+  // 3. Strict Product Extractor (Sirf genuine product cards lega, review section ZERO lega)
   const extractFromRoot = (rootDoc) => {
     let countBefore = items.size;
 
-    // A. Genuine search product cards have data-id (Review section does NOT have data-id)
+    // Genuine products always have data-id (Review widget does NOT have data-id)
     const productCards = Array.from(rootDoc.querySelectorAll("div[data-id]"));
 
     productCards.forEach(card => {
-      // STRICT FILTER: Exclude any review widgets, comments, or customer review blocks
-      if (card.closest(".lvJbLV, [class*='review'], [class*='Review']")) return;
-
       const fullText = (card.innerText || card.textContent || "").trim();
+
+      // STRICT SAFETY FILTER: Ignore any review sections, customer reviews, or review text
       if (fullText.includes("Reviews for Popular") || 
           fullText.includes("Most Helpful Review") || 
           fullText.includes("Recent Review") || 
           fullText.includes("Certified Buyer")) {
-        return; // Skip review section products completely!
+        return; // Review items ko turant drop karein
       }
 
       const pid = card.getAttribute("data-id");
       if (!pid || items.has(pid)) return;
 
-      // Extract Title
+      // Extract Clean Title (Prefer a[title], then img[alt], then text)
       let title = "";
-      const titleLink = card.querySelector("a[title], a.pIpigb, a[class*='title'], a[class*='Title']");
+      const titleLink = card.querySelector("a[title], a.pIpigb, a.GnxRXv, a[class*='title'], a[class*='Title']");
       if (titleLink && titleLink.getAttribute("title")) {
         title = titleLink.getAttribute("title").trim();
       } else if (titleLink && titleLink.innerText) {
@@ -106,7 +106,7 @@
       }
       if (!title || title.length < 3) return;
 
-      // Selling Price (Must be >= ₹50)
+      // Selling Price (>= ₹50)
       let price = null;
       const pMatch = fullText.match(/₹\s*([0-9,]+(?:\.\d+)?)/);
       if (pMatch) price = parseFloat(pMatch[1].replace(/,/g, ''));
@@ -167,7 +167,7 @@
   // 5. Discover all subsequent pages (Page 2, 3, 4...)
   const pageUrls = new Set();
 
-  // A. Discover from Flipkart's on-screen pagination bar (Image 2)
+  // A. Pagination links directly from Flipkart's on-screen navigation
   document.querySelectorAll("nav a[href*='page='], a[href*='page='], a.i2eZXn").forEach(a => {
     let href = a.getAttribute('href');
     if (href && href.includes('page=')) {
@@ -176,7 +176,7 @@
     }
   });
 
-  // B. Also construct URL search params for up to page 5
+  // B. Also construct URL search params for up to page 5 based on current page URL
   try {
     const baseObj = new URL(window.location.href);
     for (let p = 2; p <= 5; p++) {
@@ -185,19 +185,17 @@
     }
   } catch (e) {}
 
-  // Remove current URL if in set
   pageUrls.delete(window.location.href);
 
-  // Sort URLs by page number
   const urlsToFetch = Array.from(pageUrls).sort((a, b) => {
     const pA = parseInt((a.match(/page=(\d+)/) || [0, 1])[1]);
     const pB = parseInt((b.match(/page=(\d+)/) || [0, 1])[1]);
     return pA - pB;
   });
 
-  console.log(`🌐 Found ${urlsToFetch.length} page URLs to scan.`);
+  console.log(`🌐 Scanning ${urlsToFetch.length} additional pages...`);
 
-  // 6. Multi-page background fetching (Page 2, 3, 4...)
+  // 6. Multi-page background fetching
   let pageIdx = 2;
   for (const nextUrl of urlsToFetch) {
     const pMatch = nextUrl.match(/page=(\d+)/);
@@ -225,7 +223,7 @@
         break;
       }
 
-      await sleep(1000); // Polite 1s delay
+      await sleep(1000); // 1-second polite pause
     } catch (err) {
       console.warn(`Error on Page ${pNum}:`, err);
       break;
@@ -238,7 +236,7 @@
   updateBanner(`🎉 Complete! All ${allItems.length} Genuine Products Captured!`, allItems.length);
 
   if (allItems.length === 0) {
-    alert("⚠️ Koi products capture nahi hue! Kripya check karein ki aap Flipkart search page par hain:\nhttps://www.flipkart.com/search?q=Spice+Nest");
+    alert("⚠️ Koi products capture nahi hue! Kripya page ko refresh karke dobara try karein.");
     return;
   }
 
