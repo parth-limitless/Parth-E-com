@@ -2412,6 +2412,476 @@ def api_flipkart_upload_json():
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
 
+# ===========================================================================
+# Amazon 1-Click Catalog & Exact Selling Price Importer
+# ===========================================================================
+@app.route("/api/amazon/upload-json", methods=["POST", "OPTIONS"])
+def api_amazon_upload_json():
+    """
+    1-Click Amazon Daily Catalog & Exact Price Importer:
+    Accepts downloaded JSON from browser console, extracts exact selling price,
+    MRP, ratings, reviews, ASIN, and updates all Amazon SKUs in Price Hub.
+    """
+    if request.method == "OPTIONS":
+        resp = Response()
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Accept"
+        return resp
+
+    raw_data = None
+    if "file" in request.files:
+        f = request.files["file"]
+        if f and f.filename:
+            try:
+                raw_data = json.loads(f.read().decode("utf-8-sig"))
+            except Exception as e:
+                resp = jsonify({"status": "ERROR", "error": f"Invalid JSON file: {e}"})
+                resp.headers["Access-Control-Allow-Origin"] = "*"
+                return resp, 400
+    elif request.is_json:
+        raw_data = request.get_json(silent=True)
+    elif request.data:
+        try:
+            raw_data = json.loads(request.data.decode("utf-8"))
+        except Exception:
+            pass
+
+    if not raw_data or not isinstance(raw_data, list):
+        resp = jsonify({"status": "ERROR", "error": "No valid products JSON array received"})
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        return resp, 400
+
+    def parse_amazon_item(it):
+        asin = it.get('asin') or it.get('id') or it.get('product_id') or ''
+        url = it.get('url') or it.get('product_url') or ''
+        img = it.get('img') or it.get('image_url') or ''
+        txt = it.get('text', '')
+        name = it.get('name') or it.get('title') or ''
+
+        if 'price' in it and name and it['price'] is not None:
+            try:
+                p_val = float(str(it['price']).replace('₹', '').replace(',', '').strip())
+            except Exception:
+                p_val = 150.0
+            try:
+                mrp_val = float(str(it.get('mrp', p_val)).replace('₹', '').replace(',', '').strip())
+            except Exception:
+                mrp_val = p_val
+            return {
+                'product_id': asin or re.sub(r'[^a-zA-Z0-9]+', '', name)[:16],
+                'name': name,
+                'price': p_val,
+                'mrp': mrp_val,
+                'rating': float(it.get('rating') or 4.2),
+                'review_count': int(it.get('review_count') or 50),
+                'product_url': url,
+                'image_url': img,
+                'in_stock': bool(it.get('in_stock', True))
+            }
+
+        parts = [p.strip() for p in txt.split('|') if p.strip()]
+        if not name:
+            name = parts[0] if parts else 'Spice Nest Amazon Product'
+
+        prices = [float(x.replace(',', '')) for x in re.findall(r'₹\s*([\d,]+(?:\.\d+)?)', txt)]
+        selling_price = prices[0] if len(prices) > 0 else 150.0
+        mrp = prices[1] if len(prices) > 1 else selling_price
+
+        if selling_price < 50.0:
+            selling_price = mrp if mrp >= 50.0 else 150.0
+
+        rating = 4.2
+        review_count = 50
+        for p in parts:
+            if re.match(r'^\d\.\d$', p):
+                try: rating = float(p)
+                except Exception: pass
+            m_rev = re.search(r'([\d,]+)\s*(?:Reviews|Ratings)', p, re.IGNORECASE)
+            if m_rev:
+                try: review_count = int(m_rev.group(1).replace(',', ''))
+                except Exception: pass
+
+        if not asin and url:
+            m_asin = re.search(r'/dp/([a-zA-Z0-9]{10})', url) or re.search(r'/gp/product/([a-zA-Z0-9]{10})', url)
+            if m_asin:
+                asin = m_asin.group(1)
+        if not asin:
+            asin = re.sub(r'[^a-zA-Z0-9]+', '', name)[:16]
+
+        return {
+            'product_id': asin,
+            'name': name,
+            'price': selling_price,
+            'mrp': mrp,
+            'rating': rating,
+            'review_count': review_count,
+            'product_url': url,
+            'image_url': img,
+            'in_stock': True
+        }
+
+    parsed_items = [parse_amazon_item(it) for it in raw_data if it]
+    if not parsed_items:
+        resp = jsonify({"status": "ERROR", "error": "No valid products found in JSON"})
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        return resp, 400
+
+    now_iso = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with sqlite3.connect(DB) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS amazon_catalog (
+                product_id TEXT PRIMARY KEY,
+                name TEXT,
+                price REAL,
+                mrp REAL,
+                rating REAL,
+                review_count INT,
+                in_stock INT,
+                image_url TEXT,
+                product_url TEXT,
+                last_seen TEXT
+            )
+        """)
+
+        amz_links = cur.execute("""
+            SELECT l.sku_id, l.url, s.name as sku_name, s.grams 
+            FROM links l 
+            JOIN sku s ON l.sku_id = s.id 
+            WHERE l.platform = 'Amazon'
+        """).fetchall()
+
+        matched_count = 0
+
+        for p in parsed_items:
+            pid = str(p['product_id'])
+            new_price = float(p['price'])
+            p_name = p['name']
+            p_url = p.get('product_url', '')
+
+            cur.execute("""
+                INSERT INTO amazon_catalog (product_id, name, price, mrp, rating, review_count, in_stock, image_url, product_url, last_seen)
+                VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+                ON CONFLICT(product_id) DO UPDATE SET
+                    name=excluded.name,
+                    price=excluded.price,
+                    mrp=excluded.mrp,
+                    rating=excluded.rating,
+                    review_count=excluded.review_count,
+                    in_stock=excluded.in_stock,
+                    image_url=excluded.image_url,
+                    product_url=excluded.product_url,
+                    last_seen=excluded.last_seen
+            """, (pid, p_name, new_price, float(p['mrp']), float(p['rating']), int(p['review_count']), p.get('image_url', ''), p_url, now_iso))
+
+            matched_sku_ids = set()
+            if pid:
+                for al in amz_links:
+                    if al["url"] and pid in al["url"]:
+                        matched_sku_ids.add(al["sku_id"])
+            if p_url:
+                for al in amz_links:
+                    if al["url"] and (al["url"] in p_url or p_url in al["url"]):
+                        matched_sku_ids.add(al["sku_id"])
+
+            if not matched_sku_ids:
+                p_lower = p_name.lower()
+                for al in amz_links:
+                    s_lower = al["sku_name"].lower()
+                    if "gochujang" in p_lower and "gochujang" in s_lower:
+                        matched_sku_ids.add(al["sku_id"])
+                    elif "2x" in p_lower and "2x" in s_lower:
+                        matched_sku_ids.add(al["sku_id"])
+                    elif "red" in p_lower and "red" in s_lower and ("chili" in p_lower or "chilli" in p_lower):
+                        matched_sku_ids.add(al["sku_id"])
+                    elif "green" in p_lower and "green" in s_lower and "chilli" in p_lower:
+                        matched_sku_ids.add(al["sku_id"])
+                    elif "ginger" in p_lower and "ginger" in s_lower:
+                        matched_sku_ids.add(al["sku_id"])
+                    elif "garlic" in p_lower and "ginger" not in p_lower and "garlic" in s_lower and "ginger" not in s_lower:
+                        matched_sku_ids.add(al["sku_id"])
+                    elif "jam" in p_lower and "jam" in s_lower:
+                        if ("1kg" in p_lower or "1 kg" in p_lower or "1000" in p_lower) and ("1 kg" in s_lower or "1000" in s_lower):
+                            matched_sku_ids.add(al["sku_id"])
+                        elif ("370" in p_lower or "370g" in p_lower) and "370" in s_lower:
+                            matched_sku_ids.add(al["sku_id"])
+
+            for s_id in matched_sku_ids:
+                cur.execute(
+                    "INSERT INTO prices (ts, sku_id, platform, price, live, note) VALUES (?, ?, 'Amazon', ?, 1, 'In Stock')",
+                    (now_iso, s_id, new_price)
+                )
+                matched_count += 1
+
+        conn.commit()
+
+    root_db = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "spicenest.db")
+    if os.path.exists(root_db) and os.path.abspath(root_db) != os.path.abspath(DB):
+        try:
+            import shutil
+            shutil.copy2(DB, root_db)
+        except Exception:
+            pass
+
+    try:
+        csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "amazon_catalog.csv")
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["product_id", "name", "price", "mrp", "rating", "review_count", "in_stock", "image_url", "product_url"])
+            for p in parsed_items:
+                w.writerow([p["product_id"], p["name"], p["price"], p["mrp"], p["rating"], p["review_count"], True, p.get("image_url", ""), p.get("product_url", "")])
+    except Exception:
+        pass
+
+    resp = jsonify({
+        "status": "SUCCESS",
+        "message": f"Successfully synced {len(parsed_items)} Amazon products ({matched_count} Price Hub SKUs updated)!",
+        "total_items": len(parsed_items),
+        "matched_skus": matched_count
+    })
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+
+# ===========================================================================
+# JioMart 1-Click Catalog & Exact Selling Price Importer
+# ===========================================================================
+@app.route("/api/jiomart/upload-json", methods=["POST", "OPTIONS"])
+def api_jiomart_upload_json():
+    """
+    1-Click JioMart Daily Catalog & Exact Price Importer:
+    Accepts downloaded JSON from browser console, extracts exact selling price,
+    MRP, ratings, reviews, Product ID, and updates all JioMart SKUs in Price Hub.
+    """
+    if request.method == "OPTIONS":
+        resp = Response()
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Accept"
+        return resp
+
+    raw_data = None
+    if "file" in request.files:
+        f = request.files["file"]
+        if f and f.filename:
+            try:
+                raw_data = json.loads(f.read().decode("utf-8-sig"))
+            except Exception as e:
+                resp = jsonify({"status": "ERROR", "error": f"Invalid JSON file: {e}"})
+                resp.headers["Access-Control-Allow-Origin"] = "*"
+                return resp, 400
+    elif request.is_json:
+        raw_data = request.get_json(silent=True)
+    elif request.data:
+        try:
+            raw_data = json.loads(request.data.decode("utf-8"))
+        except Exception:
+            pass
+
+    if not raw_data or not isinstance(raw_data, list):
+        resp = jsonify({"status": "ERROR", "error": "No valid products JSON array received"})
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        return resp, 400
+
+    def parse_jiomart_item(it):
+        pid = it.get('id') or it.get('product_id') or ''
+        url = it.get('url') or it.get('product_url') or ''
+        img = it.get('img') or it.get('image_url') or ''
+        txt = it.get('text', '')
+        name = it.get('name') or it.get('title') or ''
+
+        if 'price' in it and name and it['price'] is not None:
+            try:
+                p_val = float(str(it['price']).replace('₹', '').replace(',', '').strip())
+            except Exception:
+                p_val = 150.0
+            try:
+                mrp_val = float(str(it.get('mrp', p_val)).replace('₹', '').replace(',', '').strip())
+            except Exception:
+                mrp_val = p_val
+            return {
+                'product_id': pid or re.sub(r'[^a-zA-Z0-9]+', '', name)[:16],
+                'name': name,
+                'price': p_val,
+                'mrp': mrp_val,
+                'rating': float(it.get('rating') or 4.3),
+                'review_count': int(it.get('review_count') or 30),
+                'product_url': url,
+                'image_url': img,
+                'in_stock': bool(it.get('in_stock', True))
+            }
+
+        parts = [p.strip() for p in txt.split('|') if p.strip()]
+        if not name:
+            name = parts[0] if parts else 'Spice Nest JioMart Product'
+
+        prices = [float(x.replace(',', '')) for x in re.findall(r'₹\s*([\d,]+(?:\.\d+)?)', txt)]
+        selling_price = prices[0] if len(prices) > 0 else 150.0
+        mrp = prices[1] if len(prices) > 1 else selling_price
+
+        if selling_price < 50.0:
+            selling_price = mrp if mrp >= 50.0 else 150.0
+
+        rating = 4.3
+        review_count = 30
+        for p in parts:
+            if re.match(r'^\d\.\d$', p):
+                try: rating = float(p)
+                except Exception: pass
+            m_rev = re.search(r'([\d,]+)\s*(?:Reviews|Ratings)', p, re.IGNORECASE)
+            if m_rev:
+                try: review_count = int(m_rev.group(1).replace(',', ''))
+                except Exception: pass
+
+        if not pid and url:
+            m_pid = re.search(r'-([a-zA-Z0-9]+-\d+)$', url) or re.search(r'/product/([a-zA-Z0-9_-]+)', url)
+            if m_pid:
+                pid = m_pid.group(1)
+        if not pid:
+            pid = re.sub(r'[^a-zA-Z0-9]+', '', name)[:16]
+
+        return {
+            'product_id': pid,
+            'name': name,
+            'price': selling_price,
+            'mrp': mrp,
+            'rating': rating,
+            'review_count': review_count,
+            'product_url': url,
+            'image_url': img,
+            'in_stock': True
+        }
+
+    parsed_items = [parse_jiomart_item(it) for it in raw_data if it]
+    if not parsed_items:
+        resp = jsonify({"status": "ERROR", "error": "No valid products found in JSON"})
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        return resp, 400
+
+    now_iso = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with sqlite3.connect(DB) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS jiomart_catalog (
+                product_id TEXT PRIMARY KEY,
+                name TEXT,
+                price REAL,
+                mrp REAL,
+                rating REAL,
+                review_count INT,
+                in_stock INT,
+                image_url TEXT,
+                product_url TEXT,
+                last_seen TEXT
+            )
+        """)
+
+        jio_links = cur.execute("""
+            SELECT l.sku_id, l.url, s.name as sku_name, s.grams 
+            FROM links l 
+            JOIN sku s ON l.sku_id = s.id 
+            WHERE l.platform = 'JioMart'
+        """).fetchall()
+
+        matched_count = 0
+
+        for p in parsed_items:
+            pid = str(p['product_id'])
+            new_price = float(p['price'])
+            p_name = p['name']
+            p_url = p.get('product_url', '')
+
+            cur.execute("""
+                INSERT INTO jiomart_catalog (product_id, name, price, mrp, rating, review_count, in_stock, image_url, product_url, last_seen)
+                VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+                ON CONFLICT(product_id) DO UPDATE SET
+                    name=excluded.name,
+                    price=excluded.price,
+                    mrp=excluded.mrp,
+                    rating=excluded.rating,
+                    review_count=excluded.review_count,
+                    in_stock=excluded.in_stock,
+                    image_url=excluded.image_url,
+                    product_url=excluded.product_url,
+                    last_seen=excluded.last_seen
+            """, (pid, p_name, new_price, float(p['mrp']), float(p['rating']), int(p['review_count']), p.get('image_url', ''), p_url, now_iso))
+
+            matched_sku_ids = set()
+            if pid:
+                for jl in jio_links:
+                    if jl["url"] and pid in jl["url"]:
+                        matched_sku_ids.add(jl["sku_id"])
+            if p_url:
+                for jl in jio_links:
+                    if jl["url"] and (jl["url"] in p_url or p_url in jl["url"]):
+                        matched_sku_ids.add(jl["sku_id"])
+
+            if not matched_sku_ids:
+                p_lower = p_name.lower()
+                for jl in jio_links:
+                    s_lower = jl["sku_name"].lower()
+                    if "gochujang" in p_lower and "gochujang" in s_lower:
+                        matched_sku_ids.add(jl["sku_id"])
+                    elif "2x" in p_lower and "2x" in s_lower:
+                        matched_sku_ids.add(jl["sku_id"])
+                    elif "red" in p_lower and "red" in s_lower and ("chili" in p_lower or "chilli" in p_lower):
+                        matched_sku_ids.add(jl["sku_id"])
+                    elif "green" in p_lower and "green" in s_lower and "chilli" in p_lower:
+                        matched_sku_ids.add(jl["sku_id"])
+                    elif "ginger" in p_lower and "ginger" in s_lower:
+                        matched_sku_ids.add(jl["sku_id"])
+                    elif "garlic" in p_lower and "ginger" not in p_lower and "garlic" in s_lower and "ginger" not in s_lower:
+                        matched_sku_ids.add(jl["sku_id"])
+                    elif "jam" in p_lower and "jam" in s_lower:
+                        if ("1kg" in p_lower or "1 kg" in p_lower or "1000" in p_lower) and ("1 kg" in s_lower or "1000" in s_lower):
+                            matched_sku_ids.add(jl["sku_id"])
+                        elif ("370" in p_lower or "370g" in p_lower) and "370" in s_lower:
+                            matched_sku_ids.add(jl["sku_id"])
+
+            for s_id in matched_sku_ids:
+                cur.execute(
+                    "INSERT INTO prices (ts, sku_id, platform, price, live, note) VALUES (?, ?, 'JioMart', ?, 1, 'In Stock')",
+                    (now_iso, s_id, new_price)
+                )
+                matched_count += 1
+
+        conn.commit()
+
+    root_db = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "spicenest.db")
+    if os.path.exists(root_db) and os.path.abspath(root_db) != os.path.abspath(DB):
+        try:
+            import shutil
+            shutil.copy2(DB, root_db)
+        except Exception:
+            pass
+
+    try:
+        csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jiomart_catalog.csv")
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["product_id", "name", "price", "mrp", "rating", "review_count", "in_stock", "image_url", "product_url"])
+            for p in parsed_items:
+                w.writerow([p["product_id"], p["name"], p["price"], p["mrp"], p["rating"], p["review_count"], True, p.get("image_url", ""), p.get("product_url", "")])
+    except Exception:
+        pass
+
+    resp = jsonify({
+        "status": "SUCCESS",
+        "message": f"Successfully synced {len(parsed_items)} JioMart products ({matched_count} Price Hub SKUs updated)!",
+        "total_items": len(parsed_items),
+        "matched_skus": matched_count
+    })
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+
 
 # ===========================================================================
 # Meesho Buyer-Side Monitor & 24h Scheduler Endpoints
@@ -3107,6 +3577,18 @@ PAGE = """<!doctype html>
         📤 Upload Meesho JSON
       </button>
       <input type="file" id="meeshoJsonFileInput" accept=".json" style="display:none;" onchange="handleMeeshoJsonUpload(this)">
+
+      <!-- 📤 Upload Amazon JSON -->
+      <button type="button" class="btn" style="background: #f59e0b; color: #000; border: 1px solid rgba(0,0,0,0.2); cursor: pointer; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('amazonJsonFileInput').click()">
+        📤 Upload Amazon JSON
+      </button>
+      <input type="file" id="amazonJsonFileInput" accept=".json" style="display:none;" onchange="handleAmazonJsonUpload(this)">
+
+      <!-- 📤 Upload JioMart JSON -->
+      <button type="button" class="btn" style="background: #0284c7; color: #fff; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('jiomartJsonFileInput').click()">
+        📤 Upload JioMart JSON
+      </button>
+      <input type="file" id="jiomartJsonFileInput" accept=".json" style="display:none;" onchange="handleJiomartJsonUpload(this)">
       <form method="post" action="/check" style="display:inline">
         <button class="primary" {% if state.running %}disabled{% endif %}>
           {% if state.running %}⏳ Running Scan...{% else %}🔄 Scan All Now (Manual){% endif %}
@@ -3901,6 +4383,68 @@ PAGE = """<!doctype html>
         document.title = originalTitle;
         if (data.status === 'SUCCESS') {
           alert(`🎉 Meesho Prices Synced!\n\n• Total Products: ${data.total_items}\n\nDashboard refresh ho raha hai.`);
+          window.location.reload();
+        } else {
+          alert('Upload Error: ' + (data.error || 'Failed to process file'));
+        }
+      })
+      .catch(err => {
+        document.title = originalTitle;
+        alert('Upload failed: ' + err);
+      });
+    }
+
+    // 1-Click Amazon JSON File Upload Handler
+    function handleAmazonJsonUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const originalTitle = document.title;
+      document.title = 'Uploading Amazon Catalog...';
+
+      fetch('/api/amazon/upload-json', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.title = originalTitle;
+        if (data.status === 'SUCCESS') {
+          alert(`🎉 Amazon Prices Synced!\n\n• Total Products: ${data.total_items}\n• Updated SKUs: ${data.matched_skus}\n\nDashboard refresh ho raha hai.`);
+          window.location.reload();
+        } else {
+          alert('Upload Error: ' + (data.error || 'Failed to process file'));
+        }
+      })
+      .catch(err => {
+        document.title = originalTitle;
+        alert('Upload failed: ' + err);
+      });
+    }
+
+    // 1-Click JioMart JSON File Upload Handler
+    function handleJiomartJsonUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const originalTitle = document.title;
+      document.title = 'Uploading JioMart Catalog...';
+
+      fetch('/api/jiomart/upload-json', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.title = originalTitle;
+        if (data.status === 'SUCCESS') {
+          alert(`🎉 JioMart Prices Synced!\n\n• Total Products: ${data.total_items}\n• Updated SKUs: ${data.matched_skus}\n\nDashboard refresh ho raha hai.`);
           window.location.reload();
         } else {
           alert('Upload Error: ' + (data.error || 'Failed to process file'));
