@@ -238,6 +238,10 @@
           🔄 Sync Flipkart Orders Now
         </button>
       </form>
+      <button type="button" class="btn-custom" style="background: #2874f0; color: #fff; border: none; cursor: pointer; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('flipkartJsonFileInput').click()">
+        📤 Upload Flipkart JSON
+      </button>
+      <input type="file" id="flipkartJsonFileInput" accept=".json" style="display:none;" onchange="handleFlipkartJsonUpload(this)">
       <a href="/flipkart/export" class="btn-custom btn-secondary-custom">
         📥 Export P&L CSV
       </a>
@@ -587,6 +591,36 @@
 
       const counter = document.getElementById('orderCounter');
       if (counter) counter.innerText = `Showing ${visible} of ${rows.length} Orders`;
+    }
+
+    function handleFlipkartJsonUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const originalTitle = document.title;
+      document.title = 'Uploading Flipkart Catalog...';
+
+      fetch('/api/flipkart/upload-json', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.title = originalTitle;
+        if (data.status === 'SUCCESS') {
+          alert(`🎉 Flipkart Prices & Catalog Synced!\n\n• Total Products: ${data.total_items}\n• Updated SKUs: ${data.matched_skus}\n\nDashboard refresh ho raha hai.`);
+          window.location.reload();
+        } else {
+          alert('Upload Error: ' + (data.error || 'Failed to process file'));
+        }
+      })
+      .catch(err => {
+        document.title = originalTitle;
+        alert('Upload failed: ' + err);
+      });
     }
 
     function resetOrderFilters() {

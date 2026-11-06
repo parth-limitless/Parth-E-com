@@ -397,12 +397,27 @@ def get_flipkart_dashboard_analytics(db_path: str = DEFAULT_DB_PATH) -> Dict[str
         conn.close()
 
     if not rows:
-        # Auto-seed if empty
-        sync_flipkart_orders(db_path=db_path, num_mock_orders=50)
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        rows = [dict(r) for r in conn.execute("SELECT * FROM flipkart_orders ORDER BY order_date DESC").fetchall()]
-        conn.close()
+        return {
+            "summary": {
+                "total_orders": 0,
+                "total_revenue": 0.0,
+                "total_cogs": 0.0,
+                "total_fee": 0.0,
+                "total_penalties": 0.0,
+                "net_pnl": 0.0,
+                "net_margin_pct": 0.0,
+                "delivered_count": 0,
+                "rto_count": 0,
+                "return_count": 0,
+                "transit_count": 0,
+                "rto_loss": 0.0,
+                "customer_return_loss": 0.0,
+                "pnl_status": "NEUTRAL"
+            },
+            "sku_profitability": [],
+            "status_breakdown": [],
+            "recent_orders": []
+        }
 
     total_orders = len(rows)
     total_revenue = round(sum(r["total_revenue"] for r in rows), 1)
