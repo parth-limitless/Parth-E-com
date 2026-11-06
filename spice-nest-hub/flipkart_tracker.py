@@ -397,8 +397,10 @@ def get_flipkart_dashboard_analytics(db_path: str = DEFAULT_DB_PATH) -> Dict[str
         conn.close()
 
     if not rows:
+        client = FlipkartSellerClient()
+        is_live = client.is_configured()
         return {
-            "summary": {
+            "kpis": {
                 "total_orders": 0,
                 "total_revenue": 0.0,
                 "total_cogs": 0.0,
@@ -411,12 +413,20 @@ def get_flipkart_dashboard_analytics(db_path: str = DEFAULT_DB_PATH) -> Dict[str
                 "return_count": 0,
                 "transit_count": 0,
                 "rto_loss": 0.0,
-                "customer_return_loss": 0.0,
-                "pnl_status": "NEUTRAL"
+                "customer_return_loss": 0.0
             },
-            "sku_profitability": [],
-            "status_breakdown": [],
-            "recent_orders": []
+            "sku_list": [],
+            "recent_orders": [],
+            "is_live": is_live,
+            "mode_title": "🟢 LIVE FLIPKART SELLER API" if is_live else "⚡ FLIPKART SELLER DASHBOARD",
+            "chart_data": {
+                "labels": ["No Orders Yet"],
+                "revenue": [0.0],
+                "pnl": [0.0],
+                "fees": [0.0],
+                "status_labels": ["Delivered", "In Transit", "RTO Returns", "Customer Returns"],
+                "status_counts": [0, 0, 0, 0]
+            }
         }
 
     total_orders = len(rows)
