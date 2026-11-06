@@ -544,3 +544,262 @@ def get_flipkart_dashboard_analytics(db_path: str = DEFAULT_DB_PATH) -> Dict[str
         }
     }
 
+
+
+# ------------------------------------------------------------------------------
+# 7. Daily Flipkart Inventory, Out of Stock, Delisted & Price Delta Engine
+# ------------------------------------------------------------------------------
+def init_flipkart_snapshot_db(conn: sqlite3.Connection):
+    """Ensures flipkart_snapshots and flipkart_changes tables exist with indices."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS flipkart_snapshots (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        snapshot_id TEXT NOT NULL,
+        snapshot_date TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        price REAL NOT NULL,
+        mrp REAL,
+        rating REAL,
+        review_count INT,
+        in_stock INT DEFAULT 1,
+        product_url TEXT,
+        image_url TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_fk_snap_date ON flipkart_snapshots(snapshot_date);
+    CREATE INDEX IF NOT EXISTS idx_fk_snap_pid ON flipkart_snapshots(product_id);
+    CREATE INDEX IF NOT EXISTS idx_fk_snap_id ON flipkart_snapshots(snapshot_id);
+
+    CREATE TABLE IF NOT EXISTS flipkart_changes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        snapshot_id TEXT,
+        detected_at TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        change_type TEXT NOT NULL,
+        old_value TEXT,
+        new_value TEXT,
+        diff_amount REAL DEFAULT 0.0,
+        pct_change REAL DEFAULT 0.0,
+        product_url TEXT,
+        image_url TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_fk_chg_date ON flipkart_changes(detected_at);
+    CREATE INDEX IF NOT EXISTS idx_fk_chg_type ON flipkart_changes(change_type);
+    CREATE INDEX IF NOT EXISTS idx_fk_chg_pid ON flipkart_changes(product_id);
+    """)
+
+
+def record_flipkart_snapshot_and_diff(conn: sqlite3.Connection, parsed_items: List[Dict[str, Any]], now_iso: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Automated Daily Snapshot & Delta Intelligence Engine for Flipkart.
+    Compares uploaded catalog against the previous day's snapshot and detects:
+    - Price Increases (PRICE_HIKE)
+    - Price Decreases (PRICE_DROP)
+    - Out of Stock items (OUT_OF_STOCK)
+    - Delisted / Removed items (DELISTED)
+    - Back In Stock items (BACK_IN_STOCK)
+    - Newly added listings (NEW_LISTING)
+    """
+    if not now_iso:
+        now_iso = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    init_flipkart_snapshot_db(conn)
+    cur = conn.cursor()
+
+    snapshot_id = f"FK-SNAP-{dt.datetime.now().strftime('%Y%m%d-%H%M%S')}-{int(time.time()*1000)%10000:04d}"
+
+    # 1. Fetch previous snapshot metadata
+    cur.execute("""
+        SELECT snapshot_id, snapshot_date 
+        FROM flipkart_snapshots 
+        GROUP BY snapshot_id 
+        ORDER BY snapshot_date DESC 
+        LIMIT 1
+    """)
+    prev_meta = cur.fetchone()
+
+    prev_items: Dict[str, Dict[str, Any]] = {}
+    if prev_meta:
+        prev_snap_id = prev_meta[0]
+        cur.execute("SELECT * FROM flipkart_snapshots WHERE snapshot_id = ?", (prev_snap_id,))
+        for r in cur.fetchall():
+            r_dict = dict(r) if hasattr(r, 'keys') else {
+                "product_id": r[3], "name": r[4], "price": r[5], "mrp": r[6],
+                "rating": r[7], "review_count": r[8], "in_stock": r[9],
+                "product_url": r[10], "image_url": r[11]
+            }
+            prev_items[str(r_dict["product_id"])] = r_dict
+
+    curr_map = {str(p["product_id"]): p for p in parsed_items if p.get("product_id")}
+
+    changes_recorded = []
+    hikes_count = 0
+    drops_count = 0
+    oos_count = 0
+    back_count = 0
+    delisted_count = 0
+    new_count = 0
+
+    # A. Compare current items with previous snapshot
+    for pid, p in curr_map.items():
+        new_price = float(p.get("price") or 0.0)
+        new_stock = 1 if p.get("in_stock", True) else 0
+        p_name = p.get("name") or "Spice Nest Product"
+        p_url = p.get("product_url") or ""
+        p_img = p.get("image_url") or ""
+
+        if pid in prev_items:
+            prev = prev_items[pid]
+            old_price = float(prev.get("price") or new_price)
+            old_stock = int(prev.get("in_stock", 1))
+
+            # 1. Price analysis
+            if new_price > old_price:
+                diff = round(new_price - old_price, 2)
+                pct = round((diff / old_price) * 100, 1) if old_price > 0 else 0.0
+                hikes_count += 1
+                cur.execute("""
+                    INSERT INTO flipkart_changes 
+                    (snapshot_id, detected_at, product_id, name, change_type, old_value, new_value, diff_amount, pct_change, product_url, image_url)
+                    VALUES (?, ?, ?, ?, 'PRICE_HIKE', ?, ?, ?, ?, ?, ?)
+                """, (snapshot_id, now_iso, pid, p_name, f"₹{old_price:,.0f}", f"₹{new_price:,.0f}", diff, pct, p_url, p_img))
+                changes_recorded.append({"type": "PRICE_HIKE", "pid": pid, "name": p_name, "old": old_price, "new": new_price, "diff": diff, "pct": pct})
+            elif new_price < old_price:
+                diff = round(old_price - new_price, 2)
+                pct = round((diff / old_price) * 100, 1) if old_price > 0 else 0.0
+                drops_count += 1
+                cur.execute("""
+                    INSERT INTO flipkart_changes 
+                    (snapshot_id, detected_at, product_id, name, change_type, old_value, new_value, diff_amount, pct_change, product_url, image_url)
+                    VALUES (?, ?, ?, ?, 'PRICE_DROP', ?, ?, ?, ?, ?, ?)
+                """, (snapshot_id, now_iso, pid, p_name, f"₹{old_price:,.0f}", f"₹{new_price:,.0f}", -diff, pct, p_url, p_img))
+                changes_recorded.append({"type": "PRICE_DROP", "pid": pid, "name": p_name, "old": old_price, "new": new_price, "diff": -diff, "pct": pct})
+
+            # 2. Stock analysis
+            if old_stock == 1 and new_stock == 0:
+                oos_count += 1
+                cur.execute("""
+                    INSERT INTO flipkart_changes 
+                    (snapshot_id, detected_at, product_id, name, change_type, old_value, new_value, diff_amount, pct_change, product_url, image_url)
+                    VALUES (?, ?, ?, ?, 'OUT_OF_STOCK', 'In Stock', 'Out of Stock', 0, 0, ?, ?)
+                """, (snapshot_id, now_iso, pid, p_name, p_url, p_img))
+                changes_recorded.append({"type": "OUT_OF_STOCK", "pid": pid, "name": p_name})
+            elif old_stock == 0 and new_stock == 1:
+                back_count += 1
+                cur.execute("""
+                    INSERT INTO flipkart_changes 
+                    (snapshot_id, detected_at, product_id, name, change_type, old_value, new_value, diff_amount, pct_change, product_url, image_url)
+                    VALUES (?, ?, ?, ?, 'BACK_IN_STOCK', 'Out of Stock', 'Back In Stock', 0, 0, ?, ?)
+                """, (snapshot_id, now_iso, pid, p_name, p_url, p_img))
+                changes_recorded.append({"type": "BACK_IN_STOCK", "pid": pid, "name": p_name})
+
+        else:
+            # If not in previous snapshot and previous snapshot existed -> NEW_LISTING
+            if prev_items:
+                new_count += 1
+                cur.execute("""
+                    INSERT INTO flipkart_changes 
+                    (snapshot_id, detected_at, product_id, name, change_type, old_value, new_value, diff_amount, pct_change, product_url, image_url)
+                    VALUES (?, ?, ?, ?, 'NEW_LISTING', 'Not in Catalog', ?, 0, 0, ?, ?)
+                """, (snapshot_id, now_iso, pid, p_name, f"Listed at ₹{new_price:,.0f}", p_url, p_img))
+                changes_recorded.append({"type": "NEW_LISTING", "pid": pid, "name": p_name, "price": new_price})
+
+        # Also detect if product explicitly marked out of stock in current json
+        if not p.get("in_stock", True) and pid not in prev_items:
+            oos_count += 1
+            cur.execute("""
+                INSERT INTO flipkart_changes 
+                (snapshot_id, detected_at, product_id, name, change_type, old_value, new_value, diff_amount, pct_change, product_url, image_url)
+                VALUES (?, ?, ?, ?, 'OUT_OF_STOCK', 'Unknown', 'Out of Stock', 0, 0, ?, ?)
+            """, (snapshot_id, now_iso, pid, p_name, p_url, p_img))
+
+    # B. Delisted analysis (present in prev_items but absent in curr_map)
+    if prev_items:
+        for prev_pid, prev in prev_items.items():
+            if prev_pid not in curr_map:
+                delisted_count += 1
+                prev_name = prev.get("name") or "Spice Nest Product"
+                prev_price = float(prev.get("price") or 0.0)
+                cur.execute("""
+                    INSERT INTO flipkart_changes 
+                    (snapshot_id, detected_at, product_id, name, change_type, old_value, new_value, diff_amount, pct_change, product_url, image_url)
+                    VALUES (?, ?, ?, ?, 'DELISTED', ?, 'Delisted / Removed from Store', 0, 0, ?, ?)
+                """, (snapshot_id, now_iso, prev_pid, prev_name, f"Was ₹{prev_price:,.0f}", prev.get("product_url", ""), prev.get("image_url", "")))
+                changes_recorded.append({"type": "DELISTED", "pid": prev_pid, "name": prev_name})
+                # Mark as out of stock / delisted in flipkart_catalog
+                cur.execute("UPDATE flipkart_catalog SET in_stock = 0 WHERE product_id = ?", (prev_pid,))
+
+    # C. Save the new snapshot
+    for p in parsed_items:
+        cur.execute("""
+            INSERT INTO flipkart_snapshots 
+            (snapshot_id, snapshot_date, product_id, name, price, mrp, rating, review_count, in_stock, product_url, image_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            snapshot_id, now_iso, p["product_id"], p["name"], float(p["price"]),
+            float(p.get("mrp") or p["price"]), float(p.get("rating") or 4.1),
+            int(p.get("review_count") or 50), 1 if p.get("in_stock", True) else 0,
+            p.get("product_url", ""), p.get("image_url", "")
+        ))
+
+    return {
+        "snapshot_id": snapshot_id,
+        "total_items": len(parsed_items),
+        "price_hikes": hikes_count,
+        "price_drops": drops_count,
+        "out_of_stock": oos_count,
+        "back_in_stock": back_count,
+        "delisted": delisted_count,
+        "new_listings": new_count,
+        "changes": changes_recorded
+    }
+
+
+def get_flipkart_delta_analytics(conn: sqlite3.Connection) -> Dict[str, Any]:
+    """Returns the latest Flipkart changes, price movements, delisted items and snapshot stats."""
+    init_flipkart_snapshot_db(conn)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT * FROM flipkart_changes 
+        ORDER BY detected_at DESC, id DESC 
+        LIMIT 150
+    """)
+    changes = [dict(r) for r in cur.fetchall()]
+
+    hikes = [c for c in changes if c.get("change_type") == "PRICE_HIKE"]
+    drops = [c for c in changes if c.get("change_type") == "PRICE_DROP"]
+    oos = [c for c in changes if c.get("change_type") == "OUT_OF_STOCK"]
+    delisted = [c for c in changes if c.get("change_type") == "DELISTED"]
+    new_skus = [c for c in changes if c.get("change_type") == "NEW_LISTING"]
+    back_in = [c for c in changes if c.get("change_type") == "BACK_IN_STOCK"]
+
+    cur.execute("""
+        SELECT count(DISTINCT snapshot_id), max(snapshot_date) 
+        FROM flipkart_snapshots
+    """)
+    snap_stats = cur.fetchone()
+
+    total_snapshots = snap_stats[0] if snap_stats and snap_stats[0] else 0
+    latest_snapshot_date = snap_stats[1] if snap_stats and snap_stats[1] else None
+
+    return {
+        "changes_items": changes,
+        "price_hikes": hikes,
+        "price_drops": drops,
+        "out_of_stock": oos,
+        "delisted": delisted,
+        "new_skus": new_skus,
+        "back_in_stock": back_in,
+        "summary": {
+            "price_hikes_count": len(hikes),
+            "price_drops_count": len(drops),
+            "out_of_stock_count": len(oos),
+            "delisted_count": len(delisted),
+            "new_skus_count": len(new_skus),
+            "back_in_stock_count": len(back_in),
+            "total_snapshots": total_snapshots,
+            "latest_snapshot_date": latest_snapshot_date
+        }
+    }

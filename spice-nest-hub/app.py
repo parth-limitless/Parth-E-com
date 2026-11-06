@@ -1693,7 +1693,10 @@ def flipkart_seller_dashboard():
     with sqlite3.connect(DB) as conn:
         conn.row_factory = sqlite3.Row
         catalog_rows = [dict(r) for r in conn.execute("SELECT * FROM flipkart_catalog ORDER BY last_seen DESC").fetchall()]
+        delta_analytics = flipkart_tracker.get_flipkart_delta_analytics(conn)
     data["catalog_items"] = catalog_rows
+    data["changes_items"] = delta_analytics.get("changes_items", [])
+    data["delta_summary"] = delta_analytics.get("summary", {})
     return render_template("flipkart_dashboard.html", data=data)
 
 
@@ -2382,6 +2385,10 @@ def api_flipkart_upload_json():
 
             pass # Do not modify prices table on Main Price Hub
 
+        # Record daily snapshot & perform delta audit (Price Hikes/Drops, Out of Stock, Delisted)
+        import flipkart_tracker
+        diff_res = flipkart_tracker.record_flipkart_snapshot_and_diff(conn, parsed_items, now_iso)
+
         conn.commit()
 
     root_db = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "spicenest.db")
@@ -2404,9 +2411,14 @@ def api_flipkart_upload_json():
 
     resp = jsonify({
         "status": "SUCCESS",
-        "message": f"Successfully synced {len(parsed_items)} Flipkart products ({matched_count} Price Hub SKUs updated)!",
+        "message": f"Flipkart ke {len(parsed_items)} products ka daily snapshot save ho gaya aur delta analysis complete!",
         "total_items": len(parsed_items),
-        "matched_skus": matched_count
+        "snapshot_id": diff_res.get("snapshot_id"),
+        "price_hikes": diff_res.get("price_hikes", 0),
+        "price_drops": diff_res.get("price_drops", 0),
+        "out_of_stock": diff_res.get("out_of_stock", 0),
+        "delisted": diff_res.get("delisted", 0),
+        "new_listings": diff_res.get("new_listings", 0)
     })
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
@@ -2889,6 +2901,8 @@ def api_flipkart_clear_catalog():
         return resp
     with sqlite3.connect(DB) as conn:
         conn.execute("DELETE FROM flipkart_catalog")
+        conn.execute("DELETE FROM flipkart_changes")
+        conn.execute("DELETE FROM flipkart_snapshots")
         conn.commit()
     csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "flipkart_catalog.csv")
     if os.path.exists(csv_path):
