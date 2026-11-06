@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: spicenest-telegram-bot
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r spice-nest-hub/requirements.txt
+    startCommand: python telegram_bot.py
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        value: "9012485147:AAFDRW0ToDqXa1sgl7hX-M4HnPxWEL-pU8M"
