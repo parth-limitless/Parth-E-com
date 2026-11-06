@@ -1690,6 +1690,10 @@ def flipkart_seller_dashboard():
     """Flipkart Seller Intelligence, P&L & Returns Tracking Dashboard."""
     import flipkart_tracker
     data = flipkart_tracker.get_flipkart_dashboard_analytics(DB)
+    with sqlite3.connect(DB) as conn:
+        conn.row_factory = sqlite3.Row
+        catalog_rows = [dict(r) for r in conn.execute("SELECT * FROM flipkart_catalog ORDER BY last_seen DESC").fetchall()]
+    data["catalog_items"] = catalog_rows
     return render_template("flipkart_dashboard.html", data=data)
 
 
@@ -2376,12 +2380,7 @@ def api_flipkart_upload_json():
                         elif ("370" in p_lower or "370g" in p_lower) and "370" in s_lower:
                             matched_sku_ids.add(fl["sku_id"])
 
-            for s_id in matched_sku_ids:
-                cur.execute(
-                    "INSERT INTO prices (ts, sku_id, platform, price, live, note) VALUES (?, ?, 'Flipkart', ?, 1, 'In Stock')",
-                    (now_iso, s_id, new_price)
-                )
-                matched_count += 1
+            pass # Do not modify prices table on Main Price Hub
 
         conn.commit()
 
@@ -2610,12 +2609,7 @@ def api_amazon_upload_json():
                         elif ("370" in p_lower or "370g" in p_lower) and "370" in s_lower:
                             matched_sku_ids.add(al["sku_id"])
 
-            for s_id in matched_sku_ids:
-                cur.execute(
-                    "INSERT INTO prices (ts, sku_id, platform, price, live, note) VALUES (?, ?, 'Amazon', ?, 1, 'In Stock')",
-                    (now_iso, s_id, new_price)
-                )
-                matched_count += 1
+            pass # Do not modify prices table on Main Price Hub
 
         conn.commit()
 
@@ -2845,12 +2839,7 @@ def api_jiomart_upload_json():
                         elif ("370" in p_lower or "370g" in p_lower) and "370" in s_lower:
                             matched_sku_ids.add(jl["sku_id"])
 
-            for s_id in matched_sku_ids:
-                cur.execute(
-                    "INSERT INTO prices (ts, sku_id, platform, price, live, note) VALUES (?, ?, 'JioMart', ?, 1, 'In Stock')",
-                    (now_iso, s_id, new_price)
-                )
-                matched_count += 1
+            pass # Do not modify prices table on Main Price Hub
 
         conn.commit()
 
@@ -2886,6 +2875,83 @@ def api_jiomart_upload_json():
 # ===========================================================================
 # Meesho Buyer-Side Monitor & 24h Scheduler Endpoints
 # ===========================================================================
+
+
+# ===========================================================================
+# Catalog Reset / Clear Endpoints (Flipkart, Meesho, Amazon, JioMart)
+# ===========================================================================
+@app.route("/api/flipkart/clear-catalog", methods=["POST", "OPTIONS"])
+def api_flipkart_clear_catalog():
+    if request.method == "OPTIONS":
+        resp = Response()
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        return resp
+    with sqlite3.connect(DB) as conn:
+        conn.execute("DELETE FROM flipkart_catalog")
+        conn.commit()
+    csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "flipkart_catalog.csv")
+    if os.path.exists(csv_path):
+        try: os.remove(csv_path)
+        except Exception: pass
+    resp = jsonify({"status": "SUCCESS", "message": "Flipkart catalog cleared successfully!"})
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+@app.route("/api/meesho/clear-catalog", methods=["POST", "OPTIONS"])
+def api_meesho_clear_catalog():
+    if request.method == "OPTIONS":
+        resp = Response()
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        return resp
+    with sqlite3.connect(DB) as conn:
+        conn.execute("DELETE FROM meesho_catalog")
+        conn.commit()
+    csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "meesho_catalog.csv")
+    if os.path.exists(csv_path):
+        try: os.remove(csv_path)
+        except Exception: pass
+    resp = jsonify({"status": "SUCCESS", "message": "Meesho catalog cleared successfully!"})
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+@app.route("/api/amazon/clear-catalog", methods=["POST", "OPTIONS"])
+def api_amazon_clear_catalog():
+    if request.method == "OPTIONS":
+        resp = Response()
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        return resp
+    with sqlite3.connect(DB) as conn:
+        conn.execute("DELETE FROM amazon_catalog")
+        conn.commit()
+    csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "amazon_catalog.csv")
+    if os.path.exists(csv_path):
+        try: os.remove(csv_path)
+        except Exception: pass
+    resp = jsonify({"status": "SUCCESS", "message": "Amazon catalog cleared successfully!"})
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+@app.route("/api/jiomart/clear-catalog", methods=["POST", "OPTIONS"])
+def api_jiomart_clear_catalog():
+    if request.method == "OPTIONS":
+        resp = Response()
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        return resp
+    with sqlite3.connect(DB) as conn:
+        conn.execute("DELETE FROM jiomart_catalog")
+        conn.commit()
+    csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jiomart_catalog.csv")
+    if os.path.exists(csv_path):
+        try: os.remove(csv_path)
+        except Exception: pass
+    resp = jsonify({"status": "SUCCESS", "message": "JioMart catalog cleared successfully!"})
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
 @app.post("/api/buyer-monitor/search-candidates")
 def api_buyer_monitor_search_candidates():
     """Searches Meesho for candidate listings matching buyer criteria using Playwright."""

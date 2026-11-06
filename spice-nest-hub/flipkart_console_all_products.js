@@ -1,38 +1,35 @@
 // ==============================================================================
-// 🌶️ SPICE NEST - FLIPKART ALL-PAGES CRAWLER (NO REVIEWS / 100% CLEAN PRODUCTS)
+// 🌶️ SPICE NEST - FLIPKART BULLETPROOF 53+ PRODUCTS CRAWLER (v5.0)
 // ==============================================================================
-// WORKS ON BOTH:
-// 1. Flipkart Brand Store:
-//    👉 https://www.flipkart.com/food-products/spice-nest~brand/pr?sid=eat
-// 2. Flipkart Search:
-//    👉 https://www.flipkart.com/search?q=Spice+Nest
-//
 // KAISE CHALAYEIN:
-// 1. Upar diya gaya koi bhi Spice Nest Flipkart page kholein.
+// 1. Flipkart par apna Spice Nest page kholein:
+//    👉 https://www.flipkart.com/food-products/spice-nest~brand/pr?sid=eat
+//       (ya https://www.flipkart.com/search?q=Spice+Nest)
 // 2. F12 dabayein (Console tab kholein)
 // 3. Neeche diya gaya poora code paste karke ENTER dabayein.
 //
 // YEH SCRIPT:
-// - Page 1, Page 2... sabhi pages ke SARE products capture karega.
-// - Footer ke "Reviews for Popular Spice Nest Products" wale section ko 100% IGNORE karega.
-// - Sabhi genuine products, exact selling prices, MRP aur ratings lega.
-// - `flipkart_all_products_YYYY-MM-DD.json` file automatically download karega!
-// - Spice Nest Hub (localhost:5000) me direct auto-sync karega!
+// - Page 1 (40 items) aur Page 2 (13 items) dono ka poora 53+ data lega.
+// - Selling Price aur MRP bilkul exact extract karega (koi 24934 jaisa bug nahi).
+// - "Reviews for Popular" section ko 100% DROP karega (zero review items).
+// - Main Price Hub ko touch nahi karega; Flipkart Dashboard me sab detail aayegi.
+// - `flipkart_all_products_YYYY-MM-DD.json` file download karega aur Hub me bhejega!
 // ==============================================================================
 
 (async () => {
   console.clear();
-  console.log("%c🌶️ SPICE NEST FLIPKART MULTI-PAGE CLEAN CRAWLER (v4.0)", "color: #2874f0; font-weight: bold; font-size: 16px;");
-
-  // 1. Safety Check: Only warn if accidentally on Cart or Checkout
-  const currentUrl = window.location.href.toLowerCase();
-  if (currentUrl.includes("/cart") || currentUrl.includes("/mcheckout")) {
-    alert("⚠️ DHYAN DEIN!\n\nAap abhi Flipkart Cart page par hain.\nKripya Spice Nest Brand ya Search page kholein.");
-    return;
-  }
+  console.log("%c🌶️ SPICE NEST FLIPKART 53+ PRODUCTS CRAWLER (v5.0)", "color: #2874f0; font-weight: bold; font-size: 16px;");
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  // 1. Session Storage Accumulator (Page 1 + Page 2 ko merge karne ke liye)
+  let stored = [];
+  try {
+    stored = JSON.parse(sessionStorage.getItem("spicenest_fk_items") || "[]");
+  } catch (e) { stored = []; }
+
   const items = new Map();
+  stored.forEach(it => { if (it && it.id) items.set(it.id, it); });
 
   // 2. On-screen floating progress banner
   let banner = document.getElementById("spicenest-fk-banner");
@@ -60,7 +57,7 @@
   const updateBanner = (msg, count = items.size) => {
     banner.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="color: #2874f0; font-size: 14px; font-weight:700;">⚡ Flipkart Sync (Clean)</span>
+        <span style="color: #2874f0; font-size: 14px; font-weight:700;">⚡ Flipkart Sync v5.0</span>
         <span style="background: #2874f0; color:#fff; padding: 2px 8px; border-radius: 9999px; font-size: 11px;">Active</span>
       </div>
       <div style="color: #38bdf8; font-size: 13px; margin: 4px 0;">${msg}</div>
@@ -68,70 +65,85 @@
     `;
   };
 
-  // 3. Strict Product Extractor (Sirf genuine product cards lega, review section ZERO lega)
+  // 3. Robust Extractor (Works identically on live DOM and DOMParser documents)
   const extractFromRoot = (rootDoc) => {
     let countBefore = items.size;
-
-    // Genuine products always have data-id (Review widget does NOT have data-id)
     const productCards = Array.from(rootDoc.querySelectorAll("div[data-id]"));
 
     productCards.forEach(card => {
+      const pid = card.getAttribute("data-id");
+      if (!pid || items.has(pid)) return;
+
       const fullText = (card.innerText || card.textContent || "").trim();
 
-      // STRICT SAFETY FILTER: Ignore any review sections, customer reviews, or review text
+      // STRICT FILTER: Exclude any review widgets completely
       if (fullText.includes("Reviews for Popular") || 
           fullText.includes("Most Helpful Review") || 
           fullText.includes("Recent Review") || 
           fullText.includes("Certified Buyer")) {
-        return; // Review items ko turant drop karein
+        return;
       }
 
-      const pid = card.getAttribute("data-id");
-      if (!pid || items.has(pid)) return;
-
-      // Extract Clean Title (Prefer a[title], then img[alt], then text)
+      // Title: Use img[alt] (100% full un-truncated title) or a[title]
       let title = "";
-      const titleLink = card.querySelector("a[title], a.pIpigb, a.GnxRXv, a[class*='title'], a[class*='Title']");
-      if (titleLink && titleLink.getAttribute("title")) {
-        title = titleLink.getAttribute("title").trim();
-      } else if (titleLink && titleLink.innerText) {
-        title = titleLink.innerText.trim();
+      const img = card.querySelector("img[alt]");
+      if (img && img.getAttribute("alt") && img.getAttribute("alt").trim().length > 3) {
+        title = img.getAttribute("alt").trim();
       }
       if (!title) {
-        const img = card.querySelector("img[alt]");
-        if (img && img.alt && img.alt.length > 3) title = img.alt.trim();
+        const titleLink = card.querySelector("a[title], a.pIpigb, a.GnxRXv");
+        if (titleLink && titleLink.getAttribute("title")) {
+          title = titleLink.getAttribute("title").trim();
+        } else if (titleLink) {
+          title = (titleLink.innerText || titleLink.textContent || "").trim();
+        }
       }
       if (!title) {
         title = fullText.split('₹')[0].trim();
       }
       if (!title || title.length < 3) return;
 
-      // Selling Price (>= ₹50)
+      // Price: Dedicated price element (.hZ3P6w) or first ₹ number
       let price = null;
-      const pMatch = fullText.match(/₹\s*([0-9,]+(?:\.\d+)?)/);
-      if (pMatch) price = parseFloat(pMatch[1].replace(/,/g, ''));
+      const priceEl = card.querySelector(".hZ3P6w, div[class*='hZ3P6w']");
+      if (priceEl) {
+        const m = (priceEl.textContent || "").match(/₹?\s*([0-9,]+)/);
+        if (m) price = parseFloat(m[1].replace(/,/g, ''));
+      }
+      if (!price) {
+        const m = fullText.match(/₹\s*([0-9,]+(?:\.\d+)?)/);
+        if (m) price = parseFloat(m[1].replace(/,/g, ''));
+      }
       if (!price || price < 50) return;
 
-      // MRP
+      // MRP: Dedicated mrp element (.kRYCnD) or second ₹ number
       let mrp = price;
-      const allPrices = Array.from(fullText.matchAll(/₹\s*([0-9,]+(?:\.\d+)?)/g));
-      if (allPrices.length > 1) {
-        mrp = parseFloat(allPrices[1][1].replace(/,/g, ''));
+      const mrpEl = card.querySelector(".kRYCnD, div[class*='kRYCnD'], strike, del");
+      if (mrpEl) {
+        const m = (mrpEl.textContent || "").match(/₹?\s*([0-9,]+)/);
+        if (m) {
+          const val = parseFloat(m[1].replace(/,/g, ''));
+          if (val >= price && val < 10000) mrp = val;
+        }
       }
 
       // Rating
       let rating = 4.2;
-      const rMatch = fullText.match(/(\d\.\d)\s*★?/);
-      if (rMatch) rating = parseFloat(rMatch[1]);
+      const rateEl = card.querySelector(".MKiFS6, div[class*='MKiFS6']");
+      if (rateEl) {
+        const m = (rateEl.textContent || "").match(/(\d\.\d)/);
+        if (m) rating = parseFloat(m[1]);
+      } else {
+        const rMatch = fullText.match(/(\d\.\d)\s*★?/);
+        if (rMatch) rating = parseFloat(rMatch[1]);
+      }
 
       // URL
       const linkEl = card.querySelector("a[href*='/p/'], a[href*='pid=']");
-      let href = linkEl ? linkEl.href : "";
-      if (!href && linkEl) href = linkEl.getAttribute("href");
+      let href = linkEl ? linkEl.href || linkEl.getAttribute("href") : "";
       if (href && !href.startsWith("http")) href = `https://www.flipkart.com${href}`;
 
       // Image
-      const img = card.querySelector("img.UCc1lI, img");
       const imgSrc = img ? (img.currentSrc || img.src || img.getAttribute("src") || "") : "";
 
       items.set(pid, {
@@ -152,23 +164,26 @@
     return items.size - countBefore;
   };
 
-  // 4. Smooth scrolling for current page (Page 1)
-  updateBanner("🚀 Scanning Page 1 products...");
+  // 4. Scan Current Page
+  updateBanner("🚀 Scanning current page products...");
   for (let pt of [0.4, 0.8, 1.0]) {
     window.scrollTo({ top: document.body.scrollHeight * pt, behavior: 'smooth' });
-    await sleep(600);
+    await sleep(500);
     extractFromRoot(document);
   }
   extractFromRoot(document);
 
-  console.log(`%c📄 [Page 1] Captured ${items.size} genuine products (Review section excluded)`, "color: #38bdf8; font-weight: bold;");
-  updateBanner(`📄 Page 1 done (${items.size} captured)`, items.size);
+  console.log(`%c📄 Current Page Scanned. Total Unique Products: ${items.size}`, "color: #38bdf8; font-weight: bold;");
+  updateBanner(`📄 Current page scanned (${items.size} captured)`, items.size);
 
-  // 5. Discover all subsequent pages (Page 2, 3, 4...)
+  // Save current progress to sessionStorage
+  sessionStorage.setItem("spicenest_fk_items", JSON.stringify(Array.from(items.values())));
+
+  // 5. Check if more pages exist & fetch them in background
   const pageUrls = new Set();
 
-  // A. Pagination links directly from Flipkart's on-screen navigation
-  document.querySelectorAll("nav a[href*='page='], a[href*='page='], a.i2eZXn").forEach(a => {
+  // Find next page link from Flipkart's bottom pagination
+  document.querySelectorAll("nav a[href*='page='], a[href*='page=']").forEach(a => {
     let href = a.getAttribute('href');
     if (href && href.includes('page=')) {
       if (!href.startsWith('http')) href = window.location.origin + href;
@@ -176,71 +191,47 @@
     }
   });
 
-  // B. Also construct URL search params for up to page 5 based on current page URL
+  // Construct page=2 if not already present
   try {
-    const baseObj = new URL(window.location.href);
-    for (let p = 2; p <= 5; p++) {
-      baseObj.searchParams.set("page", p.toString());
-      pageUrls.add(baseObj.toString());
-    }
+    const p2Url = new URL(window.location.href);
+    p2Url.searchParams.set("page", "2");
+    pageUrls.add(p2Url.toString());
   } catch (e) {}
 
   pageUrls.delete(window.location.href);
 
-  const urlsToFetch = Array.from(pageUrls).sort((a, b) => {
-    const pA = parseInt((a.match(/page=(\d+)/) || [0, 1])[1]);
-    const pB = parseInt((b.match(/page=(\d+)/) || [0, 1])[1]);
-    return pA - pB;
-  });
-
-  console.log(`🌐 Scanning ${urlsToFetch.length} additional pages...`);
-
-  // 6. Multi-page background fetching
-  let pageIdx = 2;
-  for (const nextUrl of urlsToFetch) {
-    const pMatch = nextUrl.match(/page=(\d+)/);
-    const pNum = pMatch ? pMatch[1] : pageIdx;
-
-    updateBanner(`🌐 Scanning Flipkart Page ${pNum}...`, items.size);
-    console.log(`%c🌐 Fetching Flipkart Page ${pNum}: ${nextUrl}`, "color: #2874f0; font-weight: bold;");
+  // Background fetch remaining pages
+  for (const nextUrl of pageUrls) {
+    updateBanner(`🌐 Background scanning next page...`, items.size);
+    console.log(`%c🌐 Fetching next page: ${nextUrl}`, "color: #2874f0; font-weight: bold;");
 
     try {
       const resp = await fetch(nextUrl, { credentials: 'include' });
-      if (!resp.ok) {
-        console.warn(`Page ${pNum} returned status ${resp.status}`);
-        break;
+      if (resp.ok) {
+        const html = await resp.text();
+        const fetchedDoc = new DOMParser().parseFromString(html, 'text/html');
+        const newCount = extractFromRoot(fetchedDoc);
+        console.log(`   📦 Fetched page yielded ${newCount} new products. Total: ${items.size}`);
+        updateBanner(`✅ Next page scanned (+${newCount} items)`, items.size);
       }
-
-      const html = await resp.text();
-      const fetchedDoc = new DOMParser().parseFromString(html, 'text/html');
-      const newCount = extractFromRoot(fetchedDoc);
-
-      console.log(`   📦 Page ${pNum} yielded ${newCount} new genuine products. (Total: ${items.size})`);
-      updateBanner(`✅ Page ${pNum} done (+${newCount} items)`, items.size);
-
-      if (newCount === 0) {
-        console.log(`🏁 No more products found on Page ${pNum}. Completed!`);
-        break;
-      }
-
-      await sleep(1000); // 1-second polite pause
+      await sleep(800);
     } catch (err) {
-      console.warn(`Error on Page ${pNum}:`, err);
-      break;
+      console.warn("Background fetch note:", err);
     }
-    pageIdx++;
   }
 
   const allItems = Array.from(items.values());
-  console.log(`%c🎉 FLIPKART CRAWL COMPLETE! Total ${allItems.length} products captured!`, "color: #10b981; font-weight: bold; font-size: 16px;");
-  updateBanner(`🎉 Complete! All ${allItems.length} Genuine Products Captured!`, allItems.length);
+  sessionStorage.setItem("spicenest_fk_items", JSON.stringify(allItems));
+
+  console.log(`%c🎉 FLIPKART CRAWL COMPLETE! Total ${allItems.length} genuine products captured!`, "color: #10b981; font-weight: bold; font-size: 16px;");
+  updateBanner(`🎉 Complete! All ${allItems.length} Products Captured!`, allItems.length);
 
   if (allItems.length === 0) {
-    alert("⚠️ Koi products capture nahi hue! Kripya page ko refresh karke dobara try karein.");
+    alert("⚠️ Koi products capture nahi hue! Kripya page refresh karke dobara run karein.");
     return;
   }
 
-  // 7. Automatic JSON File Download
+  // 6. Download JSON File
   const todayStr = new Date().toISOString().split('T')[0];
   const blob = new Blob([JSON.stringify(allItems, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -250,10 +241,10 @@
   a.click();
   document.body.removeChild(a);
 
-  // 8. Auto-Sync directly to Spice Nest Hub (localhost:5000)
+  // 7. Auto-Sync directly to Spice Nest Hub (localhost:5000)
   let directSynced = false;
   try {
-    updateBanner("🔄 Auto-syncing to Spice Nest Hub (localhost:5000)...");
+    updateBanner("🔄 Auto-syncing to Flipkart Seller Dashboard (localhost:5000)...");
     const res = await fetch("http://localhost:5000/api/flipkart/upload-json", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -263,8 +254,8 @@
   } catch (err) {}
 
   if (directSynced) {
-    alert(`🎉 SUCCESS!\n\n• Flipkart se total ${allItems.length} genuine products capture ho gaye!\n• Review section bilkul exclude kar diya gaya hai!\n• JSON file download ho gayi: flipkart_all_${allItems.length}_products_${todayStr}.json\n• Spice Nest Hub (localhost:5000) me direct sync ho gaya hai!`);
+    alert(`🎉 SUCCESS!\n\n• Flipkart se total ${allItems.length} genuine products capture ho gaye!\n• Review section bilkul exclude kar diya gaya hai!\n• JSON file download ho gayi: flipkart_all_${allItems.length}_products_${todayStr}.json\n• Flipkart Seller Dashboard (localhost:5000/flipkart-seller) me saari details update ho gayi hain!\n• (Main Price Hub table bilkul safe aur untouched hai)`);
   } else {
-    alert(`✅ SUCCESS!\n\n• Flipkart se total ${allItems.length} genuine products capture ho gaye!\n• Review section bilkul exclude kar diya gaya hai!\n• JSON file download ho gayi: flipkart_all_${allItems.length}_products_${todayStr}.json\n\nAap is file ko Spice Nest Hub par "📤 Upload Flipkart JSON" button se upload kar sakte hain!`);
+    alert(`✅ SUCCESS!\n\n• Flipkart se total ${allItems.length} genuine products capture ho gaye!\n• Review section bilkul exclude kar diya gaya hai!\n• JSON file download ho gayi: flipkart_all_${allItems.length}_products_${todayStr}.json\n\nAap is file ko "http://localhost:5000/flipkart-seller" page par "📤 Upload Flipkart JSON" button se upload kar sakte hain!`);
   }
 })();

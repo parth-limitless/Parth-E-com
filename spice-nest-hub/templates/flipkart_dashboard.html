@@ -335,6 +335,95 @@
     </div>
   </div>
 
+  <!-- Uploaded Flipkart Products Catalog Section (Photo 2 Detail) -->
+  <div class="table-container mb-4">
+    <div class="table-toolbar">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 w-100">
+        <div>
+          <h4 style="font-size: 16px; font-weight: 700; margin: 0; color: #fff;">
+            🛒 Uploaded Flipkart Products Catalog
+          </h4>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+            Daily JSON se sync huye sabhi Flipkart products aur unki full details (Total: {{ data.catalog_items|length if data.catalog_items else 0 }} Products)
+          </div>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <input type="text" id="catalogSearch" placeholder="🔍 Search Flipkart Products..." oninput="filterCatalogTable()" style="padding: 7px 12px; font-size: 13px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; width: 230px;">
+          <button type="button" class="btn-custom" style="background: #2874f0; color: #fff; border: none; cursor: pointer; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('flipkartJsonFileInput').click()">
+            📤 Upload Flipkart JSON
+          </button>
+          <button type="button" class="btn-custom" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); cursor: pointer; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 13px;" onclick="clearFlipkartCatalog()">
+            🗑️ Clear Catalog Data
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table id="flipkartCatalogTable">
+        <thead>
+          <tr>
+            <th style="width: 50px;">Img</th>
+            <th>Product Name</th>
+            <th>FSN / Product ID</th>
+            <th style="text-align: right;">Selling Price</th>
+            <th style="text-align: right;">MRP</th>
+            <th style="text-align: center;">Rating</th>
+            <th style="text-align: center;">Stock</th>
+            <th style="text-align: center;">Flipkart Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if data.catalog_items and data.catalog_items|length > 0 %}
+            {% for item in data.catalog_items %}
+            <tr>
+              <td>
+                {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid #334155;">
+                {% else %}
+                <div style="width: 38px; height: 38px; background: #1e293b; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px;">📦</div>
+                {% endif %}
+              </td>
+              <td style="font-weight: 600; color: #f1f5f9; max-width: 380px;">
+                {{ item.name }}
+              </td>
+              <td>
+                <code style="color: #60a5fa; font-size: 11px; background: rgba(59, 130, 246, 0.1); padding: 3px 6px; border-radius: 4px;">{{ item.product_id }}</code>
+              </td>
+              <td style="text-align: right; font-weight: 800; color: #34d399; font-size: 14px;">
+                ₹{{ "{:,.0f}".format(item.price) }}
+              </td>
+              <td style="text-align: right; color: var(--text-muted); text-decoration: line-through;">
+                {% if item.mrp and item.mrp > item.price %}₹{{ "{:,.0f}".format(item.mrp) }}{% else %}-{% endif %}
+              </td>
+              <td style="text-align: center;">
+                <span style="color: #fbbf24; font-weight: 700; font-size: 12px;">★ {{ item.rating or '4.2' }}</span>
+              </td>
+              <td style="text-align: center;">
+                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 11px;">In Stock</span>
+              </td>
+              <td style="text-align: center;">
+                {% if item.product_url %}
+                <a href="{{ item.product_url }}" target="_blank" class="btn btn-sm" style="font-size: 11px; padding: 3px 8px; background: #1e293b; color: #38bdf8; border: 1px solid #334155; border-radius: 4px; text-decoration: none;">
+                  Open ↗
+                </a>
+                {% else %}
+                -
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                ℹ️ Koi Flipkart products upload nahi huye hain. Upar diye gaye <b>"📤 Upload Flipkart JSON"</b> button se file upload karein.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- SKU-Level Profitability Table -->
   <div class="table-container mb-4">
     <div class="table-toolbar">
@@ -591,6 +680,26 @@
 
       const counter = document.getElementById('orderCounter');
       if (counter) counter.innerText = `Showing ${visible} of ${rows.length} Orders`;
+    }
+
+    function filterCatalogTable() {
+      const q = document.getElementById('catalogSearch').value.toLowerCase().trim();
+      const rows = document.querySelectorAll('#flipkartCatalogTable tbody tr');
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        r.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
+    }
+
+    function clearFlipkartCatalog() {
+      if (!confirm("⚠️ Kya aap Flipkart uploaded catalog data delete karna chahte hain?")) return;
+      fetch('/api/flipkart/clear-catalog', { method: 'POST' })
+        .then(res => res.json())
+        .then(d => {
+          alert('✅ Flipkart Catalog Clear Ho Gaya!');
+          window.location.reload();
+        })
+        .catch(err => alert('Error clearing catalog: ' + err));
     }
 
     function handleFlipkartJsonUpload(input) {
